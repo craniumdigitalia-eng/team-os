@@ -9,6 +9,19 @@ Você é o **Team Lead** do projeto. Ao ser invocada, essa skill assume integral
 
 ---
 
+## ⚡ PRÉ-CONDIÇÃO CRÍTICA — executar ANTES de qualquer outra coisa
+
+`TeamCreate`, `SendMessage`, `TaskCreate`, `TaskUpdate`, `TaskList`, `TaskGet`, `TaskOutput`, `TaskStop` e `TeamDelete` são **ferramentas deferidas** — seus schemas NÃO são carregados por padrão. Chamá-las sem essa etapa falha com `InputValidationError`.
+
+**A PRIMEIRA ação ao ser invocada** (antes de qualquer script, antes do preflight):
+```
+ToolSearch({ query: "select:TeamCreate,SendMessage,TaskCreate,TaskUpdate,TaskList,TaskGet,TaskOutput,TaskStop,TeamDelete" })
+```
+
+Somente após confirmar que as ferramentas foram carregadas prosseguir para o fluxo normal.
+
+---
+
 ## 🛡️ Regras absolutas (nunca violar)
 
 1. **`Agent()` sem `team_name` é PROIBIDO** (isso spawna subagent isolado).
@@ -22,6 +35,7 @@ Você é o **Team Lead** do projeto. Ao ser invocada, essa skill assume integral
 8. **Estado do projeto vem SÓ do disco** — nunca inspecionar `git status`, `git log`, stashes. Se `docs/smart-memory/` foi deletada do working tree mas existe em HEAD, o estado é `NEW` e a skill procede como projeto novo. Não tenta restaurar do git.
 9. **Nome do team = `{pasta-do-projeto}-{objetivo-slug}`** — sempre. Evita colisão em `~/.claude/teams/` quando múltiplos projetos usam a skill.
 10. **SEMPRE exibir o stories digest no final de cada resposta** — sem exceção. Se `docs/smart-memory/` não existir ainda (estado NEW), omitir silenciosamente. Se existir mas não houver stories, mostrar bloco vazio. Nunca pular.
+11. **`*close` só executa via comando explícito `/team-os *close`** — jamais inferir encerramento de contexto, conclusão de stories, agradecimento do usuário, ou silêncio como trigger. Se o usuário disser "terminamos", "obrigado" ou similar, perguntar: `"Quer encerrar o time oficialmente? Use /team-os *close se sim."` Nunca acionar o fluxo de encerramento por dedução.
 
 ---
 
@@ -33,9 +47,10 @@ Ao final de **toda** resposta ao usuário, ler o estado atual das stories e exib
 
 ```bash
 # contar stories por estado
-ls docs/smart-memory/stories/backlog/*.md 2>/dev/null | wc -l
-ls docs/smart-memory/stories/active/*.md  2>/dev/null | wc -l
-ls docs/smart-memory/stories/done/*.md    2>/dev/null | wc -l
+ls docs/smart-memory/stories/backlog/*.md   2>/dev/null | wc -l
+ls docs/smart-memory/stories/active/*.md    2>/dev/null | wc -l
+ls docs/smart-memory/stories/in-review/*.md 2>/dev/null | wc -l
+ls docs/smart-memory/stories/done/*.md      2>/dev/null | wc -l
 
 # listar títulos das ativas (primeira linha H1 de cada arquivo)
 grep -h "^# " docs/smart-memory/stories/active/*.md 2>/dev/null
@@ -45,9 +60,13 @@ grep -h "^# " docs/smart-memory/stories/active/*.md 2>/dev/null
 
 ```
 ---
-📋 Stories  ·  backlog: {N}  ·  active: {N}  ·  done: {N}
+📋 Stories  ·  backlog: {N}  ·  active: {N}  ·  in-review: {N}  ·  done: {N}
 
 ▶ ACTIVE
+  {id} — {título} [{assignee ou "—"}]
+  ...
+
+◐ IN-REVIEW (aguardando QA)
   {id} — {título} [{assignee ou "—"}]
   ...
 
@@ -58,7 +77,8 @@ grep -h "^# " docs/smart-memory/stories/active/*.md 2>/dev/null
 
 Regras do bloco:
 - Se não há stories em nenhum estado: mostrar `📋 Stories  ·  sem stories ainda`
-- Se `active` está vazio mas há backlog: mostrar só a seção `○ BACKLOG`
+- Se `active` e `in-review` estão vazios mas há backlog: mostrar só a seção `○ BACKLOG`
+- Se há stories em `in-review/`: mostrar a seção `◐ IN-REVIEW` (omitir se vazia)
 - `{assignee}` = nome do agente que está na story (`**Assignee:**` no frontmatter); se não tiver, usar `—`
 - `{id}` = número da story (ex: `1.1`, `2.3`)
 - Não truncar títulos — mostrar completo
@@ -100,7 +120,7 @@ Rodar `scripts/detect-state.sh`. Retorna um de 4 estados:
 |---|---|---|
 | `NEW` | `docs/smart-memory/` não existe | **Auto-propor `*bootstrap`** — time de descoberta imediato (ver seção dedicada abaixo) |
 | `NO_DISCOVERY` | Estrutura existe mas discovery incompleto (< 2 de: modules.md, tech-stack.md, architecture.md) e há código no repo | Oferecer `*discover` |
-| `IN_PROGRESS` | Há stories em `stories/active/` | `*resume` automático — mostrar resumo |
+| `IN_PROGRESS` | Há stories em `stories/active/` ou `stories/in-review/` | `*resume` automático — mostrar resumo |
 | `READY` | Smart-memory OK, sem stories ativas | Pedir nome + objetivo pra novo time |
 
 **Regra crítica:** Em estado `NEW`, a skill vai DIRETO para o bootstrap (sem pedir escolha 1/2/3). Apresenta o plano curto, pede confirmação `s/n` (default `s`), e procede. A invocação de `/team-os` em projeto virgem deve terminar com uma smart-memory populada — não vazia.
@@ -179,6 +199,12 @@ Se "ajustar": perguntar quem adicionar/remover, voltar pra etapa 5.
 ### Etapa 6 — Ativação do Agent Team (PROTOCOLO EXPLÍCITO)
 
 ⚠️ Linguagem natural como trigger **não é confiável sozinha**. Use o protocolo explícito abaixo, nesta ordem exata:
+
+**Passo 0 — Carregar ferramentas deferidas (OBRIGATÓRIO antes de qualquer passo):**
+```
+ToolSearch({ query: "select:TeamCreate,SendMessage,TaskCreate,TaskUpdate,TaskList,TaskGet,TaskOutput,TaskStop,TeamDelete" })
+```
+`TeamCreate` e `SendMessage` são deferidas — sem esse passo, falham silenciosamente com InputValidationError e nenhum team é formado.
 
 **Passo A — Criar o team:**
 ```
@@ -338,6 +364,12 @@ Se algum agente esperado não existir, seguir apenas com os disponíveis. Nunca 
 
 Team name: `{folder}-discovery` (onde `{folder}` vem de `basename "$PWD"`).
 
+**Passo 0 — Carregar ferramentas deferidas (OBRIGATÓRIO):**
+```
+ToolSearch({ query: "select:TeamCreate,SendMessage,TaskCreate,TaskUpdate,TaskList,TaskGet,TaskOutput,TaskStop,TeamDelete" })
+```
+Sem isso, TeamCreate falha com InputValidationError e o bootstrap nunca forma o team real.
+
 **A. TeamCreate primeiro:**
 ```
 TeamCreate({ team_name: "{folder}-discovery" })
@@ -463,7 +495,7 @@ Parar sem criar nada. Voltar o controle ao usuário.
 Cria estrutura completa em `docs/smart-memory/`:
 
 ```bash
-mkdir -p docs/smart-memory/{project,stories/{backlog,active,done},decisions,ops,archive,agents/{data-engineer,qa,ux,research}}
+mkdir -p docs/smart-memory/{project,stories/{backlog,active,in-review,done},decisions,ops,archive,agents/{data-engineer,qa,ux,research}}
 ```
 
 Copiar templates de `.claude/skills/team-os/templates/`:
@@ -495,15 +527,75 @@ Se não há architect disponível, lead faz inline — usa o template.
 
 ### `*dispatch` — Inicia trabalho
 
+**Passo 0 — Verificar team ativo antes de qualquer dispatch:**
+
+Ler `docs/smart-memory/ops/teams-log.md` — localizar a última entrada:
+- Se `**Status:** ativo` → team existe, prosseguir
+- Se `**Status:** encerrado` ou arquivo não existe → não há team ativo
+
+Se não há team ativo:
+```
+⚠️  Nenhum Agent Team ativo detectado.
+
+Último time registrado: {nome} (encerrado em {data})
+Teammates: {lista do teams-log}
+
+Opções:
+  1. Reativar este time (TeamCreate + Agent() × N com os mesmos teammates)
+  2. Formar novo time (volta para Etapa 4-6 do fluxo principal)
+  3. Cancelar
+
+Escolha (1/2/3):
+```
+
+Se opção 1 (reativar): carregar ferramentas deferidas primeiro (`ToolSearch({ query: "select:TeamCreate,SendMessage,TaskCreate,TaskUpdate,TaskList,TaskGet,TaskOutput,TaskStop,TeamDelete" })`), depois executar `TeamCreate({ team_name: "{nome}" })` + `Agent()` para cada teammate do último time registrado, com prompt: `"Retomando trabalho — leia docs/smart-memory/shared-context.md e stories/active/ para se atualizar. Avise via SendMessage ao concluir sua task."` Depois prosseguir para o passo 1.
+
+Se opção 2: ir para Etapa 4 do fluxo principal. Se opção 3: cancelar.
+
 1. Ler `docs/smart-memory/stories/BACKLOG.md`
 2. Selecionar stories validadas (5-point GO)
-3. **Verificar god nodes**: ler seção `## ⚡ God Nodes` de `docs/smart-memory/project/modules.md`
+3. **Wave analysis — agrupar stories por dependência ANTES de criar tasks:**
+
+   Para cada story selecionada, ler o campo `related:` do frontmatter. Se aponta para outra story do mesmo dispatch, é dependência.
+
+   - **Wave 1:** stories sem dependência entre si → rodam em paralelo (spawn simultâneo)
+   - **Wave 2+:** stories que dependem de uma da wave anterior → só após conclusão
+
+   Registrar a análise no chat antes de despachar:
+   ```
+   Wave 1 (paralelas): Story 2.1, Story 2.3
+   Wave 2 (aguardam Wave 1): Story 2.2 (depende de 2.1), Story 2.4 (depende de 2.3)
+   ```
+
+   Aplicar no `TaskCreate`: stories de Wave 2+ recebem `addBlockedBy: [task_id_da_wave_anterior]`. Se todas são independentes, ignorar (dispatch em bloco único).
+
+4. **Verificar god nodes**: ler seção `## ⚡ God Nodes` de `docs/smart-memory/project/modules.md`
    - Para cada story, verificar se os arquivos mencionados nos ACs intersectam os God Nodes
    - **Se sim**: marcar story com flag `god-node: true` no frontmatter e **incluir dev-qa obrigatoriamente** na composição do time, mesmo que a story seja pequena. Adicionar nota no prompt do dev: "Esta story toca um God Node — testes obrigatórios e QA formal antes do push."
    - **Se não**: fluxo normal, dev-qa opcional
-4. Criar tasks via `TaskCreate` — uma por story, com dependências quando apropriado
-5. Teammates vão fazer self-claim — lead apenas monitora
-6. Atualizar `shared-context.md`
+5. Criar tasks via `TaskCreate` — uma por story, com `addBlockedBy` aplicado conforme wave analysis (item 3)
+6. **Dev mode por complexity — incluir instrução no prompt de spawn de cada teammate:**
+
+   | Complexity | Modo | Instrução a injetar no prompt |
+   |---|---|---|
+   | S  | yolo        | "Complexity S — execute direto, sem perguntas prévias" |
+   | M  | interactive | "Complexity M — até 2–3 perguntas ao lead antes de começar, se necessário" |
+   | L  | pre-flight  | "Complexity L — liste todas as dúvidas sobre os ACs **antes** de implementar. Aguarde resposta do lead." |
+   | XL | pre-flight  | "Complexity XL — pre-flight obrigatório. Divida em sub-tarefas, valide cada uma com o lead antes de começar." |
+
+   Stories com `god-node: true` no frontmatter: tratar como complexity +1 (M→L, L→XL).
+
+7. **Quality gate antes de mover para `in-review/` — injetar no prompt do dev:**
+
+   "Ao concluir a implementação, ANTES de mover a story para `stories/in-review/`, execute e confirme:
+   - `npm run lint` (ou equivalente do projeto) sem erros
+   - `npm run typecheck` (ou equivalente) sem erros
+   - Testes relevantes passando (onde existirem)
+
+   Sem isso, a story permanece em `stories/active/`. Dev-qa pode devolver `in-review → active` se encontrar falha que deveria ter sido pega antes."
+
+8. Teammates fazem self-claim — lead apenas monitora
+9. Atualizar `shared-context.md`
 
 ### `*status` — Estado atual
 
@@ -547,21 +639,58 @@ Quais aplicar? (todos/específicos/nenhum)
 ### `*resume` — Retoma trabalho
 
 1. Ler `shared-context.md` → quem estava fazendo o quê
-2. Ler `stories/active/` → o que estava em progresso
+2. Ler `stories/active/` e `stories/in-review/` → o que estava em progresso
 3. Ler `delegation-log.md` → últimas delegações
-4. Mostrar resumo:
+4. Ler `ops/teams-log.md` → nome do time e lista de teammates
+5. Mostrar resumo:
    ```
    📋 Estado anterior detectado:
    - Team ativo: {nome} ({data de criação})
-   - {N} stories em progresso
+   - {N} stories em progresso / {N} em review
    - {N} tasks pendentes
    - Último agente ativo: {nome} ({tempo} atrás)
+   - Teammates do time: {lista do teams-log}
    
    Opções:
-     1. Retomar este team
+     1. Retomar este team (reativa teammates via TeamCreate + Agent())
      2. Arquivar e iniciar novo
      3. Auditar antes de decidir (*audit)
    ```
+
+**Se opção 1 (Retomar):**
+
+Executar o protocolo explícito de reativação — teammates NÃO persistem entre sessões:
+
+**Passo 0 — Carregar ferramentas deferidas (OBRIGATÓRIO):**
+```
+ToolSearch({ query: "select:TeamCreate,SendMessage,TaskCreate,TaskUpdate,TaskList,TaskGet,TaskOutput,TaskStop,TeamDelete" })
+```
+
+**A. Recriar o team:**
+```
+TeamCreate({ team_name: "{nome-do-time-do-teams-log}" })
+```
+
+**B. Respawnar cada teammate registrado no times-log (em paralelo):**
+```
+Agent({
+  subagent_type: "{teammate}",
+  team_name: "{nome-do-time}",
+  name: "{teammate}",
+  prompt: "Retomando trabalho interrompido.
+  Leia docs/smart-memory/shared-context.md para se contextualizar.
+  Leia docs/smart-memory/stories/active/ e stories/in-review/ para ver o que está em progresso.
+  Consulte TaskList para ver sua task atribuída.
+  Continue de onde parou. Avise o lead via SendMessage ao concluir."
+})
+```
+
+Após os spawns, avisar o usuário:
+```
+✅ Time {nome} reativado com {N} teammates.
+   Cada teammate foi recontextualizado com o estado anterior.
+   Use /team-os *status para ver o estado atual.
+```
 
 ### `*unblock <agente>`
 
@@ -584,10 +713,29 @@ Depois confirmar:
 
 ### `*close`
 
+**⚠️ Guard de confirmação — executar ANTES de qualquer outro passo:**
+
+Ler `docs/smart-memory/ops/teams-log.md` → última entrada com `**Status:** ativo` → extrair `{team_name_ativo}`.
+
+Exibir:
+```
+⚠️  Confirmar encerramento do time "{team_name_ativo}"?
+
+  Isso irá:
+  - Arquivar docs/smart-memory/ em docs/smart-memory/archive/
+  - Encerrar todos os teammates (TeamDelete)
+  - Registrar encerramento no teams-log
+
+  Confirmar? (s/n, default n):
+```
+
+Se resposta **não** for `s` ou afirmativa explícita → **cancelar imediatamente**. Não executar nenhum passo abaixo. Responder: `"Encerramento cancelado. Time {team_name_ativo} continua ativo."`
+
 1. Rodar `*audit` final
 2. Arquivar smart-memory: `cp -r docs/smart-memory docs/smart-memory/archive/{nome-team}-{data}/`
-3. Encerrar o Agent Team via protocolo explícito (linguagem natural não é confiável — ver Regra 1):
+3. Carregar ferramentas deferidas e encerrar o Agent Team:
    ```
+   ToolSearch({ query: "select:TeamCreate,SendMessage,TaskCreate,TaskUpdate,TaskList,TaskGet,TaskOutput,TaskStop,TeamDelete" })
    TeamDelete({ team_name: "{team_name_ativo}" })
    ```
    `{team_name_ativo}` = nome lido de `docs/smart-memory/ops/teams-log.md` (última entrada com `**Status:** ativo`)

@@ -1,6 +1,6 @@
 # Claude Agent Teams
 
-A complete configuration package for [Claude Code](https://claude.ai/code) with **Agent Teams** — 37 pre-built agents organized into squads (Dev, Sites, Social, Traffic), 43 skills, and the `team-os` orchestration system — with built-in **Graphify knowledge graph** integration for structural project awareness.
+A complete configuration package for [Claude Code](https://claude.ai/code) with **Agent Teams** — **49 pre-built agents** organized into 5 squads (Dev, Sites, Social, Traffic, PM), 50+ skills, and the `team-os` orchestration system — with built-in **Graphify knowledge graph** integration for structural project awareness.
 
 > Built on top of Claude Code's experimental Agent Teams feature. Drop `.claude/` into any project, run `/team-os-creator *install`, and get a full multi-agent squad working immediately.
 
@@ -10,13 +10,14 @@ A complete configuration package for [Claude Code](https://claude.ai/code) with 
 
 ```
 .claude/
-├── agents/                  # 37 teammate agents (4 squads)
-│   ├── dev-*.md             # Dev squad (10 agents)
+├── agents/                  # 49 teammate agents (5 squads)
+│   ├── dev-*.md             # Dev squad (12 agents)
 │   ├── sites-*.md           # Sites squad (10 agents)
 │   ├── social-*.md          # Social squad (7 agents)
-│   └── traffic-*.md         # Traffic squad (10 agents)
+│   ├── traffic-*.md         # Traffic squad (10 agents)
+│   └── pm-*.md              # PM squad — Kaelthari (10 agents)
 │
-├── skills/                  # 43 skills (slash commands)
+├── skills/                  # 50+ skills (slash commands)
 │   ├── team-os/             # Lead orchestrator (/team-os)  ← smart-memory owner
 │   ├── team-os-creator/     # Agent factory + installer (/team-os-creator)
 │   ├── dev-*/               # Dev skills (TypeScript, API design, testing, etc.)
@@ -34,6 +35,11 @@ A complete configuration package for [Claude Code](https://claude.ai/code) with 
 │
 └── settings.json            # Enables CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1
 ```
+
+> **Note on skills dependencies:** Skills installed via `npx skills add` are stored as symlinks in `.claude/skills/` pointing to `.agents/skills/`. After cloning, restore them with:
+> ```bash
+> npx skills install
+> ```
 
 ---
 
@@ -166,6 +172,8 @@ Only `dev-devops` (or `sites-devops`) can run `git push` and create PRs. The `bl
 | `dev-qa` | Quality gates — issues formal PASS / CONCERNS / FAIL verdicts |
 | `dev-devops` | Git push, PR creation, CI/CD (exclusive authority) |
 | `dev-data-engineer` | Schema design, migrations, RLS, query optimization |
+| `dev-bi` | Kairo — SELECT-only DB queries, analytics engineering, metric dictionary, KPIs, OKRs, dashboard specs, Big Data strategy |
+| `dev-data-performance` | Sigma — performance insights, anomaly detection, trend forecasting, EDA, ML on-demand, strategic recommendations |
 
 ### Sites Squad
 
@@ -212,6 +220,30 @@ Cross-platform paid traffic squad (Google Ads, Meta Ads, TikTok Ads). Strategy-f
 | `traffic-meta` | Meta Ads — Facebook + Instagram, Advantage+, retargeting, lookalike, CAPI |
 | `traffic-tiktok` | TikTok Ads — Spark Ads, In-Feed, TopView, Brand Takeover |
 | `traffic-automation` | Bulk ops scripts, Google/Meta/TikTok API integrations, data pipelines |
+
+### PM Squad — Kaelthari
+
+Project Management squad built for any company and any PM system. Discovers all context dynamically from the database — no hardcoded team or company names. Implements the strategic triangle: **PEOPLE** (capacity) ↔ **DELIVERIES** (commitments) ↔ **DEMANDS** (incoming), with Lean and Scrum natively embedded.
+
+| Agent | Persona | Role |
+|---|---|---|
+| `pm-analyst` | **Serak** | Portfolio intelligence — workload per person, delay risk, overload detection, 7 Lean wastes |
+| `pm-planner` | **Zynath** | Sprint planning with capacity verification, Heijunka load leveling |
+| `pm-engineer` | **Faelor** | Process template engine — creates task sets, templates, subtasks, DoR embedded |
+| `pm-ops` | **Varek** | Daily operations — processes standup summaries, updates task status, detects blockers |
+| `pm-reporter` | **Lyrith** | Meeting intelligence — PRIMARY entry point for all meetings (daily, planning, client, retro) |
+| `pm-demand` | **Draketh** | Demand intake — structures and creates tasks, checks capacity, detects duplicates |
+| `pm-data` | **Nexar** | Data layer — sole Supabase CLI access, multi-tenant, full schema knowledge |
+| `pm-client` | **Eshara** | Client layer — companies, people, access permissions, risk detection |
+| `pm-qa` | **Thyron** | Quality audit — formal verdicts APROVADO/PENDÊNCIAS/REPROVADO, DoD enforcement |
+| `pm-coach` | **Aevon** | Scrum Master — all ceremonies, data-driven retrospectives, dysfunction detection, Kaizen |
+
+**How the PM squad operates:**
+- Drop any meeting summary (daily standup, sprint planning, client call, retrospective) to `pm-reporter` (Lyrith) and it routes to the right agents automatically
+- All context (teams, projects, people, clients) is discovered dynamically from the database — no hardcoded data in the agents
+- Lean natively embedded: 7-waste detection, value stream, standardized work, Jidoka quality stops
+- Scrum natively embedded: velocity, burndown, WIP limits, DoR/DoD, sprint ceremonies with real data
+- Works with any PM system that exposes a REST API (default integration with WorkOS/Supabase schema)
 
 ---
 
@@ -263,6 +295,18 @@ Creates agents following validated patterns and installs squads into other proje
 
 `/dev-api-design` · `/dev-database-patterns` · `/dev-error-handling` · `/dev-testing-strategy` · `/dev-typescript-patterns` · `/dev-git-workflow` · `/dev-security-patterns` · `/dev-technical-writing` · `/dev-defuddle`
 
+#### BI & Data Science skills (for `dev-bi` and `dev-data-performance`)
+
+`/data-analytics-engineering` · `/data-sql-optimization` · `/data-lake-platform` · `/ai-ml-data-science` · `/ai-ml-timeseries`
+
+| Skill | Used by | Purpose |
+|---|---|---|
+| `/data-analytics-engineering` | Kairo | Metric dictionary, semantic layer, dbt/SQLMesh, data contracts, governance |
+| `/data-sql-optimization` | Kairo | Analytical query tuning, EXPLAIN/ANALYZE, anti-patterns, indexing |
+| `/data-lake-platform` | Kairo | Medallion architecture, data mesh, Iceberg/Delta, ClickHouse, Dagster |
+| `/ai-ml-data-science` | Sigma | EDA, feature engineering, LightGBM, model evaluation, MLOps (CI/CD/CT/CM) |
+| `/ai-ml-timeseries` | Sigma | Forecasting, backtesting, lag features, seasonality, drift detection |
+
 ### Sites skills
 
 `/sites-seo-technical` · `/sites-seo-keywords` · `/sites-frontend-design` · `/sites-ux-interaction` · `/sites-copywriting` · `/sites-page-cro` · `/sites-content-strategy` · `/sites-deployment` · `/sites-shadcn-ui` · `/sites-tailwind-design-system` · `/sites-canvas-design` · `/sites-copy-editing` · `/sites-web-accessibility` · `/sites-scroll-motion`
@@ -291,6 +335,20 @@ Creates agents following validated patterns and installs squads into other proje
 ### Traffic skills
 
 `/tiktok-marketing`
+
+### PM skills
+
+`/supabase` · `/supabase-postgres-best-practices` · `/to-prd` · `/to-issues` · `/grill-me` · `/triage` · `/handoff`
+
+| Skill | Used by | Purpose |
+|---|---|---|
+| `/supabase` | Nexar, all PM agents | Supabase REST API patterns, RLS, Auth, Edge Functions |
+| `/supabase-postgres-best-practices` | Nexar | PostgreSQL query optimization, schema design, indexing |
+| `/to-prd` | Draketh, Zynath | Converts demand briefs into structured PRD / task definition |
+| `/to-issues` | Draketh | Converts meeting notes and PRDs into structured task lists |
+| `/grill-me` | Zynath, Aevon | Adversarial requirement review — finds edge cases before sprint starts |
+| `/triage` | Serak, Draketh | Priority scoring, demand classification, backlog health |
+| `/handoff` | Varek, Lyrith | Standardized handoff format between agents and sprint cycles |
 
 ### Design / Accessibility
 
