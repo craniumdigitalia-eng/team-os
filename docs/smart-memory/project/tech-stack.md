@@ -1,65 +1,50 @@
 ---
 title: Tech Stack
-type: tech-stack
-status: active
-agent: dev-analyst
-created: 2026-04-24
-updated: 2026-04-24
-tags: [project, tech-stack]
-related: ["[[overview]]", "[[architecture]]"]
+tags: [tech-stack, dependencies]
+updated: 2026-05-19
 ---
 
-# Tech Stack — Centro de Treinamento
+# Tech Stack
 
-## Core Platform
+Este projeto não tem linguagem de programação convencional. É um pacote de configuração para Claude Code com Agent Teams — composto por Markdown, Shell e JSON.
 
-| Componente | Versão/Detalhe | Papel |
+## Camadas
+
+| Camada | Tecnologia | Versão | Notas |
+|---|---|---|---|
+| Plataforma | Claude Code | latest | Requisito base; Agent Teams experimental |
+| Orquestração | Agent Teams nativo | — | `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` |
+| Modelo de agente | Claude Sonnet | sonnet | Padrão; alguns agentes podem usar opus |
+| Conteúdo | Markdown (.md) | — | Agentes, skills, smart-memory |
+| Automação | Bash (.sh) | — | Hooks e scripts internos do team-os-creator |
+| Configuração | JSON | — | settings.json, settings.local.json, skills-lock.json |
+| Knowledge Graph | Graphify | — | `uv tool install graphifyy`; transiente, não persistido |
+| CLI de web scraping | Defuddle | 1.x | `npx @kepano/defuddle-cli` ou global; usado pelo Analyst/UX |
+
+## MCPs externos (dependências de agentes específicos)
+
+| MCP | Agente consumidor | Finalidade |
 |---|---|---|
-| **Claude Code** | CLI + Desktop + IDE Extensions | Runtime dos agentes |
-| **Claude API (Anthropic)** | claude-opus-4-x / claude-sonnet-4-x / claude-haiku-4-x | LLM por trás dos agentes |
-| **Agent Teams** | `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` | Orquestração multi-agente nativa |
+| `mcp__freepik__*` | social-photo (IRIS) | Geração e upscale de fotos AI via Freepik |
+| `mcp__stitch__*` | social-design (AEON) | Key Visuals e carousels via Google Stitch |
+| `mcp__magic__*` | social-design (AEON) | Componentes e logos via Magic/21st |
+| Apify MCP | social-content (LYRIS) | Research de tendências (Instagram, TikTok, hashtags) |
+| Meta API MCP | social-publisher (PULSE) | Publicação em Instagram e Facebook |
 
-## Modelos por papel
+## Skills externas (via skills-lock.json)
 
-| Modelo | Uso nos agentes |
-|---|---|
-| `opus` | Papéis estratégicos/QA: dev-architect, dev-qa, sites-architect, sites-qa, social-strategist, traffic-strategist, traffic-qa |
-| `sonnet` | Papéis de execução: todos os demais (dev, implementação, análise) |
-
-## MCPs (Model Context Protocol) integrados
-
-| MCP | Agentes que usam | Função |
+| Skill | Fonte GitHub | Propósito |
 |---|---|---|
-| **Apify** | social-content | Web scraping, research de tendências via RAG |
-| **Google Stitch** | social-design | Geração de assets visuais e design system |
-| **Freepik** | social-photo | Geração de imagens AI (generate, upscale, reframe) |
-| **Meta** | social-publisher | Publicação no Instagram/Facebook, scheduling, insights |
-| **magic/21st** | social-design | Component builder e logo search |
+| `deep-research` | `199-biotechnologies/claude-deep-research-skill` | Research aprofundado |
+| `tiktok-marketing` | `claude-office-skills/skills` | Marketing no TikTok |
 
-## Ferramentas padrão dos agentes
+## Ferramentas de instalação
 
-Todos os agentes têm acesso à combinação adequada de:
-- `Read, Glob, Grep` — navegação e leitura de código
-- `Write, Edit` — produção/edição de arquivos
-- `Bash` — execução de comandos shell
-- `WebSearch, WebFetch` — pesquisa e acesso web
-- `SendMessage` — comunicação com o lead (team-os) e outros teammates
+- `/team-os-creator *install` — copia agentes/skills/hooks para projeto destino
+- `/team-os *bootstrap` — init + discovery em projetos novos
+- `uv tool install graphifyy` — instala Graphify (opcional, para knowledge graph via AST)
 
-## Configuração do projeto
+## Relacionado
 
-```json
-// .claude/settings.json
-{
-  "env": {
-    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
-  }
-}
-```
-
-## Convenção de memória dos agentes
-
-Todos os agentes têm `memory: project` no frontmatter — leem e escrevem em `docs/smart-memory/` como fonte de verdade compartilhada.
-
-## Skills como módulos de comportamento
-
-Skills em `.claude/skills/` são invocadas via `/skill-name` e definem comportamentos especializados (ex: `/team-os`, `/ui-ux-pro-max`, `/deep-research`). São a principal forma de estender o comportamento do agente além do prompt base.
+- [[conventions]] — padrões de nomenclatura e estrutura
+- [[overview]] — visão geral do projeto

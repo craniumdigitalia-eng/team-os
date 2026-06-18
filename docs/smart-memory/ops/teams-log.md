@@ -1,7 +1,7 @@
 ---
 title: Teams Log
 type: task-log
-updated: 2026-04-24
+updated: 2026-05-19
 tags: [ops]
 ---
 
@@ -9,31 +9,40 @@ tags: [ops]
 
 Registro de todos os Agent Teams formados neste projeto. Lead (team-os) atualiza a cada `*dispatch` e `*close`.
 
-## 2026-04-24 — Bootstrap claude-discovery
+<!-- Entrada template:
 
-**Objetivo:** Bootstrap — descoberta e documentação completa do Centro de Treinamento
+## 2026-05-19 — Team {nome}
+
+**Objetivo:** {objetivo}
 **Lead:** team-os (skill)
 **Composição:**
-- team-os lead (inline) — criação completa da smart-memory
+- {teammate-1} — {papel}
+- {teammate-2} — {papel}
 
-**Status:** encerrado
-**Início:** 2026-04-24
-**Encerrado:** 2026-04-24
-**Arquivos produzidos:**
-- [[../project/overview]]
-- [[../project/tech-stack]]
-- [[../project/architecture]]
-- [[../project/modules]]
-- [[../project/conventions]]
-- [[../project/skills]]
-- [[../project/squads/dev-squad]]
-- [[../project/squads/sites-squad]]
-- [[../project/squads/social-squad]]
-- [[../project/squads/traffic-squad]]
-- [[../shared-context]]
-- [[../stories/BACKLOG]]
-- [[delegation-log]]
-
-**Resultado:** Smart-memory completa com documentação de 37 agentes (4 squads) + 42 skills
+**Status:** ativo / encerrado
+**Início:** {ISO date}
+**Encerrado:** {ISO date ou —}
+**Stories:** [[../stories/{N.M}]]
+**Resultado:** {resumo quando encerrado}
 
 ---
+-->
+
+## 2026-05-19 — Team ct-agentes-discovery
+
+**Objetivo:** Bootstrap — descoberta inicial do projeto CT Agentes
+**Lead:** team-os (skill)
+**Composição:**
+- dev-architect — modules.md, architecture.md
+- dev-analyst — tech-stack.md, conventions.md
+
+**Status:** encerrado
+**Início:** 2026-05-19T08:00:00Z
+**Encerrado:** 2026-05-19T09:55:00Z
+
+**Arquivos produzidos:**
+- [[../project/modules]]
+- [[../project/architecture]]
+- [[../project/tech-stack]]
+- [[../project/conventions]]
+- [[../project/overview]]

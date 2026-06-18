@@ -1,86 +1,230 @@
 ---
-title: Modules — Catálogo de Agentes
-type: modules
-status: active
+title: Mapa de Módulos
+type: overview
 agent: dev-architect
-created: 2026-04-24
-updated: 2026-04-24
-tags: [project, modules, agents]
-related: ["[[overview]]", "[[architecture]]", "[[squads/dev-squad]]", "[[squads/sites-squad]]", "[[squads/social-squad]]", "[[squads/traffic-squad]]"]
+created: 2026-05-19
+updated: 2026-05-19
+tags: [architecture, modules]
+related: ["[[architecture]]", "[[overview]]"]
 ---
 
-# Catálogo Completo de Agentes (37 total)
+# Mapa de Módulos
 
-## Squad dev — Software Complexo (10 agentes)
+## God Nodes
 
-| Agente | Modelo | Papel | Tools especiais |
-|---|---|---|---|
-| `dev-analyst` | sonnet | Research, CVE, library comparison — on-demand only | WebSearch, WebFetch |
-| `dev-architect` | opus | Arquitetura, stories (EXCLUSIVO), ADRs, module docs | WebSearch, WebFetch |
-| `dev-data-engineer` | sonnet | DB: schema, migrations, RLS, indexing — snapshot→dry-run→apply | — |
-| `dev-dev-alpha` | sonnet | Frontend: React, Next.js, Tailwind, UI components | — |
-| `dev-dev-beta` | sonnet | Backend: APIs, services, business logic, integrações | — |
-| `dev-dev-delta` | sonnet | Hardening: error handling, retry, edge cases — usa APÓS feature | WebSearch |
-| `dev-dev-gamma` | sonnet | Fullstack: glue code, cross-layer, features que cruzam front+back | — |
-| `dev-devops` | sonnet | **Autoridade exclusiva** git push, gh pr, CI/CD, releases | — |
-| `dev-qa` | opus | **Autoridade exclusiva** veredictos PASS/CONCERNS/FAIL/WAIVED | — |
-| `dev-ux` | sonnet | UX research, user flows, wireframes, component specs, a11y | WebFetch, WebSearch |
+Arquivos com papel central no sistema — mudança aqui tem impacto amplo em toda a squad. **QA obrigatório sempre que uma story tocar estes arquivos.**
 
-## Squad sites — Websites / Next.js (10 agentes)
-
-| Agente | Modelo | Papel | Tools especiais |
-|---|---|---|---|
-| `sites-analyst` | sonnet | Keyword research, competitor analysis, SEO, feasibility | WebSearch, WebFetch |
-| `sites-architect` | opus | Arquitetura de sites, stories (EXCLUSIVO), page structure | WebSearch, WebFetch |
-| `sites-data` | sonnet | DB para websites — mesmo protocolo snapshot→dry-run→apply | — |
-| `sites-dev-alpha` | sonnet | Frontend: React/Next.js, Tailwind, shadcn/ui, landing pages | — |
-| `sites-dev-beta` | sonnet | Backend: APIs, CMS integrations, server-side, third-party | — |
-| `sites-dev-delta` | sonnet | Hardening: Core Web Vitals, performance, edge cases | WebSearch |
-| `sites-dev-gamma` | sonnet | Fullstack: CRO features, SEO implementation, analytics | — |
-| `sites-devops` | sonnet | **Autoridade exclusiva** git push, Vercel/Netlify deployments | — |
-| `sites-qa` | opus | **Autoridade exclusiva** veredictos + a11y + copy + SEO checks | — |
-| `sites-ux` | sonnet | UX research, visual design, component specs, accessibility | WebFetch, WebSearch |
-
-## Squad social — Redes Sociais (7 agentes)
-
-> Agentes da squad social têm identidades alien race.
-
-| Agente | Identidade | Modelo | Papel | MCPs |
-|---|---|---|---|---|
-| `social-analyst` | — | sonnet | Research, competitor analysis, hashtag strategy, benchmarking | WebSearch, WebFetch |
-| `social-content` | **LYRIS** | sonnet | Copywriting + research via Apify (dual function) | Apify (RAG, call-actor) |
-| `social-design` | **AEON** | sonnet | Key Visuals, carousels, templates via Google Stitch | Stitch, 21st Magic |
-| `social-photo` | **IRIS** | sonnet | Fotos AI (produto, lifestyle, cinematic) via Freepik | Freepik (generate, upscale, reframe) |
-| `social-publisher` | **PULSE** | sonnet | Publicação + analytics via Meta MCP (só após VERA aprova) | Meta (publish, schedule, insights) |
-| `social-strategist` | **VERA** | opus | Validação editorial — NUNCA cria conteúdo, só valida e dirige | — |
-| `social-video` | **FLUX** | sonnet | Reels, Stories, TikToks, Shorts via ffmpeg | — |
-
-**Regra crítica da squad social:** VERA (social-strategist) DEVE aprovar ANTES de PULSE (social-publisher) publicar qualquer conteúdo.
-
-## Squad traffic — Tráfego Pago (10 agentes)
-
-| Agente | Modelo | Papel |
+| Arquivo | Papel | Impacto |
 |---|---|---|
-| `traffic-analyst` | sonnet | Performance intel: audiências, concorrentes, benchmarks, diagnóstico |
-| `traffic-automation` | sonnet | Scripts bulk ops, Google/Meta/TikTok API, pipelines de dados |
-| `traffic-bi` | sonnet | BI + atribuição: ROAS, LTV, CPA, multi-touch — fonte oficial de métricas |
-| `traffic-copywriter` | sonnet | Copy de ads: headlines, descrições, CTAs, variantes A/B por plataforma |
-| `traffic-designer` | sonnet | Criativos: banners, carousels, vídeos, assets para Stories |
-| `traffic-google` | sonnet | Google Ads: Search, PMax, Shopping, YouTube, Display |
-| `traffic-meta` | sonnet | Meta Ads: Facebook + Instagram, Advantage+, retargeting, lookalike, CAPI |
-| `traffic-qa` | opus | **Autoridade exclusiva** pré-campanha: UTMs, pixels, compliance, PASS/FAIL |
-| `traffic-strategist` | opus | **Autoridade exclusiva** stories de campanha + checklist 5 pontos |
-| `traffic-tiktok` | sonnet | TikTok Ads: Spark Ads, In-Feed, TopView, pixel, criativos nativos |
+| `.claude/skills/team-os/SKILL.md` | Orquestrador principal (team lead) — define todos os fluxos, comandos e protocolo Agent Teams | Todo time depende desta skill. Alteração quebra orquestração de todas as squads. |
+| `.claude/skills/team-os/reference/teammate-contract.md` | Contrato universal injetado em todos os agentes via `*enroll` | Regula coordenação de todos os 37 agentes. Alteração deve ser propagada em todos os `.claude/agents/*.md`. |
+| `.claude/skills/team-os-creator/SKILL.md` | Factory de agentes — gera, valida e propaga agentes para projetos do CT | Controla criação de toda nova squad. Alteração afeta todos os flows de install/propagate. |
+| `.claude/skills/team-os-creator/scripts/install-to-project.sh` | Script de instalação de agentes e skills em projetos destino | Único caminho de propagação — bugs aqui corrompem projetos destino silenciosamente. |
+| `.claude/skills/team-os/scripts/detect-state.sh` | Detecta estado do projeto (NEW/NO_DISCOVERY/IN_PROGRESS/READY) e roteia o fluxo principal | Lógica de entrada do `/team-os`. Erro aqui impede bootstrap e discovery. |
 
-**Fluxo obrigatório:** traffic-strategist (brief) → traffic-qa (PASS) → plataforma ativa
+---
 
-## Padrões de modelo
+## Clusters de Módulos
 
-- **opus** = papéis de decisão/arquitetura/QA (dev-architect, dev-qa, sites-architect, sites-qa, social-strategist, traffic-strategist, traffic-qa)
-- **sonnet** = papéis de execução, análise e produção (todos os outros 30 agentes)
+Grupos que trabalham juntos por responsabilidade funcional:
 
-## Todos os agentes têm
+### Cluster: Orquestração (team-os)
+**Núcleo do sistema.**
 
-- Frontmatter: `name`, `description`, `model`, `memory: project`, `tools`, `color`
-- Seção "Contrato com team-os" no corpo do prompt
-- Instrução para comunicar via `SendMessage` ao concluir tasks
+```
+team-os/SKILL.md
+  → team-os/scripts/preflight.sh
+  → team-os/scripts/detect-state.sh
+  → team-os/scripts/list-teammates.sh
+  → team-os/scripts/audit-smart-memory.sh
+  → team-os/scripts/audit-teammate-compliance.sh
+  → team-os/reference/teammate-contract.md
+  → team-os/reference/team-activation.md
+  → team-os/reference/obsidian-patterns.md
+  → team-os/templates/ (INDEX, shared-context, BACKLOG, story, delegation-log, teams-log, overview)
+```
+
+**Responsabilidade:** Orquestrar toda a execução de Agent Teams — detectar estado, formar times, despachar tasks, monitorar progresso, auditar smart-memory.
+
+### Cluster: Factory de Agentes (team-os-creator)
+**Criação e propagação de squads.**
+
+```
+team-os-creator/SKILL.md
+  → team-os-creator/scripts/detect-project-signals.sh
+  → team-os-creator/scripts/generate-agent.sh
+  → team-os-creator/scripts/validate-agent.sh
+  → team-os-creator/scripts/scan-ct-projects.sh
+  → team-os-creator/scripts/diff-agents.sh
+  → team-os-creator/scripts/install-to-project.sh
+  → team-os-creator/scripts/install-suggested-skills.sh
+  → team-os-creator/scripts/search-skills.sh
+  → team-os-creator/scripts/preflight.sh
+  → team-os-creator/presets/ (dev, sites, social, traffic, content, data, marketing)
+  → team-os-creator/templates/ (architect, implementer, reviewer, researcher, data, devops, ux, hardening, orchestrator)
+  → team-os-creator/reference/archetypes.md
+  → team-os-creator/reference/skills-catalog-quality.md
+  → team-os-creator/reference/smart-memory-integration.md
+```
+
+**Responsabilidade:** Gerar agentes nativos Claude Code, instalar skills, validar compliance, propagar squads para projetos do Centro de Treinamento.
+
+### Cluster: Squad Dev (10 agentes)
+**Desenvolvimento de software fullstack.**
+
+```
+dev-analyst    (researcher, cyan)    — pesquisa técnica, comparação de libs
+dev-architect  (architect, purple)   — arquitetura, ADRs, stories (exclusivo)
+dev-ux         (ux, pink)            — componentes, a11y, specs de UI
+dev-dev-alpha  (implementer)         — implementação frontend/backend
+dev-dev-beta   (implementer)         — implementação frontend/backend
+dev-dev-gamma  (implementer)         — implementação frontend/backend
+dev-dev-delta  (implementer)         — implementação + hardening
+dev-qa         (reviewer, red)       — veredictos formais PASS/FAIL (exclusivo)
+dev-devops     (devops, green)       — git push, PRs, CI/CD (exclusivo)
+dev-data-engineer (data)             — schema, migrations, queries
+```
+
+### Cluster: Squad Sites (10 agentes)
+**Desenvolvimento de sites e landing pages.**
+
+```
+sites-analyst      — pesquisa, SEO, análise de mercado
+sites-architect    — arquitetura de páginas, stories (exclusivo)
+sites-ux           — UX, interação, acessibilidade
+sites-dev-alpha/beta/gamma/delta — implementação Next.js/frontend
+sites-qa           — veredictos de qualidade
+sites-devops       — deploy, push, CI
+sites-data         — dados de analytics, schema
+```
+
+### Cluster: Squad Social (7 agentes)
+**Produção e publicação de conteúdo para redes sociais.**
+
+```
+social-strategist  (VERA, red)      — validação editorial (obrigatória antes de publicar)
+social-analyst     — métricas, performance de conteúdo
+social-content     — criação de textos e legendas
+social-design      — design de posts, carrosséis
+social-photo       — direção e seleção de imagens
+social-video       — edição e scriptwriting de vídeo
+social-publisher   — publicação final (exclusivo)
+```
+
+### Cluster: Squad Traffic (10 agentes)
+**Tráfego pago cross-platform (Google, Meta, TikTok).**
+
+```
+traffic-strategist  (purple)   — planejamento de campanhas, budget, KPIs (stories exclusivo)
+traffic-analyst     — análise de performance, atribuição
+traffic-bi          — métricas oficiais, dashboards (exclusivo)
+traffic-copywriter  — copy de anúncios
+traffic-designer    — criativos visuais para ads
+traffic-google      — campanhas Google Ads
+traffic-meta        — campanhas Meta Ads
+traffic-tiktok      — campanhas TikTok Ads
+traffic-qa          — veredictos de campanha (exclusivo)
+traffic-automation  — integrações API, automações (exclusivo)
+```
+
+### Cluster: Smart Memory
+**Fonte de verdade compartilhada entre todos os agentes.**
+
+```
+docs/smart-memory/
+  INDEX.md                        — MOC raiz (atualizado por todos os agentes)
+  shared-context.md               — status board em tempo real
+  project/
+    overview.md                   — objetivo e contexto do projeto
+    modules.md                    — este arquivo
+    architecture.md               — padrão arquitetural
+    tech-stack.md                 — stack (responsabilidade dev-analyst)
+    conventions.md                — convenções (responsabilidade dev-analyst)
+    squads/                       — specs por squad
+  stories/
+    BACKLOG.md                    — índice de stories
+    backlog/                      — stories pendentes
+    active/                       — em desenvolvimento
+    done/                         — concluídas
+  decisions/                      — ADRs numerados
+  ops/
+    delegation-log.md             — histórico de delegações
+    teams-log.md                  — times formados
+  agents/
+    data-engineer/schema.md
+    qa/results.md
+    ux/components.md
+    research/
+```
+
+### Cluster: Hooks de Enforcement
+**Guardrails executados automaticamente pelo Claude Code.**
+
+```
+.claude/hooks/
+  block-git-push.sh       — PreToolUse: bloqueia git push em agentes dev-dev-*
+  check-story-progress.sh — SubagentStop: alerta se story ficou > 2h sem conclusão
+  check-social-progress.sh — monitoramento do fluxo social
+```
+
+### Cluster: Skills por Domínio
+**Skills especializadas instaladas por squad.**
+
+```
+dev skills (11):
+  dev-api-design, dev-database-patterns, dev-defuddle,
+  dev-error-handling, dev-git-workflow, dev-security-patterns,
+  dev-technical-writing, dev-testing-strategy, dev-typescript-patterns,
+  deep-research, accessibility
+
+sites skills (14):
+  sites-canvas-design, sites-content-strategy, sites-copy-editing,
+  sites-copywriting, sites-deployment, sites-frontend-design,
+  sites-page-cro, sites-scroll-motion, sites-seo-keywords,
+  sites-seo-technical, sites-shadcn-ui, sites-tailwind-design-system,
+  sites-ux-interaction, sites-web-accessibility
+
+social skills (11):
+  social-analytics, social-apify-research, social-carousel-design,
+  social-cinematic-composition, social-copywriting, social-editorial-validation,
+  social-format-specs, social-freepik-generation, social-key-visual,
+  social-meta-publishing, social-scriptwriting, social-stitch-workflow,
+  social-video-editing
+
+traffic skills (2):
+  tiktok-marketing, (+ social skills compartilhadas)
+
+cross-squad (3):
+  team-os, team-os-creator, ui-ux-pro-max, web-design-guidelines
+```
+
+---
+
+## Estrutura de Diretórios
+
+```
+CT Agentes/
+├── .claude/
+│   ├── agents/                   — 37 agentes nativos (4 squads)
+│   │   ├── dev-*    (10)
+│   │   ├── sites-*  (10)
+│   │   ├── social-*  (7)
+│   │   └── traffic-* (10)
+│   ├── hooks/                    — 3 hooks de enforcement
+│   ├── skills/                   — 42 skills instaladas
+│   │   ├── team-os/              — orquestrador (god node)
+│   │   ├── team-os-creator/      — factory de agentes (god node)
+│   │   ├── dev-*/                — skills do domínio dev
+│   │   ├── sites-*/              — skills do domínio sites
+│   │   ├── social-*/             — skills do domínio social
+│   │   └── [cross-squad skills]
+│   ├── agent-memory/             — memória privada por agente
+│   └── settings.json             — CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1
+├── docs/
+│   ├── smart-memory/             — fonte de verdade compartilhada
+│   └── CT AGENTES/               — vault Obsidian (espelho/complementar)
+├── scripts/
+│   └── propagate-graphify.py     — propagação de knowledge graph para projetos do CT
+├── skills-lock.json              — hash de skills externas instaladas (deep-research, tiktok-marketing)
+└── README.md
+```

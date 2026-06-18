@@ -1,7 +1,7 @@
 ---
 title: Story Backlog
 type: backlog
-updated: 2026-04-24
+updated: {data}
 tags: [story]
 ---
 

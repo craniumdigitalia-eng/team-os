@@ -1,49 +1,66 @@
 ---
-title: Project Overview
-type: overview
-status: active
-agent: team-os
-created: 2026-04-24
-updated: 2026-04-24
-tags: [project]
-related: ["[[tech-stack]]", "[[architecture]]", "[[../stories/BACKLOG]]", "[[modules]]"]
+title: Overview
+tags: [overview, project]
+updated: 2026-05-19
 ---
 
-# Centro de Treinamento de Agentes Claude Code
+# CT Agentes — Overview
 
 ## Objetivo
 
-Repositório central de agentes Claude Code nativos e skills para orquestração via Agent Teams. Funciona como "sistema operacional" para squads especializadas: cada squad tem agentes com papéis bem definidos, tools restritas ao necessário, e contratos com o team-os para coordenação via SendMessage.
+Centro de Treinamento de Agentes Claude Code. Repositório-fonte de todas as squads de agentes nativos (Agent Teams) do ecossistema. Mantém agentes atualizados e os propaga para projetos destino (Dev, Site, Social Media, Tráfego pago, Designer de anuncios).
 
-## Contexto
+## Stack principal
 
-- **Plataforma:** Claude Code CLI (Anthropic) com `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`
-- **Padrão:** Agent Teams nativos — team-os como lead, teammates spawned via `Agent({team_name, ...})`
-- **Usuários alvo:** Operadores que precisam de squads especializadas para dev, sites, social ou tráfego pago
-- **Fonte de verdade:** Este repositório `.claude/` — agentes em `.claude/agents/`, skills em `.claude/skills/`
+Markdown + Shell + JSON — sem linguagem de programação convencional. Orquestrado por Agent Teams nativo do Claude Code (`CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`).
 
-## Squads disponíveis
+## Padrão arquitetural
+
+**Hub-and-Spoke com memória compartilhada centralizada.**
+- **Hub:** skill `/team-os` na main session (orquestrador)
+- **Spokes:** 37 agentes especializados em 4 squads
+- **Memória:** `docs/smart-memory/` no padrão Obsidian
+
+## Squads
 
 | Squad | Agentes | Foco |
 |---|---|---|
-| **dev** | 10 | Software complexo (backend, frontend, infra, QA) |
-| **sites** | 10 | Websites/Next.js (landing pages, CMS, SEO, deploy) |
-| **social** | 7 | Redes sociais (content, design, photo, video, publish) |
-| **traffic** | 10 | Tráfego pago Google/Meta/TikTok (estratégia → QA → ativação) |
+| `dev` | 10 | Software fullstack (analyst, architect, ux, 4 devs, qa, devops, data) |
+| `sites` | 10 | Projetos web/landing pages (mesma composição com foco sites) |
+| `social` | 7 | Criação de conteúdo social (design, foto, vídeo, copy, publicação) |
+| `traffic` | 10 | Tráfego pago Google/Meta/TikTok (estratégia, criativos, gestão) |
 
-**Total: 37 agentes + 42 skills**
+## Módulos principais
 
-## Equipe
+- [[modules]] — God Nodes e clusters de dependência
+- [[architecture]] — Fluxo Hub-and-Spoke, camadas e sequência de orquestração
+- [[tech-stack]] — Plataforma, MCPs externos, skills externas
+- [[conventions]] — Nomenclatura, frontmatter obrigatório, padrões de script
 
-Squad dinâmica — team lead via skill `/team-os`, teammates conforme disponibilidade em `.claude/agents/`.
+## God Nodes (arquivos críticos)
+
+| Arquivo | Por quê é crítico |
+|---|---|
+| `.claude/skills/team-os/SKILL.md` | Orquestrador de toda a squad — quebra tudo se alterado incorretamente |
+| `.claude/skills/team-os/reference/teammate-contract.md` | Contrato de todos os 37 agentes — propagação manual obrigatória |
+| `.claude/skills/team-os-creator/SKILL.md` | Factory de agentes — controla criação e propagação de squads |
+| `.claude/skills/team-os-creator/scripts/install-to-project.sh` | Único caminho de propagação — bugs aqui corrompem projetos destino |
+| `.claude/skills/team-os/scripts/detect-state.sh` | Entrada do `/team-os` — erro aqui bloqueia todo o bootstrap |
+
+## Projetos destino (CT)
+
+| Projeto | Squads instaladas |
+|---|---|
+| Dev | dev |
+| Site | sites |
+| Social Media | social |
+| Tráfego pago | traffic |
+| Designer de anuncios | social (design/foto/vídeo) + traffic (designer/copywriter) + sites-ux |
 
 ## Links
-- [[tech-stack]] — stack e dependências externas
-- [[architecture]] — padrão arquitetural e fluxo de orquestração
-- [[modules]] — mapa completo de todos os agentes e suas responsabilidades
-- [[conventions]] — como criar e manter agentes/skills
+
+- [[tech-stack]] — stack (fonte: dev-analyst)
+- [[architecture]] — padrão arquitetural (fonte: dev-architect)
+- [[modules]] — mapa de módulos e God Nodes (fonte: dev-architect)
+- [[conventions]] — convenções de nomenclatura e scripts (fonte: dev-analyst)
 - [[../stories/BACKLOG]] — backlog
-- [[squads/dev-squad]] — squad dev detalhada
-- [[squads/sites-squad]] — squad sites detalhada
-- [[squads/social-squad]] — squad social detalhada
-- [[squads/traffic-squad]] — squad traffic detalhada

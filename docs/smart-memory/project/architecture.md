@@ -1,96 +1,191 @@
 ---
-title: Architecture
-type: architecture
-status: active
+title: Arquitetura
+type: overview
 agent: dev-architect
-created: 2026-04-24
-updated: 2026-04-24
-tags: [project, architecture]
-related: ["[[overview]]", "[[tech-stack]]", "[[modules]]"]
+created: 2026-05-19
+updated: 2026-05-19
+tags: [architecture]
+related: ["[[modules]]", "[[overview]]"]
 ---
 
-# Arquitetura — Centro de Treinamento
+# Arquitetura
 
-## Padrão: Skill-Based Agent Orchestration
+## Padrão
 
-O sistema segue um modelo hub-and-spoke onde `team-os` é o hub central (lead) e os agentes especializados são os spokes (teammates).
+**Centro de Treinamento de Agentes (CT) — infraestrutura de Agent Teams.**
 
-```
-Usuário
-  │
-  ▼
-[/team-os skill]  ◄──── team lead (main session)
-  │
-  ├─ TeamCreate({team_name})
-  │
-  ├─ Agent(dev-architect, team_name=X) ──► escreve docs/smart-memory/project/
-  ├─ Agent(dev-analyst, team_name=X)   ──► escreve docs/smart-memory/project/
-  ├─ Agent(dev-dev-beta, team_name=X)  ──► implementa stories
-  ├─ Agent(dev-qa, team_name=X)        ──► emite veredictos PASS/FAIL
-  └─ Agent(dev-devops, team_name=X)    ──► git push, PR, deploy
-       │
-       └── SendMessage(lead) ao concluir
-```
+Não é um projeto de software tradicional. É um sistema de orquestração de agentes Claude Code nativos, estruturado como uma coleção de squads especializadas que operam sobre uma memória compartilhada (smart-memory) coordenadas por um team lead (skill `/team-os`).
 
-## Estrutura de diretórios
+Padrão arquitetural: **Hub-and-Spoke com memória compartilhada centralizada.**
+- Hub: skill `/team-os` rodando na main session
+- Spokes: até 37 agentes especializados (teammates)
+- Memória: `docs/smart-memory/` no padrão Obsidian
 
-```
-.claude/
-├── agents/          # 37 agentes — .md com frontmatter + prompt
-├── skills/          # 42 skills — diretório por skill, SKILL.md
-│   ├── team-os/     # Skill de orquestração (esta skill)
-│   │   ├── SKILL.md
-│   │   ├── templates/
-│   │   ├── scripts/
-│   │   └── reference/
-│   └── {skill-name}/
-│       └── SKILL.md
-├── hooks/           # Hooks de automação (pre/post tool calls)
-└── settings.json    # Env vars (CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1)
+---
 
-docs/smart-memory/   # Fonte de verdade compartilhada (Obsidian-compatible)
-├── INDEX.md
-├── shared-context.md
-├── project/
-├── stories/{backlog,active,done}/
-├── decisions/
-├── ops/
-└── agents/
-```
+## Camadas
 
-## Fluxo de trabalho padrão
+| Camada | Path | Responsabilidade |
+|---|---|---|
+| **Orquestração** | `.claude/skills/team-os/` | Detecta estado, forma teams, despacha tasks, monitora progresso, audita smart-memory |
+| **Factory** | `.claude/skills/team-os-creator/` | Gera agentes, valida compliance, propaga squads para projetos do CT |
+| **Agentes** | `.claude/agents/*.md` | 37 especialistas distribuídos em 4 squads (dev, sites, social, traffic) |
+| **Skills** | `.claude/skills/*/SKILL.md` | 42 skills especializadas por domínio, invocadas via `/nome-da-skill` |
+| **Memória** | `docs/smart-memory/` | Fonte de verdade compartilhada — stories, ADRs, contexto de projeto, ops log |
+| **Enforcement** | `.claude/hooks/*.sh` | Guardrails automáticos: bloqueia git push em agentes não-autorizados, monitora progresso de stories |
 
-```
-1. /team-os             → detecta estado do projeto
-2. *bootstrap/*plan     → cria smart-memory + backlog de stories
-3. *dispatch            → forma team, spawna teammates, atribui tasks
-4. [teammates trabalham em paralelo via Agent Teams]
-5. SendMessage → lead   → cada teammate reporta conclusão
-6. dev-qa gate          → PASS/CONCERNS/FAIL/WAIVED
-7. dev-devops           → git push + PR (autoridade exclusiva)
-8. *close               → arquiva smart-memory, encerra team
+---
+
+## Fluxo Principal
+
+```mermaid
+sequenceDiagram
+    participant U as Usuário
+    participant OS as team-os (lead)
+    participant SM as smart-memory
+    participant A as Agentes (teammates)
+
+    U->>OS: /team-os
+    OS->>OS: preflight.sh + detect-state.sh
+    OS->>U: proposta de time (composição)
+    U->>OS: confirma
+    OS->>OS: TeamCreate({team_name})
+    OS->>A: Agent({subagent_type, team_name, prompt})
+    A->>SM: lê contexto relevante
+    A->>A: executa task
+    A->>SM: atualiza arquivos pertinentes
+    A->>OS: SendMessage("task concluída")
+    OS->>SM: atualiza shared-context.md
+    OS->>U: relatório final
 ```
 
-## Princípios de design
+---
 
-1. **Autoridade exclusiva por papel** — stories só via dev-architect/sites-architect/traffic-strategist; QA só via dev-qa/sites-qa/traffic-qa; git push só via dev-devops/sites-devops
-2. **Prompt minimalista por agente** — cada agente faz UMA coisa bem; skills estendem comportamento quando necessário
-3. **Comunicação via SendMessage** — teammates nunca spawnam sub-teammates; nested teams são bloqueados
-4. **Smart-memory como fonte de verdade** — toda decisão relevante escrita em `docs/smart-memory/`; nunca em memória conversacional
-5. **Model fit** — Opus para decisões/QA (custo maior, qualidade superior); Sonnet para execução (velocidade + custo)
+## Protocolo de Comunicação
 
-## Squads como módulos independentes
+Todo agente segue o **Contrato com team-os** (injetado em `.claude/agents/*.md`):
 
-Cada squad (dev, sites, social, traffic) é auto-suficiente:
-- Tem seu próprio architect (estratégia + stories)
-- Tem seu próprio QA (veredictos formais)
-- Tem seu próprio devops/publisher (ativação)
-- Pode ser usada independentemente sem as outras squads
+```
+Agente → Lead:  SendMessage(to: "team-os", message: "...")
+Lead → Agente:  SendMessage(to: "{nome-agente}", message: "...")
+Agente ↛ Agente: PROIBIDO sem autorização explícita do lead
+```
 
-## Agent Teams — como funciona
+Coordenação é estritamente unidirecional (agente → lead). Comunicação lateral entre agentes requer intermediação do lead.
 
-1. `TeamCreate({team_name})` — registra o team em `~/.claude/teams/`
-2. `Agent({subagent_type, team_name, name, prompt})` — spawna teammate no team
-3. Teammates ficam visíveis no painel (Shift+Tab) e acessíveis via `SendMessage`
-4. TaskList é 1:1 com o team — tasks criadas APÓS TeamCreate ficam no team
-5. Team lead (main session) coordena; teammates executam e reportam de volta
+---
+
+## Estados do Projeto (detect-state.sh)
+
+```
+NEW            → smart-memory não existe → bootstrap automático
+NO_DISCOVERY   → estrutura existe mas < 2 de (modules, tech-stack, architecture) → oferecer *discover
+IN_PROGRESS    → há stories em stories/active/ → *resume automático
+READY          → smart-memory OK, sem stories ativas → intake de novo objetivo
+```
+
+---
+
+## Autoridades Exclusivas por Squad
+
+Cada squad possui papéis com autoridade exclusiva — nenhum outro agente pode invadir:
+
+| Squad | Autoridade | Agente |
+|---|---|---|
+| dev | git push / PRs | `dev-devops` (Grav) |
+| dev | veredictos formais | `dev-qa` (Axis) |
+| dev | criar/validar stories | `dev-architect` (Zaelor) |
+| sites | git push / deploy | `sites-devops` |
+| sites | veredictos | `sites-qa` |
+| sites | stories | `sites-architect` |
+| social | publicação | `social-publisher` |
+| social | validação editorial | `social-strategist` (VERA) |
+| traffic | métricas oficiais | `traffic-bi` |
+| traffic | veredictos de campanha | `traffic-qa` |
+| traffic | integrações API | `traffic-automation` |
+| traffic | stories de campanha | `traffic-strategist` |
+
+---
+
+## Mapa de Dependências Principais
+
+```
+/team-os (SKILL.md)
+  ← detect-state.sh          (roteamento de estado)
+  ← list-teammates.sh        (catálogo de agentes disponíveis)
+  ← audit-smart-memory.sh    (integridade da memória)
+  ← audit-teammate-compliance.sh (conformidade dos agentes)
+  ← teammate-contract.md     (contrato canônico)
+  ← templates/               (scaffolding de smart-memory)
+
+/team-os-creator (SKILL.md)
+  ← detect-project-signals.sh  (detecta stack do projeto destino)
+  ← generate-agent.sh           (gera .md do agente)
+  ← validate-agent.sh           (compliance check)
+  ← scan-ct-projects.sh         (mapeia projetos do CT)
+  ← diff-agents.sh              (detecta desatualizações)
+  ← install-to-project.sh       (propaga agentes + skills)
+  ← presets/*.yaml              (composições pré-definidas de squad)
+  ← archetypes.md               (defaults de frontmatter por archetype)
+  ← team-os/reference/teammate-contract.md  (injetado em cada agente)
+
+Agentes (.claude/agents/*.md)
+  ← team-os/reference/teammate-contract.md  (via *enroll)
+  ← docs/smart-memory/                       (fonte de verdade)
+  → docs/smart-memory/                       (produzem output aqui)
+
+Hooks
+  ← block-git-push.sh         (referenciado no frontmatter de dev-dev-*)
+  ← check-story-progress.sh   (SubagentStop — monitora todas as stories ativas)
+```
+
+---
+
+## Ciclo de Vida de uma Story
+
+```mermaid
+stateDiagram-v2
+    [*] --> backlog: Architect cria + valida (5-point)
+    backlog --> active: Lead faz *dispatch
+    active --> done: Agente conclui + QA aprova
+    done --> [*]
+    active --> backlog: QA emite FAIL
+```
+
+1. **Architect** cria story em `stories/backlog/` + valida com 5-point checklist
+2. **Lead** verifica god nodes — se story toca god node, QA é obrigatório
+3. **Lead** cria TaskCreate + despacha via `*dispatch`
+4. **Implementer** faz self-claim da task via TaskList
+5. **QA** emite veredicto formal (PASS/CONCERNS/FAIL/WAIVED)
+6. **DevOps** faz push apenas após QA PASS
+
+---
+
+## Propagação para Projetos do CT
+
+O CT Agentes atua como **fonte** para outros projetos do Centro de Treinamento:
+
+```
+CT Agentes (fonte)
+  → /team-os-creator *propagate
+    → scan-ct-projects.sh   (descobre projetos irmãos)
+    → diff-agents.sh        (detecta diff)
+    → install-to-project.sh (copia agentes + skills + team-os)
+      → Projeto destino (ex: aiox, outro-projeto)
+```
+
+Smart-memory **não** é propagada — cada projeto destino roda `/team-os` para gerar sua própria smart-memory com dados reais do seu codebase.
+
+---
+
+## Decisões Arquiteturais Identificadas
+
+1. **team-os-creator nunca vai para projetos destino** — a factory fica apenas no CT Agentes para evitar recursão e manter controle centralizado de versão dos agentes.
+
+2. **Smart-memory é responsabilidade exclusiva do team-os** — o creator deliberadamente não scaffolda smart-memory para que o `detect-state.sh` detecte `NEW` e rode bootstrap real com discovery completo.
+
+3. **Worktree apenas para implementer/hardening** — agentes que escrevem código ficam isolados para permitir paralelismo sem conflito no branch principal.
+
+4. **Hook git push como guardrail de processo** — a autoridade de push é arquitetural, não apenas convencional. O hook torna a regra inviolável em runtime.
+
+5. **Modelo opus para reviewer/architect/orchestrator** — papéis de decisão usam o modelo mais capaz; execução usa sonnet para custo/velocidade.

@@ -1,7 +1,7 @@
 ---
 title: Delegation Log
 type: task-log
-updated: 2026-04-24
+updated: {data}
 tags: [ops]
 ---
 
@@ -9,13 +9,21 @@ tags: [ops]
 
 Lead (team-os) registra cada delegação aqui. Formato cronológico invertido (mais recente no topo).
 
-## 2026-04-24
+<!-- Entrada template:
 
-### 00:00 — Lead → smart-memory bootstrap
-**Task ID:** bootstrap-001
-**Story:** —
-**Job:** Inicialização completa da smart-memory do Centro de Treinamento via `/team-os bootstrap` inline. Criados 14 arquivos documentando todos os 37 agentes e 42 skills.
-**Branch:** main
-**Status:** ✅ Concluído
+## {data}
+
+### {HH:MM} — Lead → {teammate}
+**Task ID:** {id do TaskCreate}
+**Story:** {N.M se aplicável}
+**Job:** {descrição}
+**Branch:** {branch se aplicável}
+**Status:** ⏳ Em andamento
+
+### {HH:MM} — {teammate} → Lead
+**Task ID:** {id}
+**Status:** ✅ Concluído / ❌ Falhou / ⚠️ Bloqueado
+**Resultado:** {resumo}
 
 ---
+-->

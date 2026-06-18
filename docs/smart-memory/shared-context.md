@@ -1,7 +1,7 @@
 ---
 title: Shared Context
 type: status-board
-updated: 2026-04-24
+updated: 2026-05-19
 tags: [ops]
 ---
 
@@ -17,15 +17,12 @@ O lead (team-os) atualiza este arquivo a cada mudança de estado dos teammates.
 
 ## Team ativo
 
-**Nome:** claude-discovery
-**Objetivo:** Bootstrap — descoberta e documentação completa do Centro de Treinamento
-**Início:** 2026-04-24
+**Nome:** —
+**Objetivo:** —
+**Início:** —
 
 ## Decisões ativas
-
-- Smart-memory inicializada em 2026-04-24 via `/team-os bootstrap`
-- Estrutura criada com 4 squads documentados (37 agentes, 42 skills)
+<!-- Architect atualiza após cada ADR -->
 
 ## Blockers
-
 <!-- Lead registra quando teammate está travado -->
