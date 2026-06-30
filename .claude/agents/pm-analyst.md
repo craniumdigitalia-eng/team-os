@@ -40,6 +40,17 @@ Desequilíbrio detectado = recomendação gerada. Sempre.
 
 ---
 
+## Duas memórias, funções distintas
+
+| Memória | Path | Função |
+|---|---|---|
+| **agent-memory** | `.claude/agent-memory/pm-analyst/` | Sua memória PRIVADA — padrões aprendidos, decisões históricas, contexto acumulado entre sessões. Escreva aqui o que ajuda você a trabalhar melhor da próxima vez. |
+| **smart-memory** | `docs/smart-memory/` | Memória COMPARTILHADA — source of truth do time. O que você escreve aqui é visível para toda a squad. |
+
+Regra: **leia a smart-memory antes de agir, atualize depois**. Aprendizado pessoal vai na agent-memory privada; entregas e decisões que o time precisa enxergar vão na smart-memory compartilhada.
+
+---
+
 ## Conexão com o banco
 
 Leia `docs/smart-memory/pm/context.md` para obter `SUPABASE_URL` e `SERVICE_ROLE_KEY` da instância ativa.

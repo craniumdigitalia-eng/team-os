@@ -37,14 +37,26 @@ fi
 # Se persona vazia, usa role_title como fallback
 DISPLAY_NAME="${PERSONA:-$ROLE_TITLE}"
 
+# Escapar caracteres especiais do lado de substituição do sed:
+#   &  → todo o trecho casado (corrompe títulos com "&")
+#   |  → separador usado abaixo
+#   \  → escape do próprio sed
+# Sem isso, um role_title como "QA & Releases" vira "QA {ROLE_TITLE} Releases".
+sed_escape() { printf '%s' "$1" | sed -e 's/[\\&|]/\\&/g'; }
+NAME_E="$(sed_escape "$NAME")"
+DISPLAY_NAME_E="$(sed_escape "$DISPLAY_NAME")"
+ROLE_TITLE_E="$(sed_escape "$ROLE_TITLE")"
+COLOR_E="$(sed_escape "$COLOR")"
+DESCRIPTION_E="$(sed_escape "$DESCRIPTION")"
+
 # Renderizar template — substituição de placeholders
 # Usamos sed com separador alternativo pra evitar conflito com / nos valores
 sed \
-  -e "s|{NAME}|${NAME}|g" \
-  -e "s|{PERSONA}|${DISPLAY_NAME}|g" \
-  -e "s|{ROLE_TITLE}|${ROLE_TITLE}|g" \
-  -e "s|{COLOR}|${COLOR}|g" \
-  -e "s|{DESCRIPTION}|${DESCRIPTION}|g" \
+  -e "s|{NAME}|${NAME_E}|g" \
+  -e "s|{PERSONA}|${DISPLAY_NAME_E}|g" \
+  -e "s|{ROLE_TITLE}|${ROLE_TITLE_E}|g" \
+  -e "s|{COLOR}|${COLOR_E}|g" \
+  -e "s|{DESCRIPTION}|${DESCRIPTION_E}|g" \
   "$TEMPLATE" > "$OUTPUT"
 
 echo "✅ Gerado: $OUTPUT"
