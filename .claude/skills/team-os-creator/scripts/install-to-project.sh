@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # install-to-project.sh — instala agentes e skills do projeto fonte em um projeto destino
-# Skills são SEMPRE copiadas (incluindo team-os obrigatória). Sem opção "agentes apenas".
+# Skills são SEMPRE sincronizadas (incluindo team-os obrigatória): copiadas se ausentes,
+# ATUALIZADAS se o conteúdo difere da fonte. Skills extras no destino são preservadas.
+# team-os-creator nunca vai para o destino. Sem opção "agentes apenas".
 # Usage: install-to-project.sh --source <path> --target <path> [options]
 #
 # Options:
@@ -13,12 +15,14 @@ TARGET=""
 SQUADS="all"
 INCLUDE_HOOKS=0
 DRY_RUN=0
+MATCH_TARGET=0   # --match-target-squads: deriva squads do que JÁ existe no destino (modo propagate)
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --source)       SOURCE="$2";   shift 2 ;;
     --target)       TARGET="$2";   shift 2 ;;
     --squads)       SQUADS="$2";   shift 2 ;;
+    --match-target-squads) MATCH_TARGET=1; shift ;;
     --include-hooks)  INCLUDE_HOOKS=1;  shift ;;
     --dry-run)      DRY_RUN=1;     shift ;;
     --include-skills) shift ;;  # ignorado — skills são sempre incluídas
@@ -49,6 +53,24 @@ fi
 
 if [ ! -d "$SOURCE/.claude/agents" ]; then
   echo "ERROR=no_source_agents|SOURCE=$SOURCE_NAME"
+  exit 1
+fi
+
+# Modo propagate: deriva as squads a sincronizar a partir do que JÁ existe no destino.
+# Garante que squads podadas (não instaladas) nunca sejam re-adicionadas.
+if [ $MATCH_TARGET -eq 1 ]; then
+  if [ -d "$TARGET/.claude/agents" ]; then
+    SQUADS=$(find "$TARGET/.claude/agents" -maxdepth 1 -name '*.md' -type f -exec basename {} .md \; 2>/dev/null \
+      | sed 's/-.*//' | sort -u | tr '\n' ',' | sed 's/,$//')
+  fi
+  [ -z "$SQUADS" ] && SQUADS="__none__"   # destino sem agentes → não sincroniza nenhum
+  echo "MATCH_TARGET_SQUADS=$SQUADS"
+fi
+
+# Guarda-dura: instalar TODAS as squads sem derivar do destino re-adiciona squads podadas.
+# Só permitido com --match-target-squads (deriva do destino) ou --squads <categoria> explícito.
+if [ "$SQUADS" = "all" ] && [ $MATCH_TARGET -eq 0 ]; then
+  echo "ERROR=squads_all_without_match_target|--squads default é 'all', o que re-instalaria TODAS as squads e desfaria podas por categoria. Passe --match-target-squads (deriva as squads do destino) ou --squads <categoria> explícito (ex: --squads social)." >&2
   exit 1
 fi
 
@@ -99,17 +121,22 @@ for agent_file in "$SOURCE/.claude/agents/"*.md; do
 
   target_file="$TARGET/.claude/agents/$agent_name.md"
 
-  if [ -f "$target_file" ] && [ "$agent_file" -ot "$target_file" ]; then
-    # Destino já tem versão mais nova — pula
-    agents_skipped=$((agents_skipped + 1))
+  if [ -f "$target_file" ]; then
+    # Destino já tem o agente: decide por CONTEÚDO (não por mtime).
+    # Conteúdo idêntico → skipped (alinha com o scan por hash). Difere → updated.
+    if cmp -s "$agent_file" "$target_file"; then
+      agents_skipped=$((agents_skipped + 1))
+      continue
+    fi
+    do_cp "$agent_file" "$target_file"
+    agents_updated=$((agents_updated + 1))
+    agents_list="$agents_list $agent_name"
     continue
   fi
 
-  action="copied"
-  [ -f "$target_file" ] && action="updated"
-
+  # Novo no destino → copiado
   do_cp "$agent_file" "$target_file"
-  [ "$action" = "updated" ] && agents_updated=$((agents_updated + 1)) || agents_copied=$((agents_copied + 1))
+  agents_copied=$((agents_copied + 1))
   agents_list="$agents_list $agent_name"
 done
 
@@ -123,6 +150,7 @@ echo "AGENTS_LIST=${agents_list# }"
 do_mkdir "$TARGET/.claude/skills"
 
 skills_copied=0
+skills_updated=0
 skills_skipped=0
 skills_list=""
 
@@ -133,23 +161,39 @@ for skill_path in "$SOURCE/.claude/skills"/*/; do
   # team-os-creator nunca é copiada para projetos destino
   [[ "$skill_name" == "team-os-creator" ]] && { skills_skipped=$((skills_skipped + 1)); continue; }
 
-  # Filtra por squad (skills core e sem prefixo de squad são sempre incluídas)
+  # Filtra por squad. Skill com prefixo de squad ({dev,sites,social,traffic,pm}-*)
+  # só entra se a squad está na lista; QUALQUER outra skill (geral, com ou sem hífen:
+  # accessibility, deep-research, data-*, ai-ml-*) é sempre incluída.
   if [ "$SQUADS" != "all" ]; then
-    match=0
-    for squad in $(echo "$SQUADS" | tr ',' ' '); do
-      [[ "$skill_name" == ${squad}-* ]] && { match=1; break; }
-    done
-    # Skills sem prefixo squad (ex: accessibility, deep-research) — sempre incluir
-    [[ "$skill_name" != *-* ]] && match=1
+    skill_prefix="${skill_name%%-*}"
+    case "$skill_prefix" in
+      dev|sites|social|traffic|pm)
+        match=0
+        for squad in $(echo "$SQUADS" | tr ',' ' '); do
+          [ "$skill_prefix" = "$squad" ] && { match=1; break; }
+        done ;;
+      *) match=1 ;;   # skill geral (não-squad) → sempre incluir
+    esac
     # team-os é sempre incluída; team-os-creator fica só no projeto de origem
     [[ "$skill_name" == "team-os" ]] && match=1
     [ $match -eq 0 ] && { skills_skipped=$((skills_skipped + 1)); continue; }
   fi
 
-  # Pula se já existe no destino (não sobrescreve)
   target_skill="$TARGET/.claude/skills/$skill_name"
+
   if [ -d "$target_skill" ]; then
-    skills_skipped=$((skills_skipped + 1))
+    # Já existe: ATUALIZA se o conteúdo difere da fonte (CT é source of truth).
+    # Skills extras no destino (não presentes na fonte) são preservadas — não apagamos.
+    if diff -rq "$skill_path" "$target_skill" >/dev/null 2>&1; then
+      skills_skipped=$((skills_skipped + 1))   # idêntica — nada a fazer
+      continue
+    fi
+    if [ $DRY_RUN -eq 0 ]; then
+      rm -rf "$target_skill"
+      cp -R "$skill_path" "$target_skill"
+    fi
+    skills_updated=$((skills_updated + 1))
+    skills_list="$skills_list $skill_name"
     continue
   fi
 
@@ -169,6 +213,7 @@ elif [ ! -d "$TARGET/.claude/skills/team-os" ]; then
 fi
 
 echo "SKILLS_COPIED=$skills_copied"
+echo "SKILLS_UPDATED=$skills_updated"
 echo "SKILLS_SKIPPED=$skills_skipped"
 echo "SKILLS_LIST=${skills_list# }"
 
@@ -229,6 +274,27 @@ if [ $INCLUDE_HOOKS -eq 1 ] && [ -d "$SOURCE/.claude/hooks" ]; then
   done
 
   echo "HOOKS_COPIED=$hooks_copied"
+fi
+
+# ── Session-title hook (global, core UX — sempre instalado) ──────────────────
+# Nomeia toda sessão pelo projeto+branch. Vale para todos os projetos de uma vez.
+GLOBAL_HOOK_SRC="$SOURCE/.claude/hooks/team-os-session-title.sh"
+GLOBAL_HOOK_DST="$HOME/.claude/hooks/team-os-session-title.sh"
+if [ -f "$GLOBAL_HOOK_SRC" ]; then
+  if [ $DRY_RUN -eq 0 ]; then
+    mkdir -p "$HOME/.claude/hooks"
+    cp "$GLOBAL_HOOK_SRC" "$GLOBAL_HOOK_DST"
+    chmod +x "$GLOBAL_HOOK_DST"
+  fi
+  echo "SESSION_TITLE_HOOK=installed"
+  # Registro do SessionStart no settings global é feito pela skill (edição segura de JSON).
+  if [ -f "$HOME/.claude/settings.json" ] && grep -q "team-os-session-title" "$HOME/.claude/settings.json" 2>/dev/null; then
+    echo "SESSION_TITLE_REGISTERED=1"
+  else
+    echo "SESSION_TITLE_REGISTER_TODO=1|adicione um hook SessionStart em ~/.claude/settings.json apontando para \$HOME/.claude/hooks/team-os-session-title.sh"
+  fi
+else
+  echo "SESSION_TITLE_HOOK_MISSING=team-os-session-title.sh não encontrado na fonte"
 fi
 
 echo "---"

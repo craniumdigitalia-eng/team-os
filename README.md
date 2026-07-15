@@ -1,410 +1,441 @@
-# Claude Agent Teams
+# team-os
 
-A complete configuration package for [Claude Code](https://claude.ai/code) with **Agent Teams** — **49 pre-built agents** organized into 5 squads (Dev, Sites, Social, Traffic, PM), 50+ skills, and the `team-os` orchestration system — with built-in **Graphify knowledge graph** integration for structural project awareness.
+### Pack de orquestração para Claude Code Agent Teams — *by João Guirunas*
 
-> Built on top of Claude Code's experimental Agent Teams feature. Drop `.claude/` into any project, run `/team-os-creator *install`, and get a full multi-agent squad working immediately.
+**49 agentes e 49 skills** organizados em 5 squads (Dev, Sites, Social, Traffic, PM), com a skill `/team-os` para orquestrar sessões e a `/team-os-creator` para gerar e instalar squads em qualquer projeto. Todo agente segue o **Native Teams Protocol** — autônomo, com smart-memory integrada (formato Obsidian) e coordenação peer-to-peer.
+
+> Este repositório é a **fonte da verdade**: edite agentes e skills **aqui**, audite com `/team-os-creator *audit` e propague para os projetos destino com `/team-os-creator *propagate`. Nunca edite agentes direto no destino.
 
 ---
 
-## What's inside
+## Por que team-os?
+
+Times de IA superam uma sessão única quando o trabalho tem partes independentes. O team-os transforma isso em algo pronto pra usar:
+
+- **Paralelismo real** — várias sessões trabalham ao mesmo tempo, cada uma com seu próprio context window. Research, review e features divididas por módulo terminam em uma fração do tempo de uma sessão sequencial.
+- **Especialização com autoridade clara** — 49 papéis prontos, com fronteiras explícitas (quem cria story, quem dá veredicto de QA, quem faz `git push`). Sem sobreposição, sem agente pisando no outro.
+- **Coordenação autônoma** — comunicação peer-to-peer + TaskList compartilhada + self-claim. Os teammates se organizam sozinhos; o lead orquestra em vez de microgerenciar.
+- **Memória que persiste** — smart-memory em formato Obsidian acumula arquitetura, decisões, stories e QA entre sessões. O time não recomeça do zero.
+- **Qualidade embutida** — hooks (`block-git-push`, gates de task), QA com veredicto formal PASS/CONCERNS/FAIL/WAIVED e plan mode obrigatório em mudanças de risco (schema, auth, CI/CD).
+- **Custo sob controle** — política de modelos **Híbrida**: `opus` só onde o raciocínio é crítico (arquitetura, veredictos), `inherit` no resto (seguem o `/model` do lead). Você baixa a frota inteira pra um modelo barato quando quiser.
+- **Reuso instantâneo** — `/team-os-creator *install` leva squads + skills + smart-memory para qualquer projeto. Uma fonte da verdade, propagação controlada.
+- **Menos context-rot** — cada agente é isolado: exploração e logs ficam no context dele, não no seu.
+
+---
+
+## Índice
+
+- ⭐ [the team-os Method](#-the-team-os-method) — a metodologia
+1. [Conceitos fundamentais](#1-conceitos-fundamentais)
+2. [Pré-requisitos e setup](#2-pré-requisitos-e-setup)
+3. [Skill principal: `/team-os`](#3-skill-principal-team-os)
+4. [Skill principal: `/team-os-creator`](#4-skill-principal-team-os-creator)
+5. [Os 49 agentes e suas skills](#5-os-49-agentes-e-suas-skills)
+6. [Catálogo de skills de apoio](#6-catálogo-de-skills-de-apoio)
+7. [Tutorial passo a passo](#7-tutorial-passo-a-passo)
+8. [Modelo de coordenação](#8-modelo-de-coordenação)
+9. [Política de modelos (Híbrido)](#9-política-de-modelos-híbrido)
+10. [Hooks de qualidade](#10-hooks-de-qualidade)
+11. [Estrutura do repositório](#11-estrutura-do-repositório)
+12. [Troubleshooting](#12-troubleshooting)
+13. [Manutenção do CT](#13-manutenção-do-ct)
+
+---
+
+## ⭐ the team-os Method
+
+A metodologia que torna o pack repetível para a sua equipe e seus mentorados. São **duas camadas** e **7 fases**.
+
+### Duas camadas
+
+```
+CAMADA 1 — CT (configuração e manutenção, no command center)
+  abre `claude` (puro) na pasta do CT
+   └─ /team-os-creator  →  escaneia os projetos irmãos e mostra status (team-os? agentes? drift?)
+        ├─ [1] Criar equipe       → novos agentes/squad (Native Teams Protocol + smart-memory + skills + modelo híbrido)
+        ├─ [2] Atualizar equipes  → propaga o drift para os projetos
+        └─ [3] Instalar equipe    → instala squad + skills + team-os num projeto
+   → cada projeto passa a ter: agentes + skills + /team-os  (NUNCA team-os-creator)
+
+CAMADA 2 — Projeto (execução, toda sessão de trabalho)
+  abre `claude agents` (agent view)
+   └─ /team-os  (SEMPRE o 1º comando da sessão)
+        ├─ valida Agent Teams nativo
+        ├─ sem smart-memory? → Discovery: lê o codebase e a constrói ANTES de começar
+        └─ organiza o time com paralelismo máximo e dispara a execução
+```
+
+### As 7 fases
+
+| # | Fase | O que acontece | Onde |
+|---|---|---|---|
+| 1 | **Setup** | Instalar a squad no projeto via `/team-os-creator *install` (uma vez por projeto). | CT |
+| 2 | **Bootstrap** | `/team-os` no início de **toda** sessão — valida o ambiente de Agent Teams nativo. | Projeto |
+| 3 | **Discovery** | Sem smart-memory? O team-os lê o codebase real e **constrói a smart-memory populada** antes de qualquer trabalho. | Projeto |
+| 4 | **Team Design** | Objetivo → mapeia **workstreams independentes** → spawna **muitos agentes em paralelo**, 1 por stream, com ownership exclusivo de arquivos. | Projeto |
+| 5 | **Parallel Execution** | TaskList compartilhada + self-claim + comunicação **peer-to-peer** entre teammates. | Projeto |
+| 6 | **Sync & QA** | Veredictos formais (PASS/CONCERNS/FAIL/WAIVED), gates por hook, hardening. | Projeto |
+| 7 | **Memory & Ship** | Cada agente grava findings na smart-memory; DevOps faz push/PR/release. | Projeto |
+
+### Princípios
+
+- **Paralelismo é o default.** O limite não é um número mágico — é **independência real** (ownership de arquivos disjunto) + budget de tokens. 10 módulos independentes → 10 agentes.
+- **Smart-memory é o cérebro compartilhado.** Todo agente lê ao iniciar e grava ao concluir. O time nunca recomeça do zero.
+- **Autoridade clara, sem sobreposição.** Quem cria story, quem dá veredicto, quem faz push — cada papel tem fronteira explícita.
+- **Uma fonte da verdade.** Tudo nasce no CT e é propagado; nunca se edita agente direto no projeto.
+
+---
+
+## 1. Conceitos fundamentais
+
+| Conceito | O que é |
+|---|---|
+| **Agent Teams** | Recurso (experimental) do Claude Code onde várias sessões trabalham em paralelo como um time. Uma sessão é o **lead**; as demais são **teammates**, cada uma com seu próprio context window. |
+| **Lead nativo** | A **main session** do Claude Code é o lead — não existe agente "orquestrador". O lead spawna teammates, distribui tasks e sintetiza resultados. |
+| **Teammate** | Sessão independente spawnada pelo lead a partir de uma definição em `.claude/agents/`. Comunica-se **peer-to-peer** com outros teammates via `SendMessage`. |
+| **Subagent** | Mesma definição rodando como helper dentro de uma sessão (reporta só ao chamador). Os arquivos em `.claude/agents/` servem aos dois modos. |
+| **TaskList nativo** | Lista de tasks compartilhada pelo time. Estados `pending → in_progress → completed`, com dependências e **self-claim**. |
+| **Smart-memory** | Base de conhecimento persistente em `docs/smart-memory/` (formato Obsidian: frontmatter YAML + wikilinks `[[...]]` + tags). *Source of truth* que todo agente lê ao iniciar e atualiza ao concluir. |
+| **Native Teams Protocol** | Contrato que todo agente do CT carrega: smart-memory como fonte da verdade, TaskList nativo, comunicação peer-to-peer, sem nested teams. |
+| **Skill** | Conhecimento carregável (`/nome-skill`). Em Agent Teams, skills são carregadas do projeto/usuário (o campo `skills:` do frontmatter é ignorado). |
+
+**Agent Teams vs Subagents:** use **Agent Teams** quando os trabalhadores precisam conversar entre si, dividir um trabalho complexo e se coordenar. Use **subagents** quando você só quer um worker focado que reporta um resultado de volta.
+
+---
+
+## 2. Pré-requisitos e setup
+
+1. **Claude Code** com Agent Teams habilitado. Em `~/.claude/settings.json`:
+   ```json
+   {
+     "env": { "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1" },
+     "teammateMode": "auto"
+   }
+   ```
+   Reinicie o Claude Code após adicionar. Sem essa variável, nenhum time é criado.
+
+2. **`teammateMode`** (opcional): default `"in-process"` (todos no terminal principal, agent panel ativo). Use `"auto"` para split panes em tmux/iTerm2.
+
+3. A skill `/team-os` faz esse check e corrige o `settings.json` automaticamente — basta carregá-la.
+
+---
+
+## 3. Skill principal: `/team-os`
+
+**Bootstrap e orquestração de sessão.** É **distribuída para todos os projetos** (instalada junto com a squad) — você a carrega no **início de cada sessão** do projeto para coordenar múltiplos agentes em paralelo. No CT ela também existe. (A única skill que NÃO vai para os projetos é a `/team-os-creator`.)
+
+> **Lead Discipline (regra dura):** com `/team-os` ativo, a sessão principal é **orquestrador puro** — nunca escreve código, pesquisa ou redige entregável sozinha. Para qualquer ação de trabalho ela **spawna um agente e fica livre** (monitorando, roteando, sintetizando). 1 tarefa = 1 agente, até as pequenas.
+
+> **Team Persistence (regra dura):** o lead **nunca encerra o time sozinho**. Terminou uma rodada? Sintetiza, mantém os teammates vivos e **pergunta se há mais tasks** — só encerra quando você pede. E lembre: linha some do painel após ~30s = idle (agente **vivo**, não encerrado); reative com `SendMessage` pelo nome.
+
+### O que ela faz, em fases
+1. **Scan silencioso** — lê `settings.json` (env + teammateMode), mapeia `.claude/agents/`, lê `docs/smart-memory/INDEX.md` e roda `TaskList`.
+2. **Dashboard de abertura** — mostra status do ambiente e pergunta o **objetivo da sessão**.
+3. **Correções automáticas** — injeta `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` se faltar, sugere `teammateMode`, oferece bootstrap da smart-memory.
+4. **Análise do objetivo** — classifica o trabalho (research / implementação / review / mixed) e mapeia o paralelismo real.
+5. **Dimensionamento** — `tasks independentes ÷ 5 = nº de agentes`; research adversarial = 3-5 sempre.
+6. **Proposta de time** — agentes, ownership exclusivo de paths, plan mode onde há risco, skills por agente, modelo sugerido.
+7. **Orquestração** — cria as tasks no TaskList com dependências e orienta o spawn.
+
+### Comandos
+```
+/team-os                → bootstrap completo da sessão
+/team-os *env           → só verificar/corrigir settings.json
+/team-os *memory        → status/bootstrap da smart-memory
+/team-os *tasks         → mostrar a task list atual
+/team-os *spawn {desc}  → proposta de time para {desc} (pula o scan)
+/team-os *status        → dashboard do time atual
+```
+
+### Boas práticas que ela aplica
+- **Spawn prompts cirúrgicos** (papel + paths de ownership + contexto + entregável + como reportar).
+- **Ownership exclusivo de arquivos** — dois agentes nunca no mesmo arquivo.
+- **Plan mode** obrigatório em alto risco (schema, auth, CI/CD, refactors grandes, breaking changes).
+- **Não encerrar o time cedo** — se o lead "concluir" com tasks abertas, ela orienta a continuar.
+
+---
+
+## 4. Skill principal: `/team-os-creator`
+
+**Factory de agentes.** Existe **somente no CT**. Gera arquivos `.claude/agents/*.md` completos (Native Teams Protocol + smart-memory) a partir de **8 archetypes** e presets de squad, e mantém os agentes alinhados.
+
+### Comandos
+```
+/team-os-creator                → menu principal (scan + sugestões)
+/team-os-creator *analyze       → detecta archetype/stack, sem criar
+/team-os-creator *squad <preset>→ cria uma squad inteira (dev/sites/social/traffic/pm)
+/team-os-creator *create <role> → cria UM agente interativamente
+/team-os-creator *migrate       → migra agentes do padrão antigo p/ Native Teams Protocol
+/team-os-creator *bootstrap     → cria docs/smart-memory/ + injeta protocolo no CLAUDE.md
+/team-os-creator *skills <ag>   → enriquece um agente com skills relevantes
+/team-os-creator *audit         → valida compliance de todos os agentes
+/team-os-creator *propagate     → propaga agentes atualizados p/ outros projetos
+/team-os-creator *install       → instala squads + skills + smart-memory num projeto destino
+```
+
+### Os 8 archetypes
+| Archetype | Quando usar | Model | isolation |
+|---|---|---|---|
+| `architect` | Design arquitetural, ADRs, stories | `opus` | — |
+| `implementer` | Escreve código (front/back/fullstack) | `inherit` | — |
+| `hardening` | Resiliência, retry, edge cases (após features) | `inherit` | — |
+| `reviewer` | QA com veredicto formal, read-only | `opus` | — |
+| `researcher` | Pesquisa técnica, libs, CVEs | `inherit` | — |
+| `data` | Schema, migrations, queries, RLS | `inherit` | — |
+| `devops` | Git, push, PRs, CI/CD, releases | `inherit` | — |
+| `ux` | UX research, component specs, a11y | `inherit` | — |
+
+> Não existe archetype de lead/orquestrador — a main session já é o lead nativo (regra absoluta da skill).
+
+### Regras absolutas da factory
+- Nunca cria agente sem `memory: project`.
+- Sempre injeta o bloco **Native Teams Protocol** (nunca o antigo "Contrato com team-os").
+- Sempre valida com `validate-agent.sh` após criar.
+- Idempotente — se o agente existe, oferece atualizar / pular / renomear / cancelar.
+- `*install` sempre faz bootstrap da smart-memory no destino.
+- `team-os` e `team-os-creator` nunca vão para projetos destino.
+
+---
+
+## 5. Os 49 agentes e suas skills
+
+Spawne pelo nome do arquivo, ex.:
+`"Spawn um teammate usando o agente dev-architect para mapear a arquitetura de auth"`.
+
+A coluna **Skills relacionadas** é um mapa de skills **recomendadas/disponíveis por papel** — as skills de apoio que fazem sentido para cada agente acionar via `/nome-skill` conforme a necessidade. Ela **não** reflete linha a linha o que o body de cada agente lista (vários agentes citam só um subconjunto, ou nenhuma, no próprio arquivo); serve como guia de qual skill ativar para qual tipo de trabalho. O `/team-os` pode incluí-las no spawn prompt.
+
+### Dev — Fullstack SaaS (12)
+| Agente | Papel | Skills relacionadas |
+|---|---|---|
+| `dev-analyst` | Pesquisa técnica, libs, CVEs, feasibility | `/deep-research`, `/data-analytics-engineering` |
+| `dev-architect` | Arquitetura, ADRs, **criação/validação de stories** (exclusivo) | `/dev-api-design`, `/dev-technical-writing`, `/dev-database-patterns` |
+| `dev-bi` | Data architect & dashboards (SELECT-only) | `/data-analytics-engineering`, `/data-sql-optimization`, `/data-lake-platform` |
+| `dev-data-engineer` | Schema, migrations, RLS, otimização | `/dev-database-patterns`, `/data-sql-optimization`, `/dev-security-patterns` |
+| `dev-data-performance` | Insights, anomalias, forecasts | `/data-analytics-engineering`, `/ai-ml-data-science`, `/ai-ml-timeseries` |
+| `dev-ux` | UX research + design visual + a11y | `/ui-ux-pro-max`, `/accessibility`, `/web-design-guidelines` |
+| `dev-dev-alpha` | Frontend (React, Next.js, Tailwind) | `/dev-typescript-patterns`, `/dev-testing-strategy`, `/dev-error-handling` |
+| `dev-dev-beta` | Backend (APIs, serviços, lógica) | `/dev-api-design`, `/dev-error-handling`, `/dev-database-patterns` |
+| `dev-dev-gamma` | Fullstack / cross-layer | `/dev-typescript-patterns`, `/dev-database-patterns`, `/dev-error-handling` |
+| `dev-dev-delta` | Hardening e resiliência | `/dev-security-patterns`, `/dev-testing-strategy`, `/dev-error-handling` |
+| `dev-qa` | Veredictos PASS/CONCERNS/FAIL/WAIVED (exclusivo) | `/dev-testing-strategy`, `/dev-security-patterns` |
+| `dev-devops` | `git push`, PRs, CI/CD, releases (exclusivo) | `/dev-git-workflow` |
+
+### Sites — Sites e landing pages (10)
+| Agente | Papel | Skills relacionadas |
+|---|---|---|
+| `sites-analyst` | Keyword/competitor research, feasibility | `/deep-research`, `/sites-seo-keywords` |
+| `sites-architect` | Arquitetura de páginas, stories (exclusivo) | `/dev-api-design`, `/dev-technical-writing`, `/sites-seo-technical` |
+| `sites-data` | Schema, migrations, RLS (sites) | `/dev-database-patterns`, `/data-sql-optimization` |
+| `sites-ux` | UX research + design visual + a11y | `/sites-ux-interaction`, `/ui-ux-pro-max`, `/accessibility`, `/sites-web-accessibility` |
+| `sites-dev-alpha` | Frontend / landing pages (shadcn) | `/sites-frontend-design`, `/sites-shadcn-ui`, `/sites-tailwind-design-system`, `/sites-scroll-motion`, `/ui-ux-pro-max` |
+| `sites-dev-beta` | Backend / CMS / integrações | `/dev-api-design`, `/dev-error-handling`, `/dev-database-patterns` |
+| `sites-dev-gamma` | CRO, SEO, analytics, fullstack | `/sites-page-cro`, `/sites-seo-technical`, `/dev-typescript-patterns` |
+| `sites-dev-delta` | Hardening, Core Web Vitals | `/dev-security-patterns`, `/dev-error-handling`, `/sites-web-accessibility` |
+| `sites-qa` | QA: a11y, SEO, copy, performance | `/dev-testing-strategy`, `/web-design-guidelines`, `/sites-seo-technical`, `/sites-web-accessibility` |
+| `sites-devops` | Deploy Vercel/Netlify, CI/CD | `/dev-git-workflow`, `/sites-deployment` |
+
+### Social — Social media (7)
+| Agente | Persona | Papel | Skills relacionadas |
+|---|---|---|---|
+| `social-analyst` | — | Trends, concorrência, hashtags, analytics | `/social-analytics`, `/social-apify-research`, `/deep-research` |
+| `social-content` | LYRIS | Research (Apify) + copywriting | `/social-copywriting`, `/social-scriptwriting`, `/social-editorial-validation`, `/social-format-specs`, `/social-apify-research` |
+| `social-design` | AEON | Key visuals, carrosséis (Stitch) | `/social-key-visual`, `/social-carousel-design`, `/social-stitch-workflow` |
+| `social-photo` | IRIS | Fotos AI (Freepik) | `/social-freepik-generation`, `/social-cinematic-composition` |
+| `social-publisher` | PULSE | Publicação (Meta) + métricas | `/social-meta-publishing`, `/social-analytics` |
+| `social-strategist` | VERA | Estratégia + validação editorial (gate) | `/social-editorial-validation`, `/social-format-specs` |
+| `social-video` | FLUX | Reels/Stories/Shorts (ffmpeg) + vídeo com avatar AI (HeyGen) | `/social-video-editing`, `/social-heygen-avatar`, `/social-scriptwriting`, `/social-cinematic-composition` |
+
+> Regra do squad Social: `social-publisher` **só publica** após aprovação da `social-strategist` (VERA) **e** confirmação explícita do usuário.
+
+### Traffic — Tráfego pago (10)
+| Agente | Papel | Skills relacionadas |
+|---|---|---|
+| `traffic-analyst` | Audiências, concorrência, benchmarks | `/deep-research`, `/social-analytics` |
+| `traffic-automation` | Bulk ops, APIs Google/Meta/TikTok | `/dev-api-design`, `/dev-error-handling` |
+| `traffic-bi` | Atribuição, ROAS/LTV/CPA (fonte de verdade) | `/data-analytics-engineering`, `/data-sql-optimization` |
+| `traffic-copywriter` | Copy de anúncios, variantes A/B | `/social-copywriting`, `/tiktok-marketing` |
+| `traffic-designer` | Criativos (banners, carrosséis, vídeos) | `/social-key-visual`, `/social-carousel-design`, `/ui-ux-pro-max` |
+| `traffic-google` | Google Ads (Search, PMax, Shopping, YT) | `/social-analytics` |
+| `traffic-meta` | Meta Ads (FB + IG, Advantage+) | `/social-meta-publishing`, `/social-analytics` |
+| `traffic-qa` | Compliance pré-launch (UTMs, pixels) | `/dev-testing-strategy` |
+| `traffic-strategist` | Briefings + stories de campanha (exclusivo) | `/deep-research`, `/tiktok-marketing` |
+| `traffic-tiktok` | TikTok Ads (Spark, In-Feed, TopView) | `/tiktok-marketing`, `/social-format-specs` |
+
+### PM — Gestão de projetos (10, personas Kaelthari)
+| Agente | Persona | Papel | Skills relacionadas |
+|---|---|---|---|
+| `pm-analyst` | Serak | Inteligência de portfólio (carga, risco) | `/data-analytics-engineering`, `/data-sql-optimization` |
+| `pm-client` | Eshara | Camada de cliente (acesso, churn) | `/dev-technical-writing` |
+| `pm-coach` | Aevon | Metodologias / Scrum Master | — |
+| `pm-data` | Nexar | Banco (único com Supabase CLI) | `/dev-database-patterns`, `/data-sql-optimization` |
+| `pm-demand` | Draketh | Intake de demandas | `/dev-technical-writing` |
+| `pm-engineer` | Faelor | Templates de processo / flows | `/dev-technical-writing` |
+| `pm-ops` | Varek | Operações diárias (status, subtasks) | — |
+| `pm-planner` | Zynath | Sprints, roadmap, capacidade | `/data-analytics-engineering` |
+| `pm-qa` | Thyron | Auditor formal de entregas | — |
+| `pm-reporter` | Lyrith | Meeting intelligence (dailies, retros) | `/dev-technical-writing`, `/deep-research` |
+
+---
+
+## 6. Catálogo de skills de apoio
+
+49 skills, todas diretórios reais e versionados (repositório self-contained).
+
+**Dev (9):** `dev-api-design`, `dev-database-patterns`, `dev-defuddle`, `dev-error-handling`, `dev-git-workflow`, `dev-security-patterns`, `dev-technical-writing`, `dev-testing-strategy`, `dev-typescript-patterns`
+
+**Data & ML (5):** `ai-ml-data-science`, `ai-ml-timeseries`, `data-analytics-engineering`, `data-lake-platform`, `data-sql-optimization`
+
+**Sites (14):** `sites-canvas-design`, `sites-content-strategy`, `sites-copy-editing`, `sites-copywriting`, `sites-deployment`, `sites-frontend-design`, `sites-page-cro`, `sites-scroll-motion`, `sites-seo-keywords`, `sites-seo-technical`, `sites-shadcn-ui`, `sites-tailwind-design-system`, `sites-ux-interaction`, `sites-web-accessibility`
+
+**Social (14):** `social-analytics`, `social-apify-research`, `social-carousel-design`, `social-cinematic-composition`, `social-copywriting`, `social-editorial-validation`, `social-format-specs`, `social-freepik-generation`, `social-heygen-avatar`, `social-key-visual`, `social-meta-publishing`, `social-scriptwriting`, `social-stitch-workflow`, `social-video-editing`
+
+**Design & geral (5):** `ui-ux-pro-max`, `web-design-guidelines`, `accessibility`, `deep-research`, `tiktok-marketing`
+
+**Orquestração:** `team-os` (distribuída a todos os projetos — obrigatória para rodar `/team-os` em cada sessão) · `team-os-creator` (**exclusiva do CT** — a única que não vai para os projetos).
+
+> Para banco de dados, os agentes usam `/dev-database-patterns` e `/data-sql-optimization`. Para design, o padrão é **Claude Design** (sem dependências de marketplaces externos).
+
+> As skills de conteúdo/copy do Sites — `/sites-content-strategy`, `/sites-copy-editing`, `/sites-copywriting` — são de **uso geral da squad Sites** (não estão fixadas a um único agente). Ficam disponíveis a `sites-ux`, `sites-dev-gamma` e `sites-architect` conforme a necessidade de cada story.
+
+---
+
+## 7. Tutorial passo a passo
+
+### A. Orquestrar uma sessão com Agent Teams
+```
+1. Abra o projeto no Claude Code (CT ou qualquer projeto com agentes instalados)
+2. Carregue:  /team-os
+3. Responda o objetivo quando perguntado (ex.: "implementar auth com Supabase")
+4. Revise a proposta de time (agentes, ownership, tasks) → confirme com [s]
+5. Acompanhe pelo agent panel (↑↓ navega, Enter entra na sessão, x para)
+6. Ao final: "Peça ao agente {nome} para encerrar"
+```
+> Se o lead encerrar cedo, diga: *"Continue — há tasks incompletas"*.
+
+### B. Instalar squads num projeto novo
+```
+1. No CT, carregue:  /team-os-creator *install
+2. Selecione o projeto destino e as squads
+3. Confirme o preview
+→ copia agentes (exceto team-os-creator), cria docs/smart-memory/ e configura settings.json
+```
+
+### C. Criar ou atualizar um agente
+```
+/team-os-creator *create <role>     # um agente
+/team-os-creator *squad dev         # uma squad inteira
+```
+Depois, **sempre**: `/team-os-creator *audit`.
+
+### D. Propagar mudanças do CT para os destinos
+```
+Editar agente no CT → /team-os-creator *audit → /team-os-creator *propagate → commit por projeto
+```
+
+---
+
+## 8. Modelo de coordenação
+
+- **Peer-to-peer:** teammates conversam direto entre si por nome via `SendMessage` (ex.: implementer → QA ao concluir). O lead é notificado automaticamente quando um teammate fica idle.
+- **TaskList + self-claim:** ao terminar uma task, o agente pega sozinho a próxima livre compatível. ~5-6 tasks por agente mantêm o pipeline fluindo.
+- **Sem nested teams:** teammates não spawnam outros teammates — precisa de outra especialidade? `SendMessage` para o teammate certo.
+
+### Agent panel ≠ Agent view
+| | Agent panel | Agent view (`claude agents`) |
+|---|---|---|
+| O que é | Teammates do time, abaixo do prompt da sessão | Tela de **sessões em background** independentes |
+| Controles | ↑↓, Enter (abrir/mensagem), Esc (interromper), `x` (parar), Ctrl+T (task list) | Space (peek), Enter/→ (attach), Ctrl+X (stop) |
+| Comunicação | Peer-to-peer entre teammates | Cada sessão isolada; teammates/subagents **não** aparecem como linhas |
+
+---
+
+## 9. Política de modelos (Híbrido)
+
+O campo `model` do arquivo do agente **prevalece** sobre o "Default teammate model" do `/config` quando o agente roda como teammate. Por isso o CT adota o **Híbrido**:
+
+| Modelo | Agentes | Por quê |
+|---|---|---|
+| `opus` (fixo) | architects, todos os `*-qa`/reviewers, strategists (8 agentes) | Raciocínio crítico e veredictos — não vale economizar |
+| `inherit` | os 41 demais | Seguem o `/model` do lead → controle central de custo |
+
+Para forçar outro modelo num agente `inherit`, especifique no spawn: `"Spawn {nome} usando modelo haiku para…"`.
+
+---
+
+## 10. Hooks de qualidade
+
+Referenciados no frontmatter dos agentes e em `.claude/hooks/`:
+
+- **`block-git-push.sh`** — `PreToolUse` em ~21 agentes: **todos os agentes não-devops com Bash das squads de código** (`dev-*` e `sites-*` exceto devops) **e** `social-video`. Bloqueia `git push` — garantia dura, exclusiva do DevOps.
+- **`check-story-progress.sh`** — valida progresso de stories.
+- **`check-social-progress.sh`** — valida progresso de conteúdo social.
+
+Hooks de time (em `.claude/settings.json` do projeto): `TeammateIdle`, `TaskCreated`, `TaskCompleted` — exit code 2 envia feedback e mantém o agente trabalhando.
+
+---
+
+## 11. Estrutura do repositório
 
 ```
 .claude/
-├── agents/                  # 49 teammate agents (5 squads)
-│   ├── dev-*.md             # Dev squad (12 agents)
-│   ├── sites-*.md           # Sites squad (10 agents)
-│   ├── social-*.md          # Social squad (7 agents)
-│   ├── traffic-*.md         # Traffic squad (10 agents)
-│   └── pm-*.md              # PM squad — Kaelthari (10 agents)
-│
-├── skills/                  # 50+ skills (slash commands)
-│   ├── team-os/             # Lead orchestrator (/team-os)  ← smart-memory owner
-│   ├── team-os-creator/     # Agent factory + installer (/team-os-creator)
-│   ├── dev-*/               # Dev skills (TypeScript, API design, testing, etc.)
-│   ├── sites-*/             # Sites skills (SEO, CRO, Tailwind, shadcn/ui, scroll-motion, etc.)
-│   ├── social-*/            # Social skills (copywriting, video, analytics, etc.)
-│   ├── traffic-*/           # Traffic skills (TikTok, paid ads)
-│   ├── ui-ux-pro-max/       # Design system (161 palettes, 57 fonts, 99 UX guidelines)
-│   ├── accessibility/       # WCAG 2.2 AA (Addy Osmani patterns)
-│   └── web-design-guidelines/
-│
-├── hooks/                   # Automation hooks (squad-filtered on install)
-│   ├── block-git-push.sh    # Blocks direct pushes (only devops agents can push)
+├── agents/              ← 49 definições de agentes (fonte da verdade)
+├── hooks/               ← hooks de qualidade
+│   ├── block-git-push.sh
 │   ├── check-story-progress.sh
-│   └── check-social-progress.sh
-│
-└── settings.json            # Enables CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1
-```
+│   ├── check-social-progress.sh
+│   └── team-os-session-title.sh   ← SessionStart: nomeia a sessão por "projeto · branch" (instalado globalmente em ~/.claude/hooks/ pelo *install)
+└── skills/              ← 49 skills (diretórios reais)
+    ├── team-os/                 ← orquestração (distribuída aos projetos)
+    │   ├── templates/story.md           ← template canônico de story
+    │   ├── reference/obsidian-patterns.md
+    │   └── scripts/discovery.sh         ← Smart-Memory Discovery Engine (self-contained)
+    └── team-os-creator/         ← factory de agentes (exclusiva do CT)
+        ├── templates/           ← 8 templates de archetype
+        ├── reference/           ← archetypes, smart-memory, catálogo de skills
+        ├── scripts/             ← validate-agent.sh · scan-ct-projects.sh · dashboard.sh · diff · install
+        ├── presets/             ← presets de squad
+        └── hooks/
 
-> **Note on skills dependencies:** Skills installed via `npx skills add` are stored as symlinks in `.claude/skills/` pointing to `.agents/skills/`. After cloning, restore them with:
-> ```bash
-> npx skills install
-> ```
+.github/workflows/audit.yml  ← CI: valida agentes + 0 symlinks quebrados a cada push
+
+docs/smart-memory/       ← base de conhecimento por projeto (Obsidian)
+├── INDEX.md             ← MOC raiz (todos leem ao iniciar)
+├── project/   architecture/   decisions/
+├── stories/ (backlog/active/in-review/done)
+├── research/   modules/   qa/
+```
 
 ---
 
-## Prerequisites
+## 12. Troubleshooting
 
-- **Claude Code** — latest version ([download](https://claude.ai/code))
-- **Claude Pro or Team plan** — Agent Teams requires API access
-- macOS, Linux, or Windows (WSL2)
-- **Graphify** (optional, for knowledge graph) — `uv tool install graphifyy`
-
----
-
-## Install into a project
-
-### Option A — Use `/team-os-creator` (recommended)
-
-Clone this repo as your Centro de Treinamento, open Claude Code inside it, and run:
-
-```
-/team-os-creator *install
-```
-
-The skill will:
-1. Scan sibling projects automatically
-2. Let you choose the target project and which squads to install
-3. Copy the right agents + skills (always includes `team-os` as a core dependency)
-4. Create `.claude/settings.json` with `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`
-5. Filter hooks to only include what's relevant for the selected squads
-
-Then open Claude Code **inside the target project** and run `/team-os`.
-
-### Option B — Clone directly
-
-```bash
-cd your-project
-git clone https://github.com/joaoguirunas/claude-agent-teams.git /tmp/cat
-cp -R /tmp/cat/.claude .
-```
-
-### Option C — Symlink (stays updated)
-
-```bash
-git clone https://github.com/joaoguirunas/claude-agent-teams.git ~/claude-agent-teams
-cd your-project
-ln -s ~/claude-agent-teams/.claude .claude
-```
-
-After installing via B or C, reload Claude Code in the project directory and run `/team-os`.
-
----
-
-## Quick start
-
-```
-/team-os
-```
-
-Claude Code detects the project state and routes automatically:
-
-- **New project** (`docs/smart-memory/` absent) → proposes a full bootstrap: Graphify scan + parallel discovery team populates smart-memory with real data
-- **Existing smart-memory** with active stories → resumes in-progress work
-- **Ready state** → asks for your objective and assembles the minimum viable team
-
----
-
-## Key concepts
-
-### Agent Teams (not subagents)
-
-This package uses Claude Code's native Agent Teams: agents run in parallel, communicate via `SendMessage`, and share a task list. The team lead (`/team-os` skill) is always the main session — nested orchestration is not used.
-
-### Separation of responsibilities
-
-| Responsibility | Owner |
-|---|---|
-| Create agents, install squads, wire settings | `/team-os-creator` |
-| Initialize smart-memory, run discovery, orchestrate work | `/team-os` |
-| Writing code, research, QA, deploys | Agents |
-
-**`/team-os-creator` never touches `docs/smart-memory/`** — if it did, `team-os`'s state detection would see the structure as existing and skip the real bootstrap. Smart-memory is initialized with actual project data when the user first runs `/team-os`.
-
-### Smart-memory
-
-A shared `docs/smart-memory/` directory (Obsidian-compatible) acts as the source of truth between agents. Created and owned exclusively by `/team-os`. It holds:
-- Project modules, architecture, tech stack — enriched with **God Nodes** (high-impact files)
-- Story backlog and active stories
-- Delegation log and team history
-
-### Graphify knowledge graph (3-layer integration)
-
-At bootstrap, `team-os` runs [Graphify](https://github.com/safishamsi/graphify) (`uv tool install graphifyy`) against the project to build a structural knowledge graph using AST parsing — zero API cost, pure static analysis.
-
-**Layer 1 — Discovery:** `graphify` outputs `graphify-out/GRAPH_REPORT.md` with god nodes (highest-connectivity files), dependency clusters, and module boundaries. `dev-architect` and `dev-analyst` consume this before creating the smart-memory. Then `graphify-out/` is deleted (transient, not persisted).
-
-**Layer 2 — Implementation:** Every dev agent has a **step 1.5** that checks god nodes in `modules.md` before touching any code. If the story intersects a god node: coverage ≥ 80% mandatory, formal QA required.
-
-**Layer 3 — Maintenance:** After each merge, `dev-devops` / `sites-devops` checks if > 10 files changed and runs `graphify update` to refresh the graph, notifying team-os so `modules.md` stays current.
-
-**God Nodes in `modules.md`:**
-```markdown
-## ⚡ God Nodes
-| Arquivo | Conexões | Impacto |
+| Problema | Causa | Solução |
 |---|---|---|
-| src/lib/auth.ts | 14 | autenticação, sessões, middleware |
-```
-
-### Team naming
-
-Teams are named `{project-folder}-{objective-slug}` (e.g. `myapp-refactor-auth`) to avoid collisions in `~/.claude/teams/`.
-
-### Push control
-
-Only `dev-devops` (or `sites-devops`) can run `git push` and create PRs. The `block-git-push.sh` hook prevents other agents from pushing directly.
+| Teammates não aparecem | Idle hide após 30s (v2.1.181+) — não pararam | `SendMessage` por nome para reativar |
+| `/resume` não restaura teammates | Limitação conhecida | Re-spawnar com mesmo nome + contexto da smart-memory |
+| Task travada (feita mas não marca) | Status pode atrasar | Verificar o trabalho → atualizar status manualmente |
+| Lead implementa sozinho | Não delegou | *"Aguarde os teammates completarem antes de prosseguir"* |
+| Muitos prompts de permissão | Teammates pedem aprovação | Pré-aprovar operações no settings ANTES de spawnar |
+| Lead encerra cedo | Declarou concluído antes da hora | *"Continue — há tasks incompletas"* |
+| tmux órfão | Sessão não encerrou limpo | `tmux ls` → `tmux kill-session -t {nome}` |
 
 ---
 
-## Agents
-
-### Dev Squad
-
-| Agent | Role |
-|---|---|
-| `dev-analyst` | Research, library comparison, CVE investigation |
-| `dev-architect` | Architecture decisions, ADRs, story creation (exclusive) |
-| `dev-ux` | UX research, wireframes, component specs |
-| `dev-dev-alpha` | Frontend (React, Next.js, Tailwind) |
-| `dev-dev-beta` | Backend (APIs, services, business logic) |
-| `dev-dev-gamma` | Fullstack / cross-layer integration |
-| `dev-dev-delta` | Hardening and resilience (runs after features are built) |
-| `dev-qa` | Quality gates — issues formal PASS / CONCERNS / FAIL verdicts |
-| `dev-devops` | Git push, PR creation, CI/CD (exclusive authority) |
-| `dev-data-engineer` | Schema design, migrations, RLS, query optimization |
-| `dev-bi` | Kairo — SELECT-only DB queries, analytics engineering, metric dictionary, KPIs, OKRs, dashboard specs, Big Data strategy |
-| `dev-data-performance` | Sigma — performance insights, anomaly detection, trend forecasting, EDA, ML on-demand, strategic recommendations |
-
-### Sites Squad
-
-Mirror of the Dev squad but tuned for website/marketing projects (Next.js, Vercel, SEO, CRO, accessibility).
-
-| Agent | Role |
-|---|---|
-| `sites-analyst` | Keyword research, competitor analysis, SEO research |
-| `sites-architect` | Page structure, tech stack, story creation |
-| `sites-ux` | UX research, visual design, interaction patterns |
-| `sites-dev-alpha` | Frontend (React, Next.js, shadcn/ui, landing pages) |
-| `sites-dev-beta` | Backend (CMS integrations, server-side, APIs) |
-| `sites-dev-gamma` | Fullstack / CRO / analytics wiring |
-| `sites-dev-delta` | Performance hardening, Core Web Vitals, edge cases |
-| `sites-qa` | QA gates, accessibility checks, SEO validation |
-| `sites-devops` | Vercel/Netlify deployments, CI/CD, releases |
-| `sites-data` | Database schema, migrations, RLS |
-
-### Social Squad
-
-| Agent | Role |
-|---|---|
-| `social-strategist` | VERA — editorial validator, must approve before publishing |
-| `social-content` | LYRIS — research via Apify + captions, scripts, hashtags |
-| `social-analyst` | Trend research, competitor analysis, platform analytics |
-| `social-design` | AEON — carousels, Key Visuals via Google Stitch |
-| `social-photo` | IRIS — AI photo generation via Freepik |
-| `social-video` | FLUX — Reels, TikToks, Shorts via ffmpeg |
-| `social-publisher` | PULSE — publishes via Meta API after VERA approves |
-
-### Traffic Squad
-
-Cross-platform paid traffic squad (Google Ads, Meta Ads, TikTok Ads). Strategy-first flow: `traffic-strategist` creates the brief, `traffic-qa` must PASS before any campaign goes live.
-
-| Agent | Role |
-|---|---|
-| `traffic-strategist` | Campaign strategy, budget allocation, KPIs, briefings (exclusive story authority) |
-| `traffic-analyst` | Market intelligence — audiences, competitors, benchmarks, diagnosis |
-| `traffic-qa` | Pre-campaign QA — UTMs, pixels, compliance, creatives (PASS/FAIL exclusive) |
-| `traffic-bi` | BI & attribution — ROAS, LTV, CPA, multi-touch (official metrics source) |
-| `traffic-copywriter` | Ad copy — headlines, descriptions, CTAs, A/B variants per platform |
-| `traffic-designer` | Ad creatives — banners, carousels, video assets, Stories |
-| `traffic-google` | Google Ads — Search, Performance Max, Shopping, YouTube, Display |
-| `traffic-meta` | Meta Ads — Facebook + Instagram, Advantage+, retargeting, lookalike, CAPI |
-| `traffic-tiktok` | TikTok Ads — Spark Ads, In-Feed, TopView, Brand Takeover |
-| `traffic-automation` | Bulk ops scripts, Google/Meta/TikTok API integrations, data pipelines |
-
-### PM Squad — Kaelthari
-
-Project Management squad built for any company and any PM system. Discovers all context dynamically from the database — no hardcoded team or company names. Implements the strategic triangle: **PEOPLE** (capacity) ↔ **DELIVERIES** (commitments) ↔ **DEMANDS** (incoming), with Lean and Scrum natively embedded.
-
-| Agent | Persona | Role |
-|---|---|---|
-| `pm-analyst` | **Serak** | Portfolio intelligence — workload per person, delay risk, overload detection, 7 Lean wastes |
-| `pm-planner` | **Zynath** | Sprint planning with capacity verification, Heijunka load leveling |
-| `pm-engineer` | **Faelor** | Process template engine — creates task sets, templates, subtasks, DoR embedded |
-| `pm-ops` | **Varek** | Daily operations — processes standup summaries, updates task status, detects blockers |
-| `pm-reporter` | **Lyrith** | Meeting intelligence — PRIMARY entry point for all meetings (daily, planning, client, retro) |
-| `pm-demand` | **Draketh** | Demand intake — structures and creates tasks, checks capacity, detects duplicates |
-| `pm-data` | **Nexar** | Data layer — sole Supabase CLI access, multi-tenant, full schema knowledge |
-| `pm-client` | **Eshara** | Client layer — companies, people, access permissions, risk detection |
-| `pm-qa` | **Thyron** | Quality audit — formal verdicts APROVADO/PENDÊNCIAS/REPROVADO, DoD enforcement |
-| `pm-coach` | **Aevon** | Scrum Master — all ceremonies, data-driven retrospectives, dysfunction detection, Kaizen |
-
-**How the PM squad operates:**
-- Drop any meeting summary (daily standup, sprint planning, client call, retrospective) to `pm-reporter` (Lyrith) and it routes to the right agents automatically
-- All context (teams, projects, people, clients) is discovered dynamically from the database — no hardcoded data in the agents
-- Lean natively embedded: 7-waste detection, value stream, standardized work, Jidoka quality stops
-- Scrum natively embedded: velocity, burndown, WIP limits, DoR/DoD, sprint ceremonies with real data
-- Works with any PM system that exposes a REST API (default integration with WorkOS/Supabase schema)
-
----
-
-## Skills (slash commands)
-
-### `/team-os` — Lead orchestrator
-
-The main skill. Detects project state and manages the full agent team lifecycle. **Exclusive owner of `docs/smart-memory/`.**
-
-| Command | Description |
-|---|---|
-| `/team-os` | Smart detection — routes to bootstrap / resume / new team |
-| `/team-os *bootstrap` | Full init + discovery team (new projects) |
-| `/team-os *init` | Creates empty `docs/smart-memory/` structure only |
-| `/team-os *discover` | Runs discovery audit on existing project |
-| `/team-os *plan "objective"` | Breaks objective into stories, populates backlog |
-| `/team-os *dispatch` | Forms team and starts work on active stories |
-| `/team-os *status` | Shows current tasks, stories, agents, blockers |
-| `/team-os *audit` | Validates smart-memory integrity and agent compliance |
-| `/team-os *resume` | Reads smart-memory and resumes in-progress work |
-| `/team-os *close` | Archives smart-memory and closes the team |
-
-### `/team-os-creator` — Agent factory + installer
-
-Creates agents following validated patterns and installs squads into other projects. **Never touches smart-memory.**
-
-| Command | Description |
-|---|---|
-| `/team-os-creator` | Menu: create team / propagate updates / install in project |
-| `/team-os-creator *install` | Install squads + skills into a target project |
-| `/team-os-creator *propagate` | Update agents across all projects in the Centro de Treinamento |
-| `/team-os-creator *create <role>` | Create a single agent interactively |
-| `/team-os-creator *squad <preset>` | Create a full preset squad (dev/sites/social/custom) |
-| `/team-os-creator *audit` | Validate compliance of all installed agents |
-
-**What `*install` always does:**
-- Copies `team-os` skill (required for `/team-os` to appear in the command menu)
-- Creates `settings.json` with `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`
-- Filters hooks to the selected squads only
-
-**Internal scripts** (`skills/team-os-creator/scripts/`):
-- `install-to-project.sh` — copies agents/skills/hooks/settings to a target project
-- `scan-ct-projects.sh` — discovers all projects in the Centro de Treinamento root
-- `diff-agents.sh` — compares agent versions between source and target
-- `detect-project-signals.sh` — detects stack and archetype for squad suggestions
-- `validate-agent.sh` — validates agent compliance after creation
-
-### Dev skills
-
-`/dev-api-design` · `/dev-database-patterns` · `/dev-error-handling` · `/dev-testing-strategy` · `/dev-typescript-patterns` · `/dev-git-workflow` · `/dev-security-patterns` · `/dev-technical-writing` · `/dev-defuddle`
-
-#### BI & Data Science skills (for `dev-bi` and `dev-data-performance`)
-
-`/data-analytics-engineering` · `/data-sql-optimization` · `/data-lake-platform` · `/ai-ml-data-science` · `/ai-ml-timeseries`
-
-| Skill | Used by | Purpose |
-|---|---|---|
-| `/data-analytics-engineering` | Kairo | Metric dictionary, semantic layer, dbt/SQLMesh, data contracts, governance |
-| `/data-sql-optimization` | Kairo | Analytical query tuning, EXPLAIN/ANALYZE, anti-patterns, indexing |
-| `/data-lake-platform` | Kairo | Medallion architecture, data mesh, Iceberg/Delta, ClickHouse, Dagster |
-| `/ai-ml-data-science` | Sigma | EDA, feature engineering, LightGBM, model evaluation, MLOps (CI/CD/CT/CM) |
-| `/ai-ml-timeseries` | Sigma | Forecasting, backtesting, lag features, seasonality, drift detection |
-
-### Sites skills
-
-`/sites-seo-technical` · `/sites-seo-keywords` · `/sites-frontend-design` · `/sites-ux-interaction` · `/sites-copywriting` · `/sites-page-cro` · `/sites-content-strategy` · `/sites-deployment` · `/sites-shadcn-ui` · `/sites-tailwind-design-system` · `/sites-canvas-design` · `/sites-copy-editing` · `/sites-web-accessibility` · `/sites-scroll-motion`
-
-#### `/sites-scroll-motion` — Cinematic scroll, parallax and 3D
-
-10-section reference for scroll-driven animation on the web, from CSS to Three.js WebGPU. Used by `sites-ux`, `sites-dev-alpha`, and `sites-dev-gamma`.
-
-| Section | Topics |
-|---|---|
-| 1. IntersectionObserver + CSS | `data-visible`, transition classes, staggered reveals |
-| 2. CSS Scroll Snap | `scroll-snap-type`, mandatory vs proximity, mobile behaviour |
-| 3. Dual-ref scroll (no re-render) | `scrollRef` + `progressRef` via `useRef` — zero React re-renders |
-| 4. Framer Motion | `useScroll`, `useTransform`, `useSpring`, `MotionValue` pipes |
-| 5. Keyframe camera path | 3D camera positions, `smoothstep`/`lerp`, normalised progress |
-| 6. Per-stage interpolation | Ranges, `mapRange`, multi-stop value curves |
-| 7. Three.js / R3F setup | `<Canvas>`, `useFrame`, `ScrollControls`, `useScroll` (R3F) |
-| 8. Three.js WebGPU + TSL | Compute shaders, DoF post-processing, sky gradient node materials |
-| 9. Performance rules | 11 rules — GPU budget, `will-change`, passive listeners, RAF |
-| 10. Decision guide | When to use each technique; complexity vs. impact matrix |
-
-### Social skills
-
-`/social-copywriting` · `/social-scriptwriting` · `/social-carousel-design` · `/social-video-editing` · `/social-analytics` · `/social-key-visual` · `/social-format-specs` · `/social-editorial-validation` · `/social-apify-research` · `/social-freepik-generation` · `/social-stitch-workflow` · `/social-meta-publishing` · `/social-cinematic-composition`
-
-### Traffic skills
-
-`/tiktok-marketing`
-
-### PM skills
-
-`/supabase` · `/supabase-postgres-best-practices` · `/to-prd` · `/to-issues` · `/grill-me` · `/triage` · `/handoff`
-
-| Skill | Used by | Purpose |
-|---|---|---|
-| `/supabase` | Nexar, all PM agents | Supabase REST API patterns, RLS, Auth, Edge Functions |
-| `/supabase-postgres-best-practices` | Nexar | PostgreSQL query optimization, schema design, indexing |
-| `/to-prd` | Draketh, Zynath | Converts demand briefs into structured PRD / task definition |
-| `/to-issues` | Draketh | Converts meeting notes and PRDs into structured task lists |
-| `/grill-me` | Zynath, Aevon | Adversarial requirement review — finds edge cases before sprint starts |
-| `/triage` | Serak, Draketh | Priority scoring, demand classification, backlog health |
-| `/handoff` | Varek, Lyrith | Standardized handoff format between agents and sprint cycles |
-
-### Design / Accessibility
-
-`/ui-ux-pro-max` · `/accessibility` · `/web-design-guidelines`
-
----
-
-## How it works end-to-end
+## 13. Manutenção do CT
 
 ```
-You                   team-os (skill)            Agents (in parallel)
- │                          │                          │
- ├─ /team-os ──────────────►│                          │
- │                          ├─ detect state            │
- │                          ├─ graphify (AST scan)     │  ← builds knowledge graph
- │                          ├─ TeamCreate()             │
- │                          ├─ Agent(dev-architect) ───►│ maps modules + god nodes
- │                          ├─ Agent(dev-analyst) ─────►│ maps tech stack
- │                          │  rm -rf graphify-out/    │  ← transient, not persisted
- │◄─────────────────────────┤◄─── SendMessage ──────────┤ (agents report back)
- │                          │                          │
- ├─ /team-os *plan ─────────►│                          │
- │  "add auth module"        ├─ SendMessage ────────────►│ dev-architect creates stories
- │                          │◄─── stories created ──────┤
- │                          │                          │
- ├─ /team-os *dispatch ──────►│                          │
- │                          ├─ Agent(dev-dev-beta) ─────►│ checks god nodes (step 1.5)
- │                          │                          │  implements
- │                          ├─ Agent(dev-qa) ───────────►│ expanded checklist if god node
- │                          ├─ Agent(dev-devops) ───────►│ pushes PR + graphify update
+1. Editar agente/skill AQUI (nunca no destino)
+2. /team-os-creator *audit       → 49/49 conforme
+3. /team-os-creator *propagate   → leva aos projetos destino
+4. commit por projeto
 ```
 
----
-
-## Configuration
-
-`settings.json` sets the required env var (created automatically by `/team-os-creator *install`):
-
-```json
-{
-  "env": {
-    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
-  }
-}
-```
-
-`settings.local.json` is gitignored — use it for machine-specific permissions.
+**Regra de ouro:** o CT é a fonte da verdade. Auditoria sempre verde antes de propagar.
 
 ---
 
-## Contributing
+## Requisitos
 
-Pull requests welcome. When adding a new agent, run `/team-os-creator` to generate it following the validated patterns. When adding a new skill, follow the structure in `.claude/skills/team-os/SKILL.md` as reference.
-
----
-
-## License
-
-MIT
+- Claude Code com `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` em `~/.claude/settings.json`
+- Plano com suporte a Agent Teams
+- Agent Teams é experimental — ver [limitações oficiais](https://code.claude.com/docs/en/agent-teams#limitations)

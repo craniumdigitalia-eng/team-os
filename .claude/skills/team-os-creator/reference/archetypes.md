@@ -8,33 +8,34 @@ Cada archetype mapeia pra um template em `templates/{archetype}.md` e define os 
 
 | Archetype | Model | memory | isolation | permissionMode | Tools base | Hook git push |
 |---|---|---|---|---|---|---|
-| `orchestrator` | opus | project | — | — | Read, Write, Edit, Glob, Grep, Bash, SendMessage, TaskCreate, TaskUpdate, TaskList, TaskGet | — |
-| `architect` | opus | project | — | — | Read, Write, Edit, Glob, Grep, Bash, WebSearch, WebFetch, SendMessage | — |
-| `implementer` | sonnet | project | worktree | acceptEdits | Read, Write, Edit, Glob, Grep, Bash, SendMessage | ✅ |
-| `hardening` | sonnet | project | worktree | acceptEdits | Read, Write, Edit, Glob, Grep, Bash, WebSearch, SendMessage | ✅ |
-| `reviewer` | opus | project | — | — | Read, Glob, Grep, Bash, SendMessage | — |
-| `researcher` | sonnet | project | — | — | Read, Glob, Grep, Bash, WebSearch, WebFetch, SendMessage | — |
-| `data` | sonnet | project | — | — | Read, Write, Edit, Glob, Grep, Bash, SendMessage | — |
-| `devops` | sonnet | project | — | acceptEdits | Read, Write, Edit, Glob, Grep, Bash, SendMessage | — |
-| `ux` | sonnet | project | — | — | Read, Write, Edit, Glob, Grep, Bash, WebFetch, WebSearch, SendMessage | — |
+| `architect` | opus | project | — | — | Read, Write, Edit, Glob, Grep, Bash, WebSearch, WebFetch, SendMessage | ✅¹ |
+| `implementer` | inherit | project | — | acceptEdits | Read, Write, Edit, Glob, Grep, Bash, SendMessage | ✅ |
+| `hardening` | inherit | project | — | acceptEdits | Read, Write, Edit, Glob, Grep, Bash, WebSearch, SendMessage | ✅ |
+| `reviewer` | opus | project | — | — | Read, Glob, Grep, Bash, SendMessage | ✅¹ |
+| `researcher` | inherit | project | — | — | Read, Glob, Grep, Bash, WebSearch, WebFetch, SendMessage | ✅¹ |
+| `data` | inherit | project | — | — | Read, Write, Edit, Glob, Grep, Bash, SendMessage | ✅¹ |
+| `devops` | inherit | project | — | acceptEdits | Read, Write, Edit, Glob, Grep, Bash, SendMessage | — |
+| `ux` | inherit | project | — | — | Read, Write, Edit, Glob, Grep, Bash, WebFetch, WebSearch, SendMessage | ✅¹ |
+
+> **¹ Hook git push (push exclusivo do devops):** em **squads de código** (`dev`/`sites`), **todo** agente não-`devops` que tem `Bash` carrega `block-git-push.sh` — não só os implementers. Isso transforma "push é só do devops" de convenção em **garantia dura** (defense-in-depth): qualquer agente com Bash poderia tecnicamente dar `git push`, então só o `devops` fica sem o hook. Em squads **não-código** (`social`/`traffic`/`pm`) não há devops nem fluxo de push de código — lá só o archetype `implementer` (ex.: `social-video`) leva o hook.
+
+> **Nota sobre `model` (Híbrido):** o campo `model` do arquivo do agente PREVALECE sobre o ajuste "Default teammate model" do `/config` quando o agente roda como teammate. Por isso `architect`/`reviewer` ficam fixos em `opus` (raciocínio crítico que não vale economizar) e os demais usam `inherit` — assim seguem o `/model` escolhido pelo lead, dando controle central de custo. **Não existe archetype `orchestrator`:** a main session do Claude Code já é o lead nativo (ver RULE #7 do SKILL.md).
 
 ---
 
 ## Justificativas das decisões
 
-### Por que `opus` para orchestrator/architect/reviewer
-Esses papéis precisam de raciocínio profundo: planejamento, decisões arquiteturais, veredictos de qualidade. Não vale economizar tokens aqui — uma decisão errada custa muito mais depois.
+### Por que `opus` para architect/reviewer
+Esses papéis precisam de raciocínio profundo: decisões arquiteturais, veredictos de qualidade. Não vale economizar tokens aqui — uma decisão errada custa muito mais depois. Por isso ficam fixos em `opus` (o campo do arquivo vence o `/config`).
 
-### Por que `sonnet` para implementer/data/devops/ux/researcher/hardening
-Execução com especialização bem definida. Sonnet é rápido, custa menos, e com contratos claros (smart-memory + contrato team-os) o output fica consistente.
+### Por que `inherit` para implementer/data/devops/ux/researcher/hardening
+Execução com especialização bem definida. Com `inherit`, o teammate segue o `/model` escolhido pelo lead na sessão — o lead pode baixar a frota inteira pra haiku/sonnet numa sessão barata, mantendo `architect`/`reviewer` protegidos em opus. Com contratos claros (smart-memory + Native Teams Protocol) o output fica consistente em qualquer modelo.
 
-### Por que worktree só em implementer/hardening
-Apenas esses dois **escrevem código que vai pro repositório**. Isolar em worktree permite múltiplos rodando em paralelo sem pisar no branch principal.
+### Por que isolation: worktree foi removido de implementer/hardening
+Worktree cria branches isoladas automaticamente — útil em teoria para paralelismo, mas na prática impede que as mudanças apareçam no checkout principal (onde o servidor dev roda), gera branches zumbis no git e confunde o fluxo de trabalho local. Agentes implementers e hardening agora escrevem direto na branch ativa (main), tal como o desenvolvedor faria manualmente.
 
-Reviewer é read-only (não escreve código), UX escreve specs (não código), architect escreve stories/ADRs (não código). Nenhum precisa de worktree.
-
-### Por que hook de git push só em implementer/hardening
-Mesmo argumento: são os que executam `git` commands. Outros archetypes não deveriam fazer commit/push — e se tentarem, o hook em 2 agentes já é suficiente pra bloquear (o código é chamado via path absoluto).
+### Por que hook de git push em todo agente não-devops das squads de código
+A autoridade de push é **exclusiva do `devops`**. Antes o hook ficava só nos implementers (assumindo que só eles rodam `git`), mas qualquer agente com `Bash` — architect, reviewer/QA, data, analyst, ux — *pode* tecnicamente dar `git push` e furar a exclusividade. Para fazer disso uma garantia dura (não convenção), nas squads `dev`/`sites` **todos** os não-`devops` com Bash carregam `block-git-push.sh`; só o `devops` fica livre. Nas squads não-código (`social`/`traffic`/`pm`) não há devops nem push de código, então só o `implementer` (ex.: `social-video`) leva o hook. O script é chamado via path absoluto (`$CLAUDE_PROJECT_DIR`).
 
 ### Por que `permissionMode: acceptEdits` só em implementer/hardening/devops
 Esses 3 fazem edições extensas e previsíveis (code, migrations, CI configs). `acceptEdits` reduz fricção de autorização repetitiva.
@@ -51,8 +52,8 @@ Exclusividade de **veredicto formal**. Se pudesse editar código, borraria o pap
 Independente do archetype, todo agente gerado pela skill tem:
 
 1. **Frontmatter `memory: project`** — integração com smart-memory
-2. **Seção "Contrato com team-os"** no topo do corpo — 8 regras canônicas
-3. **Mention de `SendMessage`** — obrigatório para coordenação
+2. **Seção "Native Teams Protocol"** no topo do corpo — 7 regras canônicas (peer-to-peer, TaskList nativo, smart-memory)
+3. **Mention de `SendMessage`** — obrigatório para coordenação peer-to-peer
 4. **Mention de `docs/smart-memory/`** — smart-memory obrigatório
 5. **"Regras absolutas"** ao final — enforcement
 6. **H1 com persona + role title** — identidade
@@ -75,7 +76,7 @@ Quando o usuário diz um role, mapear pra archetype assim:
 | "devops", "SRE", "release", "CI/CD" | `devops` |
 | "UX", "design", "UI", "accessibility" | `ux` |
 | "hardening", "resilience", "error handling", "security engineer" | `hardening` |
-| "chief", "orchestrator", "coordinator", "lead" | ⚠️ `orchestrator` MAS avisar que team-os já faz isso |
+| "chief", "orchestrator", "coordinator", "lead" | ⛔ Recusar — a main session do Claude Code já é o lead nativo (RULE #7). Não criar agente de orquestração. |
 
 Se ambíguo, perguntar ao usuário qual archetype usar (listar opções).
 
@@ -85,9 +86,11 @@ Se ambíguo, perguntar ao usuário qual archetype usar (listar opções).
 
 Evitar repetir cores na mesma squad (facilita shift+tab visual no Claude Code):
 
+Valores válidos (doc oficial): `red`, `blue`, `green`, `yellow`, `purple`, `orange`, `pink`, `cyan`.
+
 | Cor | Uso típico |
 |---|---|
-| `blue` | Lead/orchestrator (normalmente ocupado pela skill team-os) |
+| `blue` | Reservada ao lead (main session) — evitar em teammates |
 | `purple` | Architect |
 | `cyan` | Researcher/analyst |
 | `pink` | UX |

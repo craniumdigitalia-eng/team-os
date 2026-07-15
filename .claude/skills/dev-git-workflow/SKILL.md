@@ -9,15 +9,17 @@ updated: "2026-04-21"
 
 ## Branch Strategy
 
+> ⚠️ **Regra dura — branch de publicação:** antes de qualquer `push`/`PR`/`merge`, **pergunte em qual branch publicar; a `main` é o padrão prioritário.** Nunca crie branch nova nem assuma a branch atual por conta própria. Só use `feature/*` (ou outra) quando o usuário pedir explicitamente — nesse caso vale a nomenclatura abaixo.
+
 ```
-main             → produção, protegida, sempre estável
-├── feature/     → novas features (ex: feature/42-user-auth)
-├── fix/         → bugfixes (ex: fix/login-null-pointer)
+main             → padrão de publicação, produção, sempre estável
+├── feature/     → novas features SÓ quando o usuário pedir (ex: feature/42-user-auth)
+├── fix/         → bugfixes sob demanda (ex: fix/login-null-pointer)
 ├── hotfix/      → urgente produção, parte de main
 └── chore/       → deps, config, infra
 ```
 
-**Nomenclatura:** `{type}/{issue-id}-{slug}` — ex: `feature/42-user-authentication`
+**Nomenclatura (quando branch for solicitada):** `{type}/{issue-id}-{slug}` — ex: `feature/42-user-authentication`
 
 ## Conventional Commits
 
@@ -59,7 +61,9 @@ chore(deps): upgrade Next.js to 15.2.0
 | **`git push`** | **EXCLUSIVO dev-devops (Grav)** |
 | **`gh pr create/merge`** | **EXCLUSIVO dev-devops (Grav)** |
 
-**Garantia técnica:** Os agentes `dev-dev-alpha`, `dev-dev-beta`, `dev-dev-gamma` e `dev-dev-delta` têm o hook `~/.claude/hooks/block-git-push.sh` configurado via `PreToolUse`. Qualquer tentativa de `git push` nesses agentes é bloqueada automaticamente antes de executar — não é apenas uma regra no prompt, é uma barreira técnica.
+**Garantia técnica:** Os agentes `dev-dev-alpha`, `dev-dev-beta`, `dev-dev-gamma` e `dev-dev-delta` têm o hook `block-git-push.sh` configurado via `PreToolUse` no frontmatter. Qualquer tentativa de `git push` nesses agentes é bloqueada automaticamente antes de executar — não é apenas uma regra no prompt, é uma barreira técnica.
+
+O hook está em `.claude/hooks/block-git-push.sh` no projeto e é referenciado diretamente no frontmatter de cada agente implementer via `$CLAUDE_PROJECT_DIR/.claude/hooks/block-git-push.sh`.
 
 Se `git push` for necessário em algum desses agentes, o fluxo correto é:
 1. Dev completa o commit local
@@ -67,68 +71,65 @@ Se `git push` for necessário em algum desses agentes, o fluxo correto é:
 3. Lead delega ao Grav (dev-devops)
 4. Grav executa os quality gates e faz o push
 
-### Instalação do hook block-git-push.sh (obrigatório antes de spawnar dev agents)
+## Worktree por Dev
 
-O hook deve existir **antes** de formar qualquer Agent Team com agentes dev. Sem ele, a exclusividade de git push não é tecnicamente garantida.
+Cada dev trabalha em worktree isolado — zero conflito entre agentes paralelos.
 
-**Passo 1 — Criar o hook:**
+### Isolamento automático via frontmatter (recomendado)
+
+Agentes com `isolation: worktree` no frontmatter recebem worktree própria automaticamente ao serem spawnados como subagents. Não é necessário criar manualmente. Os agentes `dev-dev-alpha`, `dev-dev-beta`, `dev-dev-gamma` e `dev-dev-delta` já têm esse campo configurado.
+
+### Isolamento manual (quando necessário controle explícito)
+
 ```bash
-mkdir -p ~/.claude/hooks
-cat > ~/.claude/hooks/block-git-push.sh << 'EOF'
-#!/usr/bin/env bash
-# Bloqueia git push em agentes que não sejam dev-devops
-# Configurado via PreToolUse em .claude/settings.json
+# Dev Alpha inicia story-2.1
+git worktree add .claude/worktrees/story-2.1 -b feature/story-2.1
 
-TOOL_NAME="${CLAUDE_TOOL_NAME:-}"
-TOOL_INPUT="${CLAUDE_TOOL_INPUT:-}"
-
-if [[ "$TOOL_NAME" == "Bash" ]]; then
-  if echo "$TOOL_INPUT" | grep -qE '(^|[[:space:]])git[[:space:]]+push'; then
-    echo "❌ git push é exclusivo de dev-devops (Grav). Notifique o lead via SendMessage." >&2
-    exit 1
-  fi
-fi
-
-exit 0
-EOF
-chmod +x ~/.claude/hooks/block-git-push.sh
+# Dev Beta inicia story-2.2 simultaneamente
+git worktree add .claude/worktrees/story-2.2 -b feature/story-2.2
 ```
 
-**Passo 2 — Registrar em `.claude/settings.json` do projeto** (via `/update-config`):
+> Adicione `.claude/worktrees/` ao `.gitignore` para que worktrees não apareçam como untracked no checkout principal.
+
+### Copiar arquivos gitignored (`.env`, secrets)
+
+Crie `.worktreeinclude` na raiz do projeto para copiar automaticamente arquivos gitignored para cada nova worktree:
+
+```text
+# .worktreeinclude
+.env
+.env.local
+config/secrets.json
+```
+
+Só arquivos que já estão no `.gitignore` são copiados — arquivos rastreados nunca são duplicados.
+
+### Base branch da worktree
+
+Por padrão worktrees partem de `origin/HEAD` (branch padrão remota, sempre limpa). Para partir do HEAD local (útil quando se quer incluir commits não publicados):
+
 ```json
+// .claude/settings.json
 {
-  "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "Bash",
-        "hooks": [{ "type": "command", "command": "~/.claude/hooks/block-git-push.sh" }]
-      }
-    ]
+  "worktree": {
+    "baseRef": "head"
   }
 }
 ```
 
-**Passo 3 — Verificar:**
-```bash
-bash -c 'CLAUDE_TOOL_NAME=Bash CLAUDE_TOOL_INPUT="git push origin main" ~/.claude/hooks/block-git-push.sh'
-# Deve retornar exit 1 com mensagem de bloqueio
+### Sessões em background e worktrees
+
+Sessões iniciadas com `claude --bg` ou via Agent View ganham worktree isolada automaticamente em `.claude/worktrees/`, sem necessidade de `--worktree`. Para desativar esse comportamento:
+
+```json
+{ "worktree": { "bgIsolation": "none" } }
 ```
 
-## Worktree por Dev
-
-Cada dev trabalha em worktree isolado — zero conflito entre agentes paralelos:
+### Remoção (responsabilidade do DevOps)
 
 ```bash
-# Dev Alpha inicia story-2.1
-git worktree add ../worktrees/story-2.1 -b feature/story-2.1
-
-# Dev Beta inicia story-2.2 simultaneamente
-git worktree add ../worktrees/story-2.2 -b feature/story-2.2
-```
-
-DevOps (Grav) remove worktrees após merge:
-```bash
-git worktree remove ../worktrees/story-2.1
+git worktree list
+git worktree remove .claude/worktrees/story-2.1
 git branch -d feature/story-2.1
 ```
 
@@ -165,7 +166,7 @@ docs/smart-memory/stories/done/{story-id}.md
 npm run lint && npm run typecheck && npm test && npm run build
 ```
 
-Todos devem passar. Se algum falhar, Grav notifica Chief e retorna ao dev responsável.
+Todos devem passar. Se algum falhar, Grav notifica o lead e retorna ao dev responsável.
 
 ## Regras absolutas
 
