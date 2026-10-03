@@ -32,7 +32,7 @@ Os hooks em `.claude/hooks/` são referenciados diretamente no frontmatter dos a
 
 - `block-git-push.sh` — PreToolUse em **TODO agente com Bash exceto os devops** (todas as squads): push é garantia dura, exclusiva do devops. Cobre `git -C`/`--git-dir`/aliases/multilinha e `gh pr`/`gh api`
 - `block-worktree.sh` — PreToolUse registrado no `.claude/settings.json` de cada projeto (matchers `Agent|Task|EnterWorktree` e `Bash`): bloqueia `isolation: worktree`, EnterWorktree, `git worktree add` **e criação de branch** (`checkout -b`/`switch -c`/`git branch <nome>`) — todo trabalho acontece direto na branch ativa. Complementado por `"worktree": { "bgIsolation": "none" }` no mesmo settings
-- `guard-push-branch.sh` — PreToolUse nos devops: push permitido só na `main`/`master`; fora dela exige pedido explícito do usuário na sessão
+- `guard-push-branch.sh` — PreToolUse no `dev-devops`: push permitido só na `main`/`master`; fora dela exige pedido explícito do usuário na sessão
 - `task-quality.sh` — hook `TaskCreated` (registrado no settings): rejeita task vaga (título curto/genérico ou sem descrição)
 - `check-story-progress.sh` — hook `TaskCompleted`: task que referencia story só fecha com `## QA Results` ou `status: done|in-review` na story
 - `check-social-progress.sh` — hook `TaskCompleted`: task de publicação social só fecha com aprovação registrada (VERA/strategist)

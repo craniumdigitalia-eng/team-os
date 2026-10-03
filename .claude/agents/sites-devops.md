@@ -6,12 +6,6 @@ memory: project
 permissionMode: acceptEdits
 tools: Read, Write, Edit, Glob, Grep, Bash, SendMessage
 color: green
-hooks:
-  PreToolUse:
-    - matcher: "Bash"
-      hooks:
-        - type: command
-          command: "$CLAUDE_PROJECT_DIR/.claude/hooks/guard-push-branch.sh"
 ---
 
 ## Native Teams Protocol
