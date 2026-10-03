@@ -501,7 +501,7 @@ Referenciados no frontmatter dos agentes e em `.claude/hooks/`:
 
 - **`block-git-push.sh`** — `PreToolUse` em **70 agentes: todo agente com Bash exceto os devops, em TODAS as squads**. Bloqueia `git push` (inclusive `git -C`, `--git-dir`, aliases e comandos multilinha), `gh pr create/merge` e `gh api` de escrita em PRs — garantia dura, exclusiva do DevOps.
 - **`block-worktree.sh`** — `PreToolUse` registrado no `.claude/settings.json` de **cada projeto** (matchers `Agent|Task|EnterWorktree` e `Bash`). Bloqueia spawn de agente com `isolation: worktree`, a ferramenta EnterWorktree, `git worktree add` **e criação de branch** (`checkout -b`, `switch -c`, `git branch <nome>`) — garantia dura de que todo trabalho acontece na branch ativa. Complementado por `"worktree": { "bgIsolation": "none" }` no mesmo settings (desliga worktree automático de background tasks). Instalado sempre pelo `*install`.
-- **`guard-push-branch.sh`** — `PreToolUse` no `dev-devops`: push permitido só na `main`/`master`; fora dela exige pedido explícito do usuário na sessão.
+- **`guard-push-branch.sh`** — disponível, mas não ligado em nenhum devops por padrão (política: não travar deploy). Se ligado no `PreToolUse`: push permitido só na `main`/`master`; fora dela exige pedido explícito do usuário na sessão.
 - **`task-quality.sh`** — hook `TaskCreated` (registrado no settings pelo `ensure-settings.sh`/`*install`): rejeita task vaga — título curto/genérico ou sem descrição.
 - **`check-story-progress.sh`** — hook `TaskCompleted`: task que referencia story só fecha com `## QA Results` ou `status: done|in-review` na story.
 - **`check-social-progress.sh`** — hook `TaskCompleted`: task de publicação social só fecha com aprovação registrada (VERA/strategist).
@@ -521,7 +521,7 @@ Referenciados no frontmatter dos agentes e em `.claude/hooks/`:
 ├── hooks/               ← hooks de qualidade
 │   ├── block-git-push.sh
 │   ├── block-worktree.sh          ← anti-worktree: bloqueia isolation: worktree, EnterWorktree e git worktree add (registrado no settings.json de cada projeto)
-│   ├── guard-push-branch.sh       ← dev-devops: push só na main/master
+│   ├── guard-push-branch.sh       ← opcional (não ligado): push só na main/master
 │   ├── task-quality.sh            ← TaskCreated: rejeita task vaga
 │   ├── check-story-progress.sh
 │   ├── check-social-progress.sh
