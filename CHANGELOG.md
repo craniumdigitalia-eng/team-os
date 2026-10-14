@@ -61,6 +61,7 @@ Todas as mudanças relevantes deste repositório. Formato baseado em [Keep a Cha
 - `install-to-project.sh` grava skills arquivo por arquivo (sem `rsync --delete`): arquivos que o usuário criou dentro de uma skill do pack não são mais apagados, e não remove mais ícones de pasta (`Icon\r`) do destino. `scan-ct-projects.sh`, `diff-agents.sh` e o Command Center contam à parte os arquivos editados no projeto (`DRIFT_CONFLICT`, `SKILLS_CONFLICT`, `CONFLICT_LIST`) em vez de marcá-los como desatualizados; o destino não pode ser outra cópia do pack (`ERROR=target_is_pack`).
 
 ### Corrigido
+- **`release.sh` em pasta com acento no macOS:** a checagem "raiz do pack = raiz do git" comparava os caminhos como texto, e o git devolve "ã" numa forma Unicode diferente da do shell — o release recusava rodar em `/Volumes/João…`. Agora compara a pasta (`-ef`).
 - **Tokens da Sala só ficam "prontos" quando líder e todos os agentes já foram lidos** (`tokens.py`) — antes o total aparecia parcial e pulava enquanto os transcripts dos agentes ainda eram lidos.
 - **`serve.py` da Sala usa um PID por porta**: parar um painel de teste (`--port`) não derruba mais o principal (8787).
 - `install-to-project.sh` passa a copiar o `context-watch.sh` (a lista de hooks do instalador é fixa): sem isso o `ensure-settings.sh` registrava o hook nos settings do projeto e o arquivo não existia.

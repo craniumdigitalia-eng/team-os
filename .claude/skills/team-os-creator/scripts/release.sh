@@ -56,7 +56,8 @@ cd "$ROOT" || die "não consegui entrar em $ROOT"
 command -v git >/dev/null 2>&1 || die "git não encontrado"
 command -v python3 >/dev/null 2>&1 || die "python3 não encontrado"
 git rev-parse --is-inside-work-tree >/dev/null 2>&1 || die "esta pasta não é um repositório git"
-[ "$(git rev-parse --show-toplevel)" = "$ROOT" ] || die "a raiz do pack não é a raiz do repositório git"
+# -ef compara a pasta, não o texto: no macOS o git devolve o caminho com acento em outra forma Unicode (ex.: "ã" NFD x NFC)
+[ "$(git rev-parse --show-toplevel)" -ef "$ROOT" ] || die "a raiz do pack não é a raiz do repositório git"
 
 # 3. branch / tag / versão
 BRANCH="$(git rev-parse --abbrev-ref HEAD)"
