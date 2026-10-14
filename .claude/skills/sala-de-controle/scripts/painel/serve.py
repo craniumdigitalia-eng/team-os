@@ -248,6 +248,9 @@ def main():
     a = sys.argv[1:]
     root = a[a.index("--root") + 1] if "--root" in a else default_root()
     port = int(a[a.index("--port") + 1]) if "--port" in a else 8787
+    global PID_FILE
+    if port != 8787:                              # um pid por porta: parar um painel de teste não mexe no principal
+        PID_FILE = PID_FILE[:-len(".pid")] + f"-{port}.pid"
     if "--stop" in a:
         try:
             os.kill(int(open(PID_FILE).read().strip()), signal.SIGTERM)

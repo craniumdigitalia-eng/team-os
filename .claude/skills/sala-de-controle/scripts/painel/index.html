@@ -228,28 +228,69 @@
   .btn{height:42px;padding:0 14px;border-radius:6px;font-size:12.5px;letter-spacing:.02em} .btn span{font-family:var(--mono);font-size:11px;opacity:.8}
   .msg{border-top:1px solid rgba(255,255,255,.05)}
   .tip{background:#0f100e;border:1px solid rgba(255,255,255,.1);box-shadow:0 12px 32px rgba(0,0,0,.4);padding:9px 12px}
+
+  body{position:fixed;inset:0;overflow:clip} /* gaveta fechada fica fora da tela sem criar rolagem lateral */
+  /* ---- barra do topo: único lugar de informação ---- */
+  body>.top.bar{height:56px;padding:0 0 0 24px;background:#0c0d0b;border-bottom:1px solid rgba(255,255,255,.07);gap:0}
+  body>.top.bar::after{display:none}
+  body.open>.top.bar{right:400px}
+  .bar .brand{border:0;padding-right:20px;height:auto;gap:10px} .bar .brand svg{height:18px} .bar .brand .w{font-size:13px;font-weight:600;letter-spacing:.01em}
+  .bar .live{display:flex;align-items:center;gap:7px;font-family:var(--sans);font-size:11px;color:var(--bone-mute);padding-left:20px;border-left:1px solid rgba(255,255,255,.07);height:22px}
+  .bar .live i{width:6px;height:6px;border-radius:50%;background:var(--success);animation:none} .bar .live.off i{background:var(--danger)}
+  .metrics{margin-left:auto;display:flex;height:100%}
+  .m{position:relative;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:4px;min-width:132px;height:100%;padding:0 22px;background:none;border:0;border-left:1px solid rgba(255,255,255,.07);color:var(--bone);font-family:var(--sans);text-align:left;cursor:pointer;transition:background .15s var(--e)}
+  .m:hover{background:rgba(255,255,255,.025)} .m.on{background:rgba(255,255,255,.04)}
+  .m.on::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--azure)}
+  .m .k{font-size:10px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--bone-mute);white-space:nowrap;display:flex;align-items:center;gap:6px}
+  .m .k::after{content:"";width:5px;height:5px;border-right:1.2px solid currentColor;border-bottom:1.2px solid currentColor;transform:rotate(45deg) translateY(-2px);opacity:.6}
+  .m b{font-size:16px;font-weight:500;line-height:1;font-variant-numeric:tabular-nums;display:flex;align-items:center;gap:7px}
+  .m b em{font-style:normal;color:var(--bone-mute);font-weight:400}
+  .m.act b::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--bone);animation:breathe 1.6s var(--e) infinite}
+  .m.wait.hot b{color:var(--azure-light)} .m.wait.hot b::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--azure);box-shadow:0 0 0 3px #3d8fff33}
+  .m#mFeed.flash b::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--azure)}
+  /* ---- painel suspenso ---- */
+  .pop{top:62px;width:400px;max-height:calc(100% - 86px);display:none;flex-direction:column;background:#0f100e;border:1px solid rgba(255,255,255,.09);border-radius:8px;box-shadow:0 20px 50px rgba(0,0,0,.55);z-index:6;overflow:hidden;animation:in .18s var(--e)}
+  .pop.on{display:flex}
+  .pop header{display:flex;align-items:baseline;justify-content:space-between;padding:14px 18px 12px;border-bottom:1px solid rgba(255,255,255,.06)}
+  .pop header b{font-size:12.5px;font-weight:600} .pop header span{font-size:11px;color:var(--bone-mute);font-variant-numeric:tabular-nums}
+  .pop .pl{overflow:auto;padding:4px 0}
+  .pop .pr{display:grid;grid-template-columns:8px 1fr auto;gap:12px;align-items:center;padding:10px 18px}
+  .pop .pr+.pr{border-top:1px solid rgba(255,255,255,.04)}
+  .pop .pr.click{cursor:pointer} .pop .pr.click:hover{background:rgba(255,255,255,.03)}
+  .pop .pr.tk{grid-template-columns:1fr auto}
+  .pop .pt{min-width:0} .pop .pt b{display:block;font-size:12.5px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .pop .pt small{display:block;margin-top:3px;font-size:11px;color:var(--bone-mute);font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis} .pop .pt small em{font-style:normal}
+  .pop .pv{font-size:11px;color:var(--bone-mute);white-space:nowrap;font-variant-numeric:tabular-nums}
+  .pop .pr.tk .pv{font-size:13px;color:var(--bone);font-weight:500}
+  .pop .bar{display:block;height:2px;margin-top:8px;background:rgba(255,255,255,.07)} .pop .bar i{display:block;height:2px;background:var(--bone-mute)}
+  .pop .pk{display:grid;grid-template-columns:auto 1fr auto;align-items:baseline;gap:10px;padding:16px 18px;border-bottom:1px solid rgba(255,255,255,.06)}
+  .pop .pk b{font-size:26px;font-weight:500;font-variant-numeric:tabular-nums} .pop .pk span{font-size:11px;color:var(--bone-mute)}
+  .pop .rst{align-self:center;height:28px;padding:0 12px;border-radius:6px;border:1px solid rgba(255,255,255,.12);background:none;color:var(--bone-dim);font-family:var(--sans);font-size:11.5px;cursor:pointer} .pop .rst:hover{background:rgba(255,255,255,.05);color:#fff}
+  .pop .pe{padding:22px 18px;font-size:12px;color:var(--bone-mute)}
+  .pop footer{display:flex;flex-wrap:wrap;gap:16px;padding:11px 18px;border-top:1px solid rgba(255,255,255,.06);font-size:10.5px;color:var(--bone-mute)}
+  .pop footer span{display:flex;align-items:center;gap:6px} .pop footer.tip2{border-top:0;padding-top:0;line-height:1.5}
+  .pop .d{width:7px;height:7px;border-radius:50%;display:inline-block;flex:none;box-sizing:border-box}
+  .d.on{background:var(--bone)} .d.ap{background:var(--azure);box-shadow:0 0 0 3px #3d8fff2a} .d.ok{background:var(--success)} .d.wt{border:1.5px dashed var(--bone-dim)} .d.off{border:1.5px solid #585C57}
 </style>
 </head>
 <body>
 <canvas id="c"></canvas>
 
-<div class="top">
-<div class="brand">
-  <svg viewBox="0 0 84.54 136"><polygon fill="#3d8fff" points="69.84,0.00 0.00,78.66 36.76,79.39 11.76,135.26 83.81,60.28 43.37,58.81"/></svg>
-  <div class="w">Sala de Controle<small>SERVICE AS A SYSTEM</small></div>
+<div class="top bar">
+  <div class="brand">
+    <svg viewBox="0 0 84.54 136"><polygon fill="#3d8fff" points="69.84,0.00 0.00,78.66 36.76,79.39 11.76,135.26 83.81,60.28 43.37,58.81"/></svg>
+    <div class="w">Sala de Controle</div>
+  </div>
+  <div class="live" id="live"><i></i><span id="clock">conectando…</span></div>
+  <nav class="metrics">
+    <button class="m" data-pop="sess"><span class="k">Sessões</span><b id="sSess">0</b></button>
+    <button class="m" id="mWork" data-pop="work"><span class="k">Agentes ativos</span><b id="sWork">0</b></button>
+    <button class="m wait" id="mWait" data-pop="wait"><span class="k">Precisam de você</span><b id="sWait">0</b></button>
+    <button class="m" id="mFeed" data-pop="feed"><span class="k">Atividade</span><b id="sFeed">—</b></button>
+    <button class="m" data-pop="tok"><span class="k" id="sTokK">Tokens</span><b id="sTok">0</b></button>
+  </nav>
 </div>
-<div class="live" id="live" style="margin-left:24px"><i></i><span id="clock">—</span></div>
-<div class="stats">
-  <div class="stat"><b id="sSess">0</b><span class="kicker">sessões</span></div>
-  <div class="stat"><b id="sAg">0</b><span class="kicker">agentes</span></div>
-  <div class="stat az"><b id="sWork">0</b><span class="kicker">ativos</span></div>
-  <div class="stat" title="tokens processados pelas sessões abertas (líder + agentes)"><b id="sTok">0</b><span class="kicker" id="sTokK">tokens</span></div>
-  <div class="stat am"><b id="sWait">0</b><span class="kicker">precisam de você</span></div>
-</div>
-</div>
-<div class="ui legend"><span><i class="f"></i> ativo</span><span><i class="d"></i> aguardando</span><span><i></i> parado</span><span><i class="a"></i> precisa de você</span></div>
-<div class="ui hint">arraste · role para zoom · clique para abrir · duplo clique no fundo recentra</div>
-<div class="ui feed" id="feed"></div>
+<div class="ui pop" id="pop"></div>
 <div class="tip" id="tip"></div>
 
 <aside class="ui drawer" id="drawer">
@@ -341,7 +382,7 @@ cv.addEventListener('pointermove',e=>{mouse={x:e.clientX,y:e.clientY};if(down&&M
   else if(pan){view.x=pan.vx+e.clientX-pan.x;view.y=pan.vy+e.clientY-pan.y;}});
 function up(e){if(drag){drag.drag=false;drag.vx=drag.vy=0;if(!moved)open(drag);drag=null;}else if(pan&&!moved&&e&&e.detail===2){}pan=null;down=null;}
 cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);cv.addEventListener('lostpointercapture',()=>{if(drag){drag.drag=false;drag=null;}pan=null;down=null;});
-function fitAll(){const arr=[...nodes.values()];if(!arr.length||W<200||H<200)return;let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;arr.forEach(n=>{x0=Math.min(x0,n.x-60);y0=Math.min(y0,n.y-40);x1=Math.max(x1,n.x+60);y1=Math.max(y1,n.y+40);});const pad=70,availW=(document.body.classList.contains('open')?W-380:W)-pad*2,availH=H-pad*2-60;const k=Math.min(1.6,Math.max(0.35,Math.min(availW/(x1-x0),availH/(y1-y0))));view.k=k;view.x=pad+(availW-(x1-x0)*k)/2-x0*k;view.y=pad+60+(availH-(y1-y0)*k)/2-y0*k;}
+function fitAll(){const arr=[...nodes.values()];if(!arr.length||W<200||H<200)return;let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;arr.forEach(n=>{x0=Math.min(x0,n.x-60);y0=Math.min(y0,n.y-40);x1=Math.max(x1,n.x+60);y1=Math.max(y1,n.y+40);});const pad=70,availW=(document.body.classList.contains('open')?W-380:W)-pad*2,availH=H-pad*2-56;const k=Math.min(1.6,Math.max(0.35,Math.min(availW/(x1-x0),availH/(y1-y0))));view.k=k;view.x=pad+(availW-(x1-x0)*k)/2-x0*k;view.y=pad+56+(availH-(y1-y0)*k)/2-y0*k;}
 cv.addEventListener('dblclick',e=>{if(!pick(e.clientX,e.clientY))fitAll();});
 let fitted=false;
 cv.addEventListener('wheel',e=>{e.preventDefault();userMoved=true;const k=Math.min(2.4,Math.max(0.4,view.k*(e.deltaY<0?1.08:0.925)));const p=toWorld(e.clientX,e.clientY);view.k=k;view.x=e.clientX-p.x*k;view.y=e.clientY-p.y*k;},{passive:false});
@@ -405,11 +446,7 @@ function frame(now){
     const dx=SN.x-SN.lead.x,dy=SN.y-SN.lead.y,d=Math.hypot(dx,dy)||1;const vert=Math.abs(dx)<10;
     const lx=vert?SN.x:SN.x+dx/d*16,ly=vert?SN.y+(dy>0?SN.r+15:-(SN.r+8)):SN.y+dy/d*16+4,al=vert?'center':dx>0?'left':'right';
     text(shortName(SN.sess.name).slice(0,30),lx,ly,10,st==='idle'?COL.dim:COL.bone,500,al);
-    text((SN.sess.status||'').toUpperCase(),lx,ly+11,7.5,'#8F948D',400,al,'mono');
-    const tk=SN.sess.tokens;
-    if(tk&&tk.ready&&tk.total>0){SN.tokShow=(SN.tokShow==null?tk.total:SN.tokShow+(tk.total-SN.tokShow)*0.12);const tc=TK_COL[tk.level]||TK_COL.ok,bw=46,bx=al==='center'?lx-bw/2:al==='left'?lx:lx-bw,by=ly+17;
-      text(fmtTok(SN.tokShow)+' tok'+(tk.rate>0?' ▲':''),lx,ly+25,7.5,tc,500,al,'mono');
-      ctx.fillStyle='rgba(255,255,255,.10)';ctx.fillRect(bx,by+10,bw,2);ctx.fillStyle=tc;ctx.fillRect(bx,by+10,Math.max(2,bw*Math.min(1,tk.ctx/CTX_MAX)),2);}}
+    text((SN.sess.status||'').toUpperCase(),lx,ly+11,7.5,'#8F948D',400,al,'mono');}
   // agentes
   for(const A of nodes.values()){if(A.kind!=='agent')continue;A.glow=Math.max(0,A.glow-dt/700);A.pulse=Math.max(0,A.pulse-dt/900);const s=A.ag.state,col=colorOf(s),isSel=sel===A||hov===A;
     const age=A.ag.age==null?0:A.ag.age;const fade=s==='active'?1:Math.max(0.15,1-Math.max(0,age-60)/240);ctx.globalAlpha=fade;
@@ -434,10 +471,12 @@ function frame(now){
 }
 
 /* ===================== EVENTOS → ANIMAÇÃO + FEED ===================== */
-const feed=document.getElementById('feed');
+const FEED=[];let feedFlashT=null;
+addEventListener('scroll',()=>{if(scrollX||scrollY)scrollTo(0,0);});
 function fmtTime(ep){const d=new Date(ep*1000);return d.toTimeString().slice(0,8);}
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
-function pushFeed(kind,who,what,where,ep){const e=document.createElement('div');e.className='ev '+kind;e.innerHTML=`<time>${fmtTime(ep)}</time><i></i><div><b>${esc(who)}</b> ${esc(what)}<small>${esc(where)}</small></div>`;feed.appendChild(e);while(feed.children.length>6)feed.removeChild(feed.firstChild);[...feed.children].forEach((c,i,a)=>c.style.opacity=(0.35+0.65*(i+1)/a.length).toFixed(2));}
+function pushFeed(kind,who,what,where,ep){FEED.push({kind,who,what,where,ep});if(FEED.length>40)FEED.shift();sFeed.textContent=fmtTime(ep).slice(0,5);
+  mFeed.classList.add('flash');clearTimeout(feedFlashT);feedFlashT=setTimeout(()=>mFeed.classList.remove('flash'),1600);if(POP==='feed')renderPop();}
 function findAgentNode(sid,name){const lc=(name||'').toLowerCase();for(const n of nodes.values())if(n.kind==='agent'&&n.sess.id===sid&&n.ag.name.toLowerCase()===lc)return n;return null;}
 function findLeadBySession(sid){return nodes.get('s:'+sid)||null;}
 function findLeadByName(name){const lc=(name||'').toLowerCase();for(const n of nodes.values())if(n.kind==='session'&&(n.sess.name.toLowerCase()===lc||lc.startsWith(n.sess.name.toLowerCase())))return n;for(const n of nodes.values())if(n.kind==='lead'&&n.proj.name.toLowerCase()===lc)return n;return null;}
@@ -470,7 +509,58 @@ function tokensHtml(t){if(!t||!t.ready)return '';const c=TK_COL[t.level]||TK_COL
     <div style="height:3px;margin:10px 0 6px;background:rgba(255,255,255,.10)"><div style="height:3px;width:${Math.max(1,pct)}%;background:${c}"></div></div>
     <div class="kicker" style="color:${c}">${TK_WORD[t.level]||''}</div>
     <div style="margin-top:10px">${t.lead?row('Sessão (líder)',t.lead.total,'contexto '+fmtTok(t.lead.ctx)):''}${(t.agents||[]).map(a=>row(a.name,a.total,a.rate?fmtTok(a.rate)+'/min':'')).join('')}${t.agents_n>(t.agents||[]).length?`<div class="kicker" style="margin-top:6px">+ ${t.agents_n-t.agents.length} agentes menores</div>`:''}</div></div>`;}
-function updateStats(){const c=S.counts||{};sSess.textContent=c.sessions||0;sAg.textContent=c.agents||0;sWork.textContent=c.active||0;sWait.textContent=c.approval||0;sTok.textContent=fmtTok(c.tokens||0);sTokK.textContent=c.tokens_rate?'tokens · '+fmtTok(c.tokens_rate)+'/min':'tokens';clock.textContent=(S.generated||'').slice(11,19)+' · '+(S.took_ms||0)+' ms';}
+/* ===== tokens desde o reset: baseline por sessão, guardada no navegador ===== */
+// TB = {at: epoch ms do reset, base: {sid: total no reset | null = ainda lendo}}. Sessão que nasce depois do reset conta inteira.
+let TB=null;
+function tbSave(){try{localStorage.setItem('salaTokBase',JSON.stringify(TB));}catch{}}
+function tbReset(){TB={at:Date.now(),base:{}};(S?S.sessions:[]).forEach(s=>{TB.base[s.id]=s.tokens&&s.tokens.ready?s.tokens.total:null;});tbSave();}
+try{TB=JSON.parse(localStorage.getItem('salaTokBase')||'null');}catch{TB=null;}
+function tbSpent(s){const t=s.tokens;if(!t||!t.ready)return 0;if(!(s.id in TB.base))return t.total;let b=TB.base[s.id];
+  if(b==null){b=TB.base[s.id]=t.total;tbSave();}return Math.max(0,t.total-b);}
+const hhmm=ms=>new Date(ms).toTimeString().slice(0,5);
+const projName=s=>{const p=S.projects.find(x=>x.path===s.project);return p?p.name:(s.cwd||'').split('/').pop();};
+
+/* ===== barra do topo: cada indicador abre um painel suspenso (um por vez) ===== */
+let POP=null;
+const popEl=document.getElementById('pop');
+const stDot={active:'on',approval:'ap',waiting:'wt',idle:'off'};
+const prow=(dot,name,sub,val,attrs)=>`<div class="pr${attrs?' click':''}" ${attrs||''}><i class="d ${dot}"></i><div class="pt"><b>${esc(name)}</b>${sub?`<small>${esc(sub)}</small>`:''}</div><span class="pv">${val||''}</span></div>`;
+const phead=(title,meta)=>`<header><b>${title}</b><span>${meta||''}</span></header>`;
+const pempty=t=>`<div class="pe">${t}</div>`;
+function agentsWhere(pred){const out=[];S.sessions.filter(s=>!s.is_sala).forEach(s=>s.agents.filter(pred).forEach(a=>out.push({s,a})));return out;}
+const POPS={
+  sess(){const ss=S.sessions.filter(s=>!s.is_sala).sort((a,b)=>(stateOfSession(b)==='active')-(stateOfSession(a)==='active'));
+    return phead('Sessões abertas',ss.length)+`<div class="pl">${ss.map(s=>{const st=stateOfSession(s);return prow(stDot[st],s.name||projName(s),projName(s)+' · '+s.agents.length+' agente'+(s.agents.length===1?'':'s'),stateWord[st],`data-sess="${esc(s.id)}"`);}).join('')||pempty('Nenhuma sessão aberta.')}</div>
+      <footer><span><i class="d on"></i>ativo</span><span><i class="d wt"></i>aguardando</span><span><i class="d off"></i>parado</span><span><i class="d ap"></i>precisa de você</span></footer>
+      <footer class="tip2">Arraste o mapa · role para zoom · duplo clique no fundo recentra</footer>`;},
+  work(){const xs=agentsWhere(a=>a.state==='active'||a.state==='approval').sort((x,y)=>(y.a.state==='approval')-(x.a.state==='approval'));
+    const busy=S.sessions.filter(s=>!s.is_sala&&s.status==='busy'&&!s.agents.some(a=>a.state==='active'));
+    return phead('Agentes ativos',xs.length+' de '+(S.counts.agents||0))+`<div class="pl">${xs.map(({s,a})=>prow(stDot[a.state],a.name,shortName(projName(s))+' · '+(a.tool?a.tool[0]+' '+a.tool[1]:(a.now||a.type||'')),stateWord[a.state],`data-sid="${esc(s.id)}" data-agent="${esc(a.name)}"`)).join('')}
+      ${busy.map(s=>prow('on',s.name||projName(s),'sessão · '+(s.tool?s.tool[0]+' '+s.tool[1]:'trabalhando'),'líder',`data-sess="${esc(s.id)}"`)).join('')}
+      ${!xs.length&&!busy.length?pempty('Nenhum agente trabalhando agora.'):''}</div>`;},
+  wait(){const xs=agentsWhere(a=>a.state==='approval'),bl=S.sessions.filter(s=>s.state==='blocked');
+    return phead('Precisam de você',xs.length+bl.length)+`<div class="pl">${xs.map(({s,a})=>prow('ap',a.name,shortName(projName(s))+' · '+(a.now||''),'decidir',`data-sid="${esc(s.id)}" data-agent="${esc(a.name)}"`)).join('')}${bl.map(s=>prow('ap',s.name||projName(s),projName(s)+' · sessão aguardando você','decidir',`data-sess="${esc(s.id)}"`)).join('')}${!xs.length&&!bl.length?pempty('Nada esperando uma decisão sua.'):''}</div>`;},
+  feed(){const dk={dispatch:'ap',approval:'ap',done:'ok',user:'ap',start:'on'};
+    return phead('Atividade recente',FEED.length?'últimos '+FEED.length:'')+`<div class="pl">${FEED.slice().reverse().map(e=>prow(dk[e.kind]||'off',(e.who||'')+' '+(e.what||''),e.where,fmtTime(e.ep).slice(0,5))).join('')||pempty('Sem atividade desde que o painel abriu.')}</div>`;},
+  tok(){const rows=S.sessions.map(s=>({s,v:tbSpent(s)})).filter(r=>r.v>0).sort((a,b)=>b.v-a.v),tot=rows.reduce((a,r)=>a+r.v,0),mx=Math.max(1,...rows.map(r=>r.v)),rate=S.counts.tokens_rate||0;
+    return phead('Tokens','desde '+hhmm(TB.at))+`<div class="pk"><b>${fmtTok(tot)}</b><span>${rate?fmtTok(rate)+' / min agora':'parado agora'}</span><button class="rst" id="tokRst">Zerar contagem</button></div>
+      <div class="pl">${rows.map(r=>{const t=r.s.tokens,c=TK_COL[t.level]||TK_COL.ok;return `<div class="pr click tk" data-sess="${esc(r.s.id)}"><div class="pt"><b>${esc(r.s.name||projName(r.s))}</b><small>${esc(projName(r.s))} · contexto <em style="color:${c}">${fmtTok(t.ctx)}</em></small><span class="bar"><i style="width:${Math.max(2,Math.round(r.v/mx*100))}%"></i></span></div><span class="pv">${fmtTok(r.v)}</span></div>`;}).join('')||pempty('Nenhum gasto desde a última vez que zerou.')}</div>
+      <footer class="tip2">Líder + agentes. Contexto em amarelo acima de 200k e em vermelho acima de 400k: vale compactar.</footer>`;}
+};
+function renderPop(){document.querySelectorAll('.m[data-pop]').forEach(b=>b.classList.toggle('on',b.dataset.pop===POP));
+  if(!POP||!S){popEl.classList.remove('on');return;}
+  const html=POPS[POP]();if(popEl.innerHTML!==html)popEl.innerHTML=html;popEl.classList.add('on');
+  const r=document.querySelector(`.m[data-pop="${POP}"]`).getBoundingClientRect(),w=popEl.offsetWidth;popEl.style.left=Math.max(16,Math.min(innerWidth-w-16,r.right-w))+'px';}
+document.querySelectorAll('.m[data-pop]').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();POP=POP===b.dataset.pop?null:b.dataset.pop;renderPop();}));
+document.addEventListener('click',()=>{if(POP){POP=null;renderPop();}});
+addEventListener('keydown',e=>{if(e.key==='Escape'&&POP){POP=null;renderPop();}});
+popEl.addEventListener('click',e=>{e.stopPropagation();if(e.target.id==='tokRst'){tbReset();updateStats();return;}
+  const r=e.target.closest('[data-sess],[data-agent]');if(!r)return;const n=r.dataset.agent?findAgentNode(r.dataset.sid,r.dataset.agent):nodes.get('s:'+r.dataset.sess);if(n){POP=null;renderPop();open(n);}});
+function updateStats(){const c=S.counts||{};if(!TB)tbReset();
+  sSess.textContent=c.sessions||0;sWork.innerHTML=(c.active||0)+'<em> / '+(c.agents||0)+'</em>';mWork.classList.toggle('act',(c.active||0)>0);
+  sWait.textContent=c.approval||0;mWait.classList.toggle('hot',(c.approval||0)>0);
+  sTok.textContent=fmtTok(S.sessions.reduce((a,s)=>a+tbSpent(s),0));sTokK.textContent='Tokens · desde '+hhmm(TB.at);
+  clock.textContent='ao vivo · '+(S.generated||'').slice(11,16);renderPop();}
 
 /* ===================== DRAWER ===================== */
 const stateWord={active:'ativo',approval:'precisa de você',waiting:'aguardando',idle:'parado'};

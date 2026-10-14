@@ -352,6 +352,15 @@ def collect(root):
                 if cwd.startswith(p + "/"):
                     sess["project"] = p
                     break
+        # sessão numa pasta fora da raiz (ex.: outro negócio no Drive): vira projeto "fora da raiz"
+        # para os agentes dela aparecerem no mapa em vez de sumirem
+        if not sess["project"] and cwd and not is_sala and os.path.isdir(cwd):
+            sm = os.path.isfile(os.path.join(cwd, "docs", "smart-memory", "INDEX.md"))
+            projects[cwd] = {"path": cwd, "name": os.path.basename(cwd), "business": os.path.basename(os.path.dirname(cwd)),
+                             "kind": "external", "squads": [], "agents_installed": 0, "smart_memory": sm,
+                             "stage": "fora da raiz do Command Center", "summary": "", "backlog_open": "",
+                             "last_touch": "", "sessions": []}
+            sess["project"] = cwd
         if team_name:
             msgs = inbox_messages(team_name, now - 3600)
             for m in msgs:

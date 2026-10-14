@@ -144,12 +144,15 @@ def summary(main_jsonl):
     register(main_jsonl)
     lead = _read(main_jsonl)
     agents = {}
+    all_ready = True                              # só "pronto" quando líder E todos os agentes já foram lidos
     sub = main_jsonl[:-len(".jsonl")] + "/subagents"
     for p in glob.glob(os.path.join(sub, "*.jsonl")):
         register(p)
         r = _read(p)
         if not r:
+            all_ready = False
             continue
+        all_ready = all_ready and r["ready"]
         name = _agent_name(p)
         a = agents.setdefault(name, {"name": name, "new": 0, "reread": 0, "total": 0, "rate": 0, "ctx": 0})
         for k in ("new", "reread", "total", "rate"):
@@ -160,7 +163,7 @@ def summary(main_jsonl):
         return {"ready": False, "total": 0, "new": 0, "reread": 0, "rate": 0, "ctx": 0, "level": "ok",
                 "lead": None, "agents": [], "agents_total": 0}
     a_total = sum(a["total"] for a in ag)
-    return {"ready": lead["ready"], "total": lead["total"] + a_total,
+    return {"ready": lead["ready"] and all_ready, "total": lead["total"] + a_total,
             "new": lead["new"] + sum(a["new"] for a in ag), "reread": lead["reread"] + sum(a["reread"] for a in ag),
             "rate": lead["rate"] + sum(a["rate"] for a in ag), "ctx": lead["ctx"], "level": level(lead["ctx"]),
             "lead": {"total": lead["total"], "new": lead["new"], "rate": lead["rate"], "ctx": lead["ctx"]},
