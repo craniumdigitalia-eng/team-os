@@ -4,6 +4,8 @@ Todas as mudanças relevantes deste repositório. Formato baseado em [Keep a Cha
 
 ## [Não lançado]
 
+## [2.4.0] — 2026-10-14
+
 ### Adicionado
 - **Squad `security` (7 agentes, personas nórdicas) + 4 skills `security-*`** — add-on de projetos com código (`--squads sites,security` ou `dev,security`), adaptada de `msitarzewski/agency-agents` (MIT, ver `THIRD_PARTY_NOTICES.md`). Audita, prioriza e especifica a correção. **Nunca** edita o código (dev/sites corrige), **nunca** rotaciona credencial nem executa contenção em produção (usuário/devops), **nunca** testa contra terceiro (teste ativo só em local/staging com escopo escrito).
   - **Agentes:**
