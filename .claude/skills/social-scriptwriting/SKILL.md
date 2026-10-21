@@ -1,13 +1,13 @@
 ---
 name: social-scriptwriting
 description: "Roteiros para vídeo curto (Reels, TikTok, Shorts, Stories) — 3 ganchos de fórmulas diferentes com nota 0–100, fala e texto de tela como roteiros separados, zona segura, uma ideia por vídeo, loop final e nada de número inventado. Use ao roteirizar vídeo curto, escolher o gancho, definir timing de cenas ou escrever texto em tela e narração."
-version: "1.2"
+version: "1.3"
 updated: "2026-10-20"
 ---
 
 # Social Scriptwriting — Roteiros para Vídeo Curto
 
-> Skill injetada no agente LYRIS (social-content). Núcleo comum a vídeo vertical curto; o que só vale para o Instagram está na seção **Instagram** no fim. Fórmulas de gancho em `reference/ganchos.md`.
+> Skill injetada nos agentes de conteúdo das squads de plataforma (`<plataforma>-content` — ex.: LYRIS, instagram-content). Núcleo comum a vídeo vertical curto; o que só vale para o Instagram está na seção **Instagram** no fim. Fórmulas de gancho em `reference/ganchos.md`.
 
 ## 1. Antes de escrever
 

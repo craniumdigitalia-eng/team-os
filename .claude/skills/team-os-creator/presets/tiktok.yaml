@@ -1,0 +1,25 @@
+name: tiktok
+description: Squad de TikTok orgânico (3 agentes). Estratégia, pauta e gate com janela de sons (~48h), tendências e roteiro nativo, pacote de upload para o usuário subir e leitura do export de métricas. Produção de vídeo, capa e imagem vem do estúdio social sob brief. Pago e Spark Ads ficam com o traffic-tiktok.
+project_archetypes: [social-media, content-marketing, short-video]
+agents:
+  - name: tiktok-strategist
+    archetype: strategist
+    persona: RIFF
+    role_title: Estrategista TikTok
+    description: "RIFF, estrategista e gate da squad TikTok (orgânico). Define pilares, pauta e séries, decide sons dentro da janela de ~48h e emite PASS/CONCERNS/FAIL antes do pacote de upload. Nunca escreve roteiro nem publica."
+    color: purple
+    skills: [tiktok-marketing, tiktok-publishing, social-editorial-validation, social-format-specs]
+  - name: tiktok-content
+    archetype: implementer
+    persona: BEAT
+    role_title: Conteúdo TikTok
+    description: "BEAT, criador de conteúdo da squad TikTok. Pesquisa tendências e sons, propõe a pauta, escreve roteiro nativo, texto de tela e legenda e manda o brief ao estúdio social depois do PASS."
+    color: yellow
+    skills: [tiktok-marketing, social-scriptwriting, social-copywriting, social-apify-research]
+  - name: tiktok-publisher
+    archetype: implementer
+    persona: LOOP
+    role_title: Publicação e Métricas TikTok
+    description: "LOOP, publicação e métricas da squad TikTok. Monta o pacote de upload (arquivo, legenda, som, capa, rótulo de IA, horário) para o usuário subir e lê o export de métricas. Só com PASS da tiktok-strategist e confirmação do usuário; nunca impulsiona."
+    color: green
+    skills: [tiktok-publishing, tiktok-marketing, social-analytics]

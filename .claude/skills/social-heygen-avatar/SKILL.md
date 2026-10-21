@@ -1,8 +1,8 @@
 ---
 name: social-heygen-avatar
 description: "Geração de vídeo com avatar AI via HeyGen — talking-head, image-to-video, dublagem multilíngue e seleção de voz. Use ao criar vídeo com apresentador virtual, transformar imagem em vídeo, dublar conteúdo para outros idiomas ou escolher avatar e voz para campanha."
-version: "1.0"
-updated: "2026-09-04"
+version: "1.1"
+updated: "2026-10-20"
 ---
 
 # Social HeyGen Avatar — Vídeo com Avatar AI
@@ -31,7 +31,7 @@ Se o MCP sumir num run headless e não houver key, **pare e avise o lead**.
 | Modo | Tool | Quando |
 |---|---|---|
 | **Prompt → vídeo** | `create_video_agent` | Caminho recomendado. Texto descritivo vira vídeo completo. Modo `generate` para one-shot. |
-| **Avatar + roteiro** | `create_video_from_avatar` | Controle explícito de `avatar_id` + `voice_id` + script do LYRIS. |
+| **Avatar + roteiro** | `create_video_from_avatar` | Controle explícito de `avatar_id` + `voice_id` + roteiro aprovado da `<plataforma>-content`. |
 | **Animar imagem** | `create_video_from_image` | Dá vida a Key Visual (AEON) ou foto (IRIS) com script/áudio. |
 
 > `create_video_agent` em `mode: "generate"` para one-shot. **Nunca** deixar em
@@ -42,7 +42,7 @@ Se o MCP sumir num run headless e não houver key, **pare e avise o lead**.
 
 1. **Descobrir assets** — `list_avatar_looks` / `list_voices` (filtrar por idioma/tom).
    Se a campanha tem avatar fixo, reusar o `avatar_id`/`voice_id` salvos na smart-memory.
-2. **Roteiro** — usar o copy do LYRIS (`social-media/campaigns/{id}/copy/`). Texto
+2. **Roteiro** — usar o roteiro aprovado da `<plataforma>-content` (`social-media/campaigns/{id}/copy/`). Texto
    curto: hook nos 3s, frases faladas curtas.
 3. **Aspect ratio** — social = **9:16** (`portrait`). Pedir vertical na criação;
    se vier 16:9, FLUX corrige no ffmpeg (`scale=1080:1920...crop`).
@@ -52,7 +52,7 @@ Se o MCP sumir num run headless e não houver key, **pare e avise o lead**.
 6. **Pós** — baixar o `.mp4`, passar pelo FLUX (legendas `.srt` SEMPRE, música,
    compressão por plataforma) e arquivar em
    `social-media/campaigns/{id}/assets/videos/exports/`.
-7. **Notificar VERA** para validação editorial antes de publicar.
+7. **Notificar o lead** para o gate do estrategista da plataforma (`<plataforma>-strategist`) antes de publicar — o estúdio nunca aprova nem publica.
 
 ## Voz
 

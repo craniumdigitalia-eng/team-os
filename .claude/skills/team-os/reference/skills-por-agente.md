@@ -23,7 +23,7 @@ team-os SEMPRE inclui no spawn prompt as skills relevantes para cada tipo de age
 | **sites-dev-gamma** | `/sites-copy`, `/sites-page-cro`, `/sites-seo-technical`, `/traffic-analytics-tracking` |
 | **sites-ux** | `/sites-ux-interaction`, `/sites-copy`, `/ui-ux-pro-max`, `/accessibility` |
 | **sites-qa** | `/dev-security-patterns`, `/dev-testing-strategy`, `/testing-playwright-e2e`, `/web-design-guidelines`, `/sites-seo-technical`, `/accessibility` |
-| **social-content** | `/social-copywriting`, `/social-editorial-validation`, `/social-format-specs` |
+| **instagram-content** | `/social-copywriting`, `/instagram-dm-flows`, `/social-editorial-validation`, `/social-format-specs` |
 | **social-design** | `/social-key-visual`, `/social-carousel-design` |
 | **traffic-strategist** | `/traffic-paid-ads-optimization`, `/tiktok-marketing` |
 | **traffic-google** | `/traffic-google-ads-mcp`, `/traffic-paid-ads-optimization` |

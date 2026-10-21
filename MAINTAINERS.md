@@ -21,6 +21,7 @@ Para virar mantenedor numa máquina, basta criar o arquivo vazio: `touch .team-o
 4. test-hooks.sh                → todos os casos dos hooks
    test-update.sh               → teste do *update (se mexeu em update/manifest/propagação)
    test-propagate.sh            → teste do *install/*propagate (precisa de rsync)
+   test-migrate-social.sh       → teste da migração social → squads por plataforma
 5. generate-agents-page.py      → regenera docs/agentes.html
 6. pack-manifest.sh             → regenera pack-manifest.json (o CI confere com --check)
 7. CHANGELOG.md                 → descrever em "## [Não lançado]" (Adicionado / Alterado / Corrigido)

@@ -33,8 +33,8 @@ Pipeline da `SKILL.md`: EDL → trechos com `afade` → concat → overlays com 
 ## 7. Entrega
 
 - **Poster como frame 0:** escolha o frame mais forte e *assentado* (texto já parado, fora de transição), salve como `poster.jpg` e substitua o frame 0 do vídeo por ele — substituir, não acrescentar, para não mexer em duração e sincronia.
-- **Texto para postar:** legenda curta + CTA, na voz aprovada, para LYRIS (social-content) revisar.
-- Arquivos em `social-media/campaigns/{id}/assets/videos/exports/` e aviso a VERA.
+- **Texto para postar:** legenda curta + CTA, na voz aprovada, para a `<plataforma>-content` (ex.: LYRIS, instagram-content) revisar.
+- Arquivos em `social-media/campaigns/{id}/assets/videos/exports/` e aviso ao lead para o gate do estrategista da plataforma.
 
 ## Proibições
 

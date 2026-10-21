@@ -1,13 +1,13 @@
 ---
 name: social-copywriting
 description: "Copywriting para redes sociais — legenda Job A × Job B, linha visível antes do \"mais\", termos de busca no texto, uma ação por post, keyword de CTA, hashtags enxutas e alt text. Use ao escrever legendas, ganchos de texto, CTAs ou adaptar tom e formato da copy para Instagram, TikTok, LinkedIn e outras plataformas."
-version: "1.2"
+version: "1.4"
 updated: "2026-10-20"
 ---
 
 # Social Copywriting — Legendas e Copy
 
-> Skill injetada no agente LYRIS (social-content). Núcleo comum a todas as plataformas; o que só vale para o Instagram está na seção **Instagram** no fim.
+> Skill injetada nos agentes de conteúdo das squads de plataforma (`<plataforma>-content` — ex.: LYRIS, instagram-content). Núcleo comum a todas as plataformas; o que só vale para uma plataforma está nas seções **Instagram** e **LinkedIn** no fim.
 
 ## 1. Antes de escrever: qual é o trabalho desta legenda?
 
@@ -94,7 +94,7 @@ link:       1º comentário (texto abaixo)
 alt text:   "..."
 ```
 
-Nada é publicado aqui: a peça segue para validação (`/social-editorial-validation`) e o usuário/PULSE publica.
+Nada é publicado aqui: a peça segue para validação (`/social-editorial-validation`) e o publisher da plataforma (ex.: PULSE, instagram-publisher) publica com PASS do estrategista da plataforma e confirmação do usuário.
 
 ## Instagram
 
@@ -104,3 +104,14 @@ Nada é publicado aqui: a peça segue para validação (`/social-editorial-valid
 - Keyword de CTA costuma alimentar automação de DM (ManyChat): a palavra precisa bater exatamente com a configurada e ser falada no Reel.
 - Link: bio, 1º comentário ou DM. Nunca na legenda.
 - Alt text: campo "Configurações avançadas → Acessibilidade" ao publicar.
+
+## LinkedIn
+
+- **2–3 primeiras linhas antes do "ver mais".** O corte varia por dispositivo (celular corta antes do desktop): escreva a abertura para funcionar mesmo cortada na 2ª linha e confira na pré-visualização antes de entregar.
+- **Limite de 3.000 caracteres**; corpo de referência **1.000–1.300**. Passou disso, considere documento PDF ou artigo.
+- **Perfil pessoal × página da empresa:** perfil em 1ª pessoa ("eu"), com opinião e experiência; página em "nós". Se a mesma ideia vai para os dois, entregue **duas versões** — nunca o mesmo texto colado nos dois lugares.
+- **Link:** no corpo ou no 1º comentário, conforme a estratégia da `linkedin-strategist`. Tratar como **hipótese a testar** (registrar qual opção foi usada e ler o resultado), não como regra fixa.
+- **Hashtags:** poucas e específicas do assunto, ou nenhuma. Nada de bloco genérico no fim.
+- **Documento PDF (carrossel):** a legenda complementa o documento — contexto, por que ler, pergunta — sem repetir o que está nas páginas.
+- **Comentário estratégico** (em post de outra pessoa): 2–4 frases que acrescentam um dado, uma experiência ou uma discordância fundamentada; sem link e sem pitch. Entregue como texto pronto: quem posta é o usuário, à mão.
+- **Alt text** em toda imagem (campo de texto alternativo ao anexar a imagem).

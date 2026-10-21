@@ -1,13 +1,13 @@
 ---
 name: social-analytics
 description: "Análise de métricas de redes sociais — múltiplo de outlier sobre a mediana da conta, retenção em 3 s, envios e follows por alcance, KPIs por objetivo, rubrica de perfil e relatório. Use ao analisar performance de campanhas sociais, montar relatório de métricas, comparar resultados com benchmarks ou decidir ajustes de conteúdo com base em dados."
-version: "1.2"
+version: "1.3"
 updated: "2026-10-20"
 ---
 
 # Social Analytics — Métricas e Relatórios
 
-> Skill injetada no agente PULSE (social-publisher).
+> Skill injetada nos publishers das squads de plataforma (`<plataforma>-publisher` — ex.: PULSE, instagram-publisher), fonte dos números orgânicos; números pagos são do traffic-bi.
 
 Núcleo comum a todas as plataformas; o que só vale para o Instagram está na seção **Instagram** no fim. Rubrica de perfil em `reference/perfil-rubrica.md`.
 

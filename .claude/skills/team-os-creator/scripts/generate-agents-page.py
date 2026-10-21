@@ -31,10 +31,17 @@ if "--photos" in args: PHOTOS = args[args.index("--photos") + 1]
 if "--out" in args: OUT = args[args.index("--out") + 1]
 CHECK = "--check" in args
 
-SQUADS = [
+# Squads = campo `name:` de cada presets/*.yaml (presets/custom/ fica de fora) — nunca lista à mão.
+# SQUAD_META só dá rótulo, subtítulo e ORDEM de exibição; squad nova sem meta entra no fim, com
+# rótulo = nome e subtítulo = 1ª frase da description do preset.
+SQUAD_META = [
     ("dev", "Dev", "Fullstack SaaS — da arquitetura ao deploy"),
     ("sites", "Sites", "Websites e landing pages — SEO, CRO, performance"),
-    ("social", "Social", "Social media — copy, design, foto, vídeo, publicação"),
+    ("social", "Social", "Estúdio comum — design, foto e vídeo sob brief de uma squad de plataforma; nunca aprova nem publica"),
+    ("instagram", "Instagram", "Instagram, Facebook e Threads — estratégia e gate, conteúdo e DM, publicação via Meta"),
+    ("tiktok", "TikTok", "TikTok orgânico — pauta e gate, roteiro nativo, pacote de upload e leitura de métricas"),
+    ("youtube", "YouTube", "YouTube — pauta e gate, roteiro, pacote (título, thumb, capítulos) e leitura do canal"),
+    ("linkedin", "LinkedIn", "LinkedIn orgânico — pauta B2B e gate, posts, documentos e artigos, pacote de publicação"),
     ("traffic", "Traffic", "Tráfego pago — Google, Meta, TikTok, BI e atribuição"),
     ("pm", "PM", "Gestão de projetos — sprints, dailies, portfólio"),
     ("sales", "Sales", "Propostas e apresentações — discovery, tese, números, copy, PDF, QA, fechamento"),
@@ -44,6 +51,45 @@ SQUADS = [
     ("seo", "SEO", "Auditoria e otimização de busca — técnico, conteúdo, schema, sitemap/i18n, CWV, GEO/AI search, SXO, clusters, local, backlinks, e-commerce, dados Google, drift, QA"),
     ("security", "Security", "Segurança de aplicação — modelo de ameaças, appsec, código gerado por IA e apps com LLM, credenciais, privacidade no código, incidente, QA"),
 ]
+
+
+def load_squads():
+    """[(nome, rótulo, subtítulo)] das squads do pack, derivadas de presets/*.yaml."""
+    pdir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "presets")
+    found = {}
+    try:
+        names = sorted(os.listdir(pdir))
+    except OSError:
+        names = []
+    for fn in names:
+        if not fn.endswith(".yaml"):
+            continue
+        try:
+            text = open(os.path.join(pdir, fn), encoding="utf-8").read()
+        except OSError:
+            continue
+        m = re.search(r"^name:\s*[\"']?([a-z][a-z0-9]*)[\"']?\s*$", text, re.M)
+        if not m:
+            continue
+        d = re.search(r"^description:\s*(.+)$", text, re.M)
+        found[m.group(1)] = d.group(1).strip().strip("\"'") if d else ""
+    meta = {s: (label, sub) for s, label, sub in SQUAD_META}
+    if not found:  # fallback seguro: sem presets legíveis, usa a ordem/meta conhecida
+        return list(SQUAD_META)
+    order = [s for s, _, _ in SQUAD_META if s in found] + sorted(s for s in found if s not in meta)
+    out = []
+    for s in order:
+        label, sub = meta.get(s, (s.capitalize(), first_sentence_plain(found[s])))
+        out.append((s, label, sub))
+    return out
+
+
+def first_sentence_plain(text):
+    s = re.split(r"(?<=[.!?])\s", (text or "").strip())[0]
+    return s if len(s) <= 160 else s[:157] + "…"
+
+
+SQUADS = load_squads()
 
 # Resumo em PT por agente (linha principal do card). Agente ausente → 1ª frase da description.
 RESUMOS_PT = {
@@ -69,13 +115,12 @@ RESUMOS_PT = {
     "sites-devops": "Release de sites. Autoridade exclusiva de push, PRs e deploys Vercel/Netlify.",
     "sites-qa": "QA de sites: veredictos formais, acessibilidade, qualidade de copy, SEO e performance.",
     "sites-ux": "UX de sites: research, fluxos, wireframes, specs visuais e a11y antes do alpha implementar.",
-    "social-analyst": "Research de social: tendências, concorrência, hashtags e benchmarks — entrega dados, outros decidem.",
-    "social-content": "Criador de conteúdo: research de mercado via Apify + copy (legendas, roteiros, hooks, hashtags).",
-    "social-design": "Designer gráfico da squad: key visuals, carrosséis, templates e overlays via Google Stitch.",
-    "social-photo": "Fotos AI via Freepik: capas, carrosséis, heroes e fundos cinematográficos.",
-    "social-publisher": "Publica (via Meta) e analisa métricas — só depois da aprovação da VERA E confirmação do usuário.",
-    "social-strategist": "Estrategista e validadora editorial. Nunca cria — valida e direciona; aprovação obrigatória antes de publicar.",
-    "social-video": "Editor de vídeo: Reels, Stories, TikToks com ffmpeg + avatar AI e dublagem via HeyGen.",
+    "social-design": "Designer gráfico do estúdio: key visuals, carrosséis, templates e overlays via Google Stitch — sob brief de uma squad de plataforma.",
+    "social-photo": "Fotos AI via Freepik: capas, carrosséis, heroes e fundos cinematográficos — sob brief de uma squad de plataforma.",
+    "social-video": "Editor de vídeo do estúdio: Reels, Shorts, TikToks com ffmpeg + avatar AI e dublagem via HeyGen — sob brief, nunca publica.",
+    "instagram-strategist": "Estrategista e validadora editorial do Instagram. Nunca cria — valida e direciona; PASS obrigatório antes de publicar.",
+    "instagram-content": "Conteúdo do Instagram: pesquisa via Apify, copy (legendas, roteiros, ganchos), fluxos de DM e triagem de comentários.",
+    "instagram-publisher": "Publica no Instagram, Facebook e Threads via Meta e lê as métricas — só com PASS da VERA E confirmação do usuário; nunca impulsiona.",
     "brand-analyst": "Audita a marca como ela é hoje, mapeia concorrentes e territórios, sintetiza públicos — toda afirmação com fonte. Entrega evidência; outros decidem.",
     "brand-strategist": "Escreve a plataforma de marca e a postura do reposicionamento; gate da plataforma e da direção de identidade. Nunca escreve a peça.",
     "brand-architect": "Arquitetura de marca (marca-mãe, sub-marcas, marca pessoal, sistema de nomes) e autoridade exclusiva das stories do reposicionamento.",
@@ -227,7 +272,7 @@ def load_skill_map(skills):
     """Última célula das linhas de agente nas tabelas §5 do README + skills novas curadas."""
     amap = {}
     for row in open(os.path.join(ROOT, "README.md")).read().splitlines():
-        m = re.match(r"^\|\s*`((?:dev|sites|social|traffic|pm|sales)-[a-z-]+)`\s*\|", row)
+        m = re.match(r"^\|\s*`((?:" + "|".join(s for s, _, _ in SQUADS) + r")-[a-z-]+)`\s*\|", row)
         if not m:
             continue
         last = row.rstrip("|").rsplit("|", 1)[-1]

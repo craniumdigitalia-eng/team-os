@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # install-to-project.sh — instala agentes e skills do projeto fonte em um projeto destino
 # Skills instaladas = união de: citadas no body dos agentes instalados (`/skill` ou skill `x`),
-# team-os (sempre), --extra-skills, prefixo da squad ({dev,sites,…,seo,security}-*), e as já presentes
+# team-os (sempre), --extra-skills, prefixo da squad (<squad>-*, squads lidas de presets/*.yaml), e as já presentes
 # no destino (mantidas atualizadas). Copiadas se ausentes, ATUALIZADAS (arquivo por arquivo) se o
 # conteúdo difere — menos o que o usuário editou no destino (vira CONFLICT, ver --on-conflict).
 # Skills e arquivos extras no destino são preservados. team-os-creator nunca vai para o destino.
@@ -12,7 +12,10 @@
 # Usage: install-to-project.sh --source <path> --target <path> [options]
 #
 # Options:
-#   --squads dev,sites,social,traffic   squads a instalar (default: all)
+#   --squads dev,sites,instagram        squads a instalar (default: all). Squads do pack = campo
+#                                       `name:` de presets/*.yaml (presets/custom/ fora). O estúdio
+#                                       `social` sem squad de plataforma (instagram, tiktok, youtube,
+#                                       linkedin) instala, mas avisa: WARN=studio_without_platform
 #   --squads none                       modo Sala de Controle: nenhum agente, nenhuma skill geral,
 #                                       sem team-os/hooks/settings — só o que vier em --extra-skills
 #                                       (+ CLAUDE.md mínimo se não existir)
@@ -28,6 +31,9 @@
 #                                       context-watch.sh são
 #                                       SEMPRE instalados)
 #   --dry-run                           simula sem copiar nada
+#   (com --match-target-squads)         agente do destino que saiu do pack (registrado ou no histórico
+#                                       do CT, sem `origin: custom`) sai como ORPHAN_AGENT=<nome>|… —
+#                                       nunca é removido; social-* → rode migrate-social-split.sh
 #   --custom <nome1,nome2|all>          instala também agentes PRÓPRIOS do CT (`origin: custom`,
 #                                       registrados em presets/custom/*.yaml), fora do filtro por
 #                                       squad. Com --match-target-squads os próprios que já existem
@@ -65,6 +71,23 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 #   sala-de-controle = roteia entre sessões do Claude Code · maestri-os = roteia entre terminais do Maestri
 CONTROL_ROOM_SKILLS="sala-de-controle maestri-os"
 is_cr_skill() { case " $CONTROL_ROOM_SKILLS " in *" $1 "*) return 0 ;; esac; return 1; }
+
+# Squads do pack — derivadas do campo `name:` de cada presets/*.yaml (presets/custom/ fica de
+# fora: agente próprio segue a regra do prefixo, mas não vira squad do pack). Sem presets
+# legíveis, cai na lista fixa abaixo (fallback seguro). Nunca escreva a lista à mão em outro lugar.
+PACK_SQUADS_FALLBACK="dev sites social instagram tiktok youtube linkedin traffic pm sales brand finance legal seo security"
+# Squads de PLATAFORMA social: dão gate (estrategista) e publicação ao estúdio `social`.
+PLATFORM_SQUADS="instagram tiktok youtube linkedin"
+pack_squads() { # $1=raiz do CT → squads separadas por espaço
+  local out="" y n
+  for y in "$1/.claude/skills/team-os-creator/presets/"*.yaml; do
+    [ -f "$y" ] || continue
+    n=$(sed -n 's/^name:[[:space:]]*["'\'']\{0,1\}\([a-z][a-z0-9]*\)["'\'']\{0,1\}[[:space:]]*$/\1/p' "$y" | head -1)
+    [ -n "$n" ] && case " $out " in *" $n "*) ;; *) out="$out $n" ;; esac
+  done
+  if [ -n "$out" ]; then echo "${out# }"; else echo "$PACK_SQUADS_FALLBACK"; fi
+}
+in_list() { case " $2 " in *" $1 "*) return 0 ;; esac; return 1; }
 has_cr_skill() { # $1=pasta — tem alguma skill de Sala instalada?
   for crs in $CONTROL_ROOM_SKILLS; do [ -d "$1/.claude/skills/$crs" ] && return 0; done; return 1
 }
@@ -190,6 +213,45 @@ fi
 if [ "$SQUADS" = "all" ] && [ $MATCH_TARGET -eq 0 ]; then
   echo "ERROR=squads_all_without_match_target|--squads default é 'all', o que re-instalaria TODAS as squads e desfaria podas por categoria. Passe --match-target-squads (deriva as squads do destino) ou --squads <categoria> explícito (ex: --squads social)." >&2
   exit 1
+fi
+
+PACK_SQUADS="$(pack_squads "$SOURCE")"
+
+# Agentes órfãos (só no *propagate): agente do destino com prefixo de squad do pack que JÁ foi do
+# pack (registrado no .team-os/installed.json ou presente no histórico git do CT) e não existe mais
+# no CT. Nada é removido — só avisa. Agente próprio (`origin: custom`) e agente que o usuário criou
+# no destino nunca são órfãos. social-* órfão = squad social antiga → migrate-social-split.sh.
+if [ $MATCH_TARGET -eq 1 ] && [ $CONTROL_ROOM -eq 0 ] && [ -d "$TARGET/.claude/agents" ]; then
+  orphans=0
+  for ta in "$TARGET/.claude/agents/"*.md; do
+    [ -f "$ta" ] || continue
+    tn=$(basename "$ta" .md)
+    in_list "${tn%%-*}" "$PACK_SQUADS" || continue
+    [ -f "$SOURCE/.claude/agents/$tn.md" ] && continue
+    is_custom_agent "$ta" && continue
+    was_pack=0
+    grep -qF "\".claude/agents/$tn.md\"" "$TARGET/.team-os/installed.json" 2>/dev/null && was_pack=1
+    if [ $was_pack -eq 0 ] && [ -n "$(git -C "$SOURCE" log -1 --format=%h HEAD -- ".claude/agents/$tn.md" 2>/dev/null)" ]; then
+      was_pack=1
+    fi
+    [ $was_pack -eq 1 ] || continue
+    orphans=$((orphans + 1))
+    case "$tn" in
+      social-*) echo "ORPHAN_AGENT=$tn|saiu do pack (a social virou estúdio + squads de plataforma) — não foi removido; rode migrate-social-split.sh \"$TARGET\" (dry-run) para migrar sem ficar com dois gates" ;;
+      *)        echo "ORPHAN_AGENT=$tn|saiu do pack — não foi removido nem atualizado; revise e mova para .team-os/removed/ se não usa mais" ;;
+    esac
+  done
+  [ $orphans -gt 0 ] && echo "ORPHAN_AGENTS=$orphans"
+fi
+
+# Estúdio `social` (design, foto, vídeo) produz sob brief de uma squad de plataforma e nunca
+# aprova nem publica — sozinho não tem gate. Não bloqueia: só avisa.
+if [ "$SQUADS" != "all" ] && [ "$SQUADS" != "__none__" ] && in_csv social "$SQUADS"; then
+  has_platform=0
+  for ps in $PLATFORM_SQUADS; do in_csv "$ps" "$SQUADS" && { has_platform=1; break; }; done
+  if [ $has_platform -eq 0 ]; then
+    echo "WARN=studio_without_platform|a squad social é só o estúdio (design, foto, vídeo) e não aprova nem publica — instale também uma squad de plataforma (--squads social,instagram | tiktok | youtube | linkedin) para ter gate editorial e publicação."
+  fi
 fi
 
 echo "STATUS=starting"
@@ -319,7 +381,7 @@ fi
 #   (i)   citadas no body dos agentes instalados (`/nome-da-skill` ou skill `nome`)
 #   (ii)  team-os (sempre, salvo Sala de Controle)
 #   (iii) --extra-skills (opt-in)
-#   (iv)  prefixo da squad instalada ({dev,sites,…,seo,security}-*)
+#   (iv)  prefixo da squad instalada (<squad>-*, squads do pack lidas de presets/*.yaml)
 #   (+)   já presente no destino → mantida atualizada (propagate), nunca removida
 # Nunca: team-os-creator · sala-de-controle/maestri-os (só via --extra-skills ou já presente).
 # No dry-run cada skill sai com a origem: SKILL_ORIGIN=<skill>|<origem>.
@@ -382,12 +444,11 @@ for skill_path in "$SOURCE/.claude/skills"/*/; do
     # (iv) prefixo da squad instalada
     if [ -z "$origin" ] && [ "$SQUADS" != "all" ]; then
       skill_prefix="${skill_name%%-*}"
-      case "$skill_prefix" in
-        dev|sites|social|traffic|pm|sales|brand|finance|legal|seo|security)
-          for squad in $(echo "$SQUADS" | tr ',' ' '); do
-            [ "$skill_prefix" = "$squad" ] && { origin="prefixo da squad $squad"; break; }
-          done ;;
-      esac
+      if in_list "$skill_prefix" "$PACK_SQUADS"; then
+        for squad in $(echo "$SQUADS" | tr ',' ' '); do
+          [ "$skill_prefix" = "$squad" ] && { origin="prefixo da squad $squad"; break; }
+        done
+      fi
     elif [ -z "$origin" ] && [ "$SQUADS" = "all" ]; then
       origin="todas as squads"
     fi

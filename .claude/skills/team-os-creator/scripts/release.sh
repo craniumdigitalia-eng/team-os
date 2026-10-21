@@ -103,7 +103,7 @@ if [ "$DRY" = "1" ]; then
   step "converteria '## [Não lançado]' em '## [$VER] — $TODAY' e recriaria '## [Não lançado]' vazio"
   step "regeraria docs/agentes.html e pack-manifest.json"
   if [ "$SKIP_TESTS" != "1" ]; then
-    step "rodaria: validate-agent.sh · validate-agent.sh --skills · test-hooks.sh · test-update.sh · test-propagate.sh"
+    step "rodaria: validate-agent.sh · validate-agent.sh --skills · test-hooks.sh · test-update.sh · test-propagate.sh · test-migrate-social.sh"
   fi
   step "criaria o commit 'release: v$VER' e a tag anotada v$VER (locais)"
   echo "PUSH_COMMAND=git push origin main v$VER"
@@ -155,6 +155,7 @@ if [ "$SKIP_TESTS" != "1" ]; then
   run_check "test-hooks.sh"                bash "$HERE/test-hooks.sh"
   run_check "test-update.sh"               bash "$HERE/test-update.sh"
   run_check "test-propagate.sh"            bash "$HERE/test-propagate.sh"
+  run_check "test-migrate-social.sh"       bash "$HERE/test-migrate-social.sh"
   # os testes não podem ter mexido nos arquivos do release
   bash "$HERE/pack-manifest.sh" --check >/dev/null || fail "o manifest ficou desatualizado depois dos testes"
 fi

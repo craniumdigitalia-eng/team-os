@@ -78,7 +78,10 @@ PRESETS_DIR="$SKILLS_DIR/team-os-creator/presets"
 NTP_FILE="$SKILLS_DIR/team-os-creator/reference/native-teams-protocol.md"
 MCP_FILE="$SKILLS_DIR/team-os-creator/reference/mcp-servers.md"
 
-KNOWN_SQUADS="dev sites social traffic pm sales brand finance legal seo security"
+# Squads do pack: derivadas do `name:` de cada presets/*.yaml (logo abaixo, ao carregar os presets).
+# Esta lista é só o fallback seguro — usada se nenhum preset do pack for lido.
+KNOWN_SQUADS_FALLBACK="dev sites social instagram tiktok youtube linkedin traffic pm sales brand finance legal seo security"
+KNOWN_SQUADS=""
 COLOR_ENUM="red blue green yellow purple orange pink cyan"
 COLOR_LIMIT=7  # 8 cores do enum menos blue (reservada ao lead): acima disso repetição é inevitável
 PERMISSION_ENUM="default acceptEdits auto dontAsk bypassPermissions plan"
@@ -241,7 +244,11 @@ load_preset() {  # load_preset <arquivo.yaml> <pack|custom>
 for preset in "$PRESETS_DIR"/*.yaml; do
   [ -f "$preset" ] || continue
   load_preset "$preset" pack
+  sq="$(awk -F': *' '/^name:/{print $2; exit}' "$preset" | tr -d "\"' \r")"
+  [ -n "$sq" ] && { in_list "$sq" "$KNOWN_SQUADS" || KNOWN_SQUADS="${KNOWN_SQUADS:+$KNOWN_SQUADS }$sq"; }
 done
+[ -n "$KNOWN_SQUADS" ] || KNOWN_SQUADS="$KNOWN_SQUADS_FALLBACK"
+SQUAD_ALT="$(printf '%s' "$KNOWN_SQUADS" | tr ' ' '|')"   # alternância para regex (dev|sites|…)
 for preset in "$PRESETS_DIR"/custom/*.yaml; do
   [ -f "$preset" ] || continue
   load_preset "$preset" custom
@@ -537,7 +544,7 @@ validate() {
       warnings+=("cita persona '$cited_persona' para $cited_agent, mas o H1 atual dele é '$current_persona'")
     fi
   done <<EOF_CITES
-$(printf '%s\n' "$BODY" | grep -oE '[A-Z][A-Za-z+]+ \((dev|sites|social|traffic|pm|sales|brand|finance|legal|seo|security)-[a-z][a-z-]+\)' | sort -u)
+$(printf '%s\n' "$BODY" | grep -oE "[A-Z][A-Za-z+]+ \\(($SQUAD_ALT)-[a-z][a-z-]+\\)" | sort -u)
 EOF_CITES
   # (b) persona de OUTRA squad citada no body
   if [ -n "$SQUAD" ]; then

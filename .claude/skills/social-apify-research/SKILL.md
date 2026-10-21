@@ -1,13 +1,13 @@
 ---
 name: social-apify-research
 description: "Pesquisa de tendências e concorrentes via Apify MCP — referências escolhidas pelo múltiplo de outlier (views ÷ mediana da conta), contas comparáveis, hashtags e padrões de gancho, com limite de volume e respeito aos termos das plataformas. Use ao pesquisar tendências, analisar perfis concorrentes ou levantar referências antes de planejar conteúdo social."
-version: "1.1"
+version: "1.2"
 updated: "2026-10-20"
 ---
 
 # Social Apify Research — Pesquisa via Apify MCP
 
-> Skill injetada no agente LYRIS (social-content). Núcleo comum a todas as plataformas; o que só vale para o Instagram está na seção **Instagram** no fim.
+> Skill injetada nos agentes de conteúdo das squads de plataforma (`<plataforma>-content` — ex.: LYRIS, instagram-content). Núcleo comum a todas as plataformas; o que só vale para o Instagram está na seção **Instagram** no fim.
 
 ## 1. Limite de volume e termos de uso (ler antes de rodar)
 

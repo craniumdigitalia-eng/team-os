@@ -23,6 +23,7 @@ HAS_BRANDING=0
 HAS_FINANCE=0
 HAS_LEGAL=0
 HAS_SEO=0
+HAS_SOCIAL=0
 HAS_PACKAGE=0
 [ -f "package.json" ] && HAS_PACKAGE=1
 
@@ -117,6 +118,16 @@ if [ "${BRANDING_HITS:-0}" -ge 2 ] && [ "${PROPOSAL_CORE_HITS:-0}" -lt 1 ] && [ 
   HAS_BRANDING=1
 fi
 
+# Social signals — workspace de conteúdo para redes (sem código): Reels, carrosséis, Stories,
+# roteiros, legendas, thumbnails, calendário editorial, pastas por plataforma. O nome da pasta
+# (Marketing, Social, Instagram, Conteúdo, Redes Sociais…) soma 2. Exige ≥2 sinais, nenhum sinal
+# nuclear de proposta, sem código e mais sinais de social que de marca (pasta de marca também tem
+# key visual e logo). Sugere o estúdio `social` + a squad de plataforma `instagram` (a mais comum);
+# troque por tiktok/youtube/linkedin se o projeto for de outra rede.
+BASENAME_SOC=$(basename "$(pwd)" | tr '[:upper:]' '[:lower:]' | sed 's/[áàâã]/a/g; s/[éê]/e/g; s/í/i/g; s/[óôõ]/o/g; s/ú/u/g; s/ç/c/g')
+SOCIAL_HITS=$(find . -maxdepth 3 \( -iname "*reels*" -o -iname "*carrossel*" -o -iname "*carrosseis*" -o -iname "*carrosséis*" -o -iname "*carousel*" -o -iname "*stories*" -o -iname "*instagram*" -o -iname "*tiktok*" -o -iname "*youtube*" -o -iname "*shorts*" -o -iname "*linkedin*" -o -iname "*legenda*" -o -iname "*roteiro*" -o -iname "*thumbnail*" -o -iname "*calendario*editorial*" -o -iname "*calendário*editorial*" -o -iname "*pauta*" -o -iname "*redes*sociais*" -o -iname "*social*media*" \) -not -path "*/node_modules/*" -not -path "*/.git/*" -not -path "*/.claude/*" 2>/dev/null | head -20 | wc -l | tr -d ' ')
+case "$BASENAME_SOC" in *social*|*marketing*|*instagram*|*tiktok*|*youtube*|*linkedin*|*conteudo*|*"redes sociais"*|*reels*) SOCIAL_HITS=$((SOCIAL_HITS + 2)) ;; esac
+
 # Finance / Legal signals — workspaces de gestão financeira e jurídica (sem código).
 # Pasta recém-criada costuma estar VAZIA: o nome da pasta é sinal forte (Financeiro, Finance,
 # Jurídico, Legal, Contratos). Conteúdo: ≥2 arquivos/pastas com vocabulário da área e nenhum
@@ -146,6 +157,10 @@ SEO_NAME=0
 case "$BASENAME_LC" in *seo*|*"busca organica"*|*"organic search"*) SEO_NAME=1; SEO_HITS=$((SEO_HITS + 2)) ;; esac
 [ "${SEO_HITS:-0}" -ge 2 ] && HAS_SEO=1
 
+if [ "${SOCIAL_HITS:-0}" -ge 2 ] && [ "${PROPOSAL_CORE_HITS:-0}" -lt 1 ] && [ $HAS_PACKAGE -eq 0 ] && [ $HAS_BACKEND -eq 0 ] && [ "${SOCIAL_HITS:-0}" -ge "${BRANDING_HITS:-0}" ]; then
+  HAS_SOCIAL=1
+fi
+
 # Sala de Controle (recurso Maestri): pasta cujo nome diz "sala de controle"/"control room",
 # ou que já tem a skill maestri-os. Sem código, sem squad — só a skill opt-in.
 DIRNAME_LC=$(basename "$(pwd)" | tr '[:upper:]' '[:lower:]')
@@ -166,6 +181,8 @@ elif [ $HAS_FINANCE -eq 1 ]; then
   ARCHETYPE="finance"
 elif [ $HAS_LEGAL -eq 1 ]; then
   ARCHETYPE="legal"
+elif [ $HAS_SOCIAL -eq 1 ] && [ $HAS_FINANCE -eq 0 ] && [ $HAS_LEGAL -eq 0 ]; then
+  ARCHETYPE="social-media"
 elif [ $HAS_BRANDING -eq 1 ]; then
   ARCHETYPE="branding"
 elif [ $HAS_PROPOSALS -eq 1 ]; then
@@ -192,6 +209,8 @@ fi
 
 # Mapear archetype → preset do team-os-creator
 SUGGESTED_PRESET="custom"
+SUGGESTED_SQUADS=""
+SUGGESTED_SQUAD_ADDON=""
 SUGGESTED_EXTRA_SKILLS=""
 WARNING=""
 case "$ARCHETYPE" in
@@ -213,6 +232,11 @@ case "$ARCHETYPE" in
     SUGGESTED_PRESET="sales" ;;
   branding)
     SUGGESTED_PRESET="brand" ;;
+  social-media)
+    # Estúdio sozinho não tem gate nem publicação → sempre com uma squad de plataforma
+    SUGGESTED_PRESET="social"
+    SUGGESTED_SQUAD_ADDON="instagram"
+    SUGGESTED_SQUADS="social,instagram" ;;
   finance)
     SUGGESTED_PRESET="finance" ;;
   legal)
@@ -226,7 +250,6 @@ case "$ARCHETYPE" in
     ;;
 esac
 # Site com código e sinais de SEO → sugere a squad seo como add-on (audita; sites implementa)
-SUGGESTED_SQUAD_ADDON=""
 if [ $HAS_SEO -eq 1 ] && [ "$ARCHETYPE" != "seo" ]; then
   case "$ARCHETYPE" in website|content-site|fullstack-saas|frontend-app) SUGGESTED_SQUAD_ADDON="seo" ;; esac
 fi
@@ -248,6 +271,7 @@ echo "PROJECT_ARCHETYPE=$ARCHETYPE"
 echo "SUGGESTED_PRESET=$SUGGESTED_PRESET"
 [ -n "$SUGGESTED_EXTRA_SKILLS" ] && echo "SUGGESTED_EXTRA_SKILLS=$SUGGESTED_EXTRA_SKILLS"
 [ -n "$SUGGESTED_SQUAD_ADDON" ] && echo "SUGGESTED_SQUAD_ADDON=$SUGGESTED_SQUAD_ADDON"
+[ -n "$SUGGESTED_SQUADS" ] && echo "SUGGESTED_SQUADS=$SUGGESTED_SQUADS"
 [ -n "${CONTROL_ROOM_OPTIONS:-}" ] && echo "CONTROL_ROOM_OPTIONS=$CONTROL_ROOM_OPTIONS"
 [ -n "$WARNING" ] && echo "WARNING=$WARNING"
 echo "LANGUAGE=$LANGUAGE"
@@ -260,3 +284,4 @@ echo "HAS_CI=$HAS_CI"
 echo "HAS_ML=$HAS_ML"
 echo "HAS_CONTENT=$HAS_CONTENT"
 echo "HAS_SEO=$HAS_SEO"
+echo "HAS_SOCIAL=$HAS_SOCIAL"

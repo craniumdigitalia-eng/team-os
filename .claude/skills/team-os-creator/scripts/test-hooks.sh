@@ -264,6 +264,19 @@ expect 0 $H "$(task_payload TaskCompleted "Publicar" "Fila: docs/smart-memory/ag
 expect 0 $H "$(task_payload TaskCompleted "Escrever legenda do post de sexta" "Rascunho em agents/social/content/")" "sem ato de publicação → passa"
 expect 0 $H "$(task_payload TaskCompleted "Revisar post do Instagram de ontem" "Ajustar hashtags.")" "'post' como substantivo (revisão) → passa"
 expect 0 $H "$(task_payload TaskCompleted "Publish npm package @acme/ui" "Bump 1.2.0")" "'publish' sem objeto social → passa"
+# Squads de plataforma (instagram, tiktok, youtube, linkedin) — mesmo hook, vocabulário ampliado
+expect 2 $H "$(task_payload TaskCompleted "Publicar" "Fila: docs/smart-memory/agents/instagram/publisher/queue.md")" "path agents/instagram/publisher + publicar → bloqueia"
+expect 0 $H "$(task_payload TaskCompleted "Publicar" "Fila: docs/smart-memory/agents/instagram/publisher/queue.md — PASS da VERA em 2026-10-20")" "path instagram + PASS da VERA → passa"
+expect 2 $H "$(task_payload TaskCompleted "Subir vídeo no YouTube" "Pacote pronto: título, thumb, capítulos.")" "'subir vídeo' sem aprovação → bloqueia"
+expect 0 $H "$(task_payload TaskCompleted "Subir vídeo no YouTube" "Aprovado pelo KAIROS em 2026-10-20 — agents/youtube/strategy/approvals.md")" "'subir vídeo' + aprovado → passa"
+expect 2 $H "$(task_payload TaskCompleted "Upload do vídeo como private + publishAt" "Studio.")" "'upload do vídeo' sem aprovação → bloqueia"
+expect 2 $H "$(task_payload TaskCompleted "Agendar estreia no YouTube" "Sexta 19h.")" "'agendar estreia' sem aprovação → bloqueia"
+expect 2 $H "$(task_payload TaskCompleted "Publicar o Short da semana" "Sem PASS do KAIROS ainda.")" "'publicar Short' + 'sem PASS' → bloqueia"
+expect 2 $H "$(task_payload TaskCompleted "Publicar no LinkedIn" "Post de texto sobre o case.")" "'publicar no LinkedIn' sem aprovação → bloqueia"
+expect 0 $H "$(task_payload TaskCompleted "Agendar post no LinkedIn" "PASS do STRATA registrado em agents/linkedin/strategy/approvals.md")" "'agendar post' LinkedIn + PASS → passa"
+expect 2 $H "$(task_payload TaskCompleted "Montar pacote de upload" "Fila: docs/smart-memory/agents/tiktok/publisher/queue.md — aguardando PASS do RIFF")" "path tiktok/publisher + upload + 'aguardando PASS' → bloqueia"
+expect 0 $H "$(task_payload TaskCompleted "Publish a short summary to the wiki" "Docs only.")" "'short' minúsculo (adjetivo) → passa"
+expect 0 $H "$(task_payload TaskCompleted "Subir o deploy da API" "Branch main.")" "'subir' sem objeto de vídeo → passa"
 
 # ── 4. check-proposal-progress.sh ────────────────────────────────────────────
 section "check-proposal-progress.sh"

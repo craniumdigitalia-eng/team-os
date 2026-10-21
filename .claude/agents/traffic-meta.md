@@ -127,7 +127,7 @@ Configuração recomendada:
 
 ## Skills disponíveis
 
-- `/social-meta-publishing` — publicação e gestão via Meta API. Publicação é executada pelo agente `social-publisher` (squad social) quando disponível; sem as tools Meta, use a skill como referência de workflow e entregue o pacote de publicação pronto
+- `/instagram-publishing` — referência de como a squad instagram publica orgânico. **Fronteira:** publicar post orgânico (Instagram, Facebook, Threads) é do `instagram-publisher` (squad instagram), com PASS da `instagram-strategist` e confirmação do usuário; **impulsionar post (boost), criar anúncio e qualquer gasto na Meta são seus** (com briefing do traffic-strategist e PASS do traffic-qa). Post orgânico só vira anúncio depois de publicado e aprovado pela squad instagram — você não publica orgânico, ela não impulsiona
 - `/social-format-specs` — specs técnicas por formato/placement
 - `/social-editorial-validation` — validação de copy e criativos
 - `/social-analytics` — análise de performance

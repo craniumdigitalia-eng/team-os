@@ -13,7 +13,8 @@
 # intocados · arquivo que saiu do pack · hook editado · agente próprio com/sem --custom ·
 # --dry-run não escreve nada · Sala de Controle (sem backup, sem agentes no installed.json) ·
 # backup .claude.bak-* só no *install, guarda 3, o resto na Lixeira · .gitignore preservado ·
-# scan/diff contam conflito à parte.
+# scan/diff contam conflito à parte · squad de plataforma (instagram-*) derivada no propagate e
+# aviso do estúdio social sem plataforma · aviso de agente órfão (ORPHAN_AGENT) no propagate.
 #
 # Uso: bash test-propagate.sh   (exit 0 = tudo passou). Bash 3.2-safe; precisa de python3, rsync.
 
@@ -264,6 +265,58 @@ check "install: guarda 3 .claude.bak-*" [ "$(ls -d "$P10"/.claude.bak-* 2>/dev/n
 check "install: BACKUP_TRASHED=1 na 4ª" grep -q '^BACKUP_TRASHED=1' "$T/10-4.out"
 check "install: o mais antigo foi para a Lixeira (portável)" sh -c "ls -a '$TRASH' | grep -q '^\.claude\.bak-'"
 check "install repetido: 0 conflitos (nada editado)" [ "$(kv CONFLICT_FILES "$T/10-4.out")" = "0" ]
+
+# ═══ 12. squads derivadas dos presets (squad de plataforma, estúdio social) ═══
+echo "── 12. squad de plataforma (instagram) e estúdio social"
+# Hermético: agente, skill e preset sintéticos na cópia do CT (não depende do que já existe no pack)
+mkdir -p "$SRC2/.claude/skills/instagram-teste-skill"
+printf -- '---\nname: instagram-teste-skill\ndescription: skill de teste\n---\n# teste\n' > "$SRC2/.claude/skills/instagram-teste-skill/SKILL.md"
+printf -- '---\nname: instagram-teste\ndescription: agente de teste\n---\n# TESTE — Teste\n**Área na smart-memory:** `docs/smart-memory/agents/instagram/content/`\nversão nova do CT\n' > "$SRC2/$A/instagram-teste.md"
+PR2="$SRC2/.claude/skills/team-os-creator/presets"
+[ -f "$PR2/instagram.yaml" ] || printf 'name: instagram\ndescription: teste\nagents:\n  - name: instagram-teste\n    archetype: implementer\n' > "$PR2/instagram.yaml"
+P12="$T/proj12"; mkdir -p "$P12/$A"
+printf -- '---\nname: instagram-teste\n---\n# TESTE — versão antiga\n' > "$P12/$A/instagram-teste.md"
+inst "$T/12a.out" --source "$SRC2" --target "$P12" --match-target-squads
+check "plataforma: rc=0" [ "$RC" = "0" ]
+check "plataforma: agente instagram-* reconhecido como squad instagram" grep -qx 'MATCH_TARGET_SQUADS=instagram' "$T/12a.out"
+check "plataforma: agente instagram atualizado" grep -q 'versão nova do CT' "$P12/$A/instagram-teste.md"
+check "plataforma: skill instagram-* entra pelo prefixo da squad" [ -f "$P12/.claude/skills/instagram-teste-skill/SKILL.md" ]
+check "plataforma: estúdio social não entra sozinho" sh -c "! ls '$P12/$A'/social-*.md >/dev/null 2>&1"
+check "plataforma: sem aviso de estúdio" sh -c "! grep -q '^WARN=studio_without_platform' '$T/12a.out'"
+inst "$T/12b.out" --source "$SRC2" --target "$T/proj12b" --squads social --dry-run
+check "estúdio sem plataforma: WARN=studio_without_platform (não bloqueia)" sh -c "[ '$RC' = '0' ] && grep -q '^WARN=studio_without_platform' '$T/12b.out'"
+inst "$T/12c.out" --source "$SRC2" --target "$T/proj12c" --squads social,instagram --dry-run
+check "estúdio + instagram: sem aviso" sh -c "! grep -q '^WARN=studio_without_platform' '$T/12c.out'"
+
+# ═══ 13. agente órfão (saiu do pack) no *propagate ═══════════════════════════
+echo "── 13. aviso de agente órfão"
+P13="$T/proj13 | social antigo"; mkdir -p "$P13"
+inst "$T/13a.out" --source "$SRC2" --target "$P13" --squads social
+check "órfão: install inicial rc=0" [ "$RC" = "0" ]
+# agente próprio (origin: custom) registrado + agente criado pelo usuário (sem registro)
+awk 'NR==1{print; next} !d && /^name:/{print "name: social-proprio"; next} !d && /^memory:/{print; print "origin: custom"; d=1; next} {print}' \
+  "$CT/$A/social-design.md" > "$P13/$A/social-proprio.md"
+printf -- '---\nname: social-meu\n---\nmeu agente\n' > "$P13/$A/social-meu.md"
+python3 - "$P13/.team-os/installed.json" "$A/social-proprio.md" "$(h "$P13/$A/social-proprio.md")" <<'PYEOF'
+import json, sys
+p, rel, hh = sys.argv[1:4]
+d = json.load(open(p)); d["files"][rel] = hh
+json.dump(d, open(p, "w"), ensure_ascii=False, indent=1)
+PYEOF
+mv "$SRC2/$A/social-photo.md" "$T/social-photo.fora-do-ct.md"     # o "CT" deixa de ter o social-photo
+PHOTO_H="$(h "$P13/$A/social-photo.md")"
+inst "$T/13b.out" --source "$SRC2" --target "$P13" --match-target-squads
+check "órfão: rc=0" [ "$RC" = "0" ]
+check "órfão: ORPHAN_AGENT=social-photo" grep -q '^ORPHAN_AGENT=social-photo|' "$T/13b.out"
+check "órfão social-*: manda rodar migrate-social-split.sh" grep -q '^ORPHAN_AGENT=social-photo|.*migrate-social-split.sh' "$T/13b.out"
+check "órfão: ORPHAN_AGENTS=1 (próprio e criado pelo usuário não contam)" [ "$(kv ORPHAN_AGENTS "$T/13b.out")" = "1" ]
+check "órfão: agente próprio (origin: custom) não é órfão" sh -c "! grep -q '^ORPHAN_AGENT=social-proprio' '$T/13b.out'"
+check "órfão: agente criado pelo usuário não é órfão" sh -c "! grep -q '^ORPHAN_AGENT=social-meu' '$T/13b.out'"
+check "órfão: nada removido (social-photo intacto)" [ "$(h "$P13/$A/social-photo.md")" = "$PHOTO_H" ]
+check "órfão: agente do usuário em outro destino (dev-meu) nunca foi órfão" sh -c "! grep -q '^ORPHAN_AGENT=dev-meu' '$T/5f.out'"
+inst "$T/13c.out" --source "$SRC2" --target "$P13" --squads social --dry-run
+check "órfão: *install (sem --match-target-squads) não avisa" sh -c "! grep -q '^ORPHAN_AGENT=' '$T/13c.out'"
+mv "$T/social-photo.fora-do-ct.md" "$SRC2/$A/social-photo.md"
 
 # ═══ 11. nada fora da pasta temporária ═══════════════════════════════════════
 check "Lixeira usada é a do HOME falso/da pasta do teste" sh -c "case '$TRASH' in '$T'/*) exit 0;; esac; exit 1"

@@ -134,8 +134,8 @@ Usuário: `/maestri-os atualize a home do site com o novo depoimento, crie um po
    | João Guirunas \| Campanhas | João Guirunas \| Campanhas | — | campanhas |
 
    Usuário: "OK, só acrescenta 'tráfego, ads' em Campanhas". Grava as 3 seções; não pergunta mais por esses nomes.
-3. `scan-project.sh` nas 3 pastas → Site: `sites` (10 agentes) · Marketing: `social` (6) · Campanhas: `traffic` (10). Atualiza a parte automática de cada seção e regenera `OVERVIEW.md`.
-4. Decompõe em 3 sub-pedidos e roteia: depoimento na home → **Site** (apelido "home" + sites-dev-alpha); post → **Marketing** (social-content/social-strategist); relatório de tráfego → **Campanhas** (apelido "tráfego" + traffic-bi). Mostra o mapa e pede confirmação (3 destinos).
+3. `scan-project.sh` nas 3 pastas → Site: `sites` (10 agentes) · Marketing: `social` (3) + `instagram` (3) · Campanhas: `traffic` (10). Atualiza a parte automática de cada seção e regenera `OVERVIEW.md`.
+4. Decompõe em 3 sub-pedidos e roteia: depoimento na home → **Site** (apelido "home" + sites-dev-alpha); post → **Marketing** (instagram-content/instagram-strategist); relatório de tráfego → **Campanhas** (apelido "tráfego" + traffic-bi). Mostra o mapa e pede confirmação (3 destinos).
 5. `maestri check` nos 3 → Marketing está no meio de uma tarefa → avisa; usuário diz "manda mesmo assim".
 6. Dois sub-pedidos são longos → `maestri ask --batch '{"João Guirunas | Site | Home":"<cabeçalho>+<pedido>","João Guirunas | Marketing | Calendário":"…","João Guirunas | Campanhas":"…"}'` com `run_in_background`.
 7. Três linhas em `dispatches.md` com `status: aguardando aviso`. Usuário liberado.

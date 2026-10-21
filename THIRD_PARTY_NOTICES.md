@@ -95,6 +95,9 @@ Conceitos e métodos reescritos em pt-BR no padrão do pack (texto próprio, sem
 | `social-video-editing` (regras de correção, corte por silêncio, legenda, áudio, autoavaliação) | [browser-use/video-use](https://github.com/browser-use/video-use) | MIT — `Copyright (c) 2026 Browser Use` | commit 43cfc56 |
 | `social-video-editing/reference/launch-video.md` | [latent-spaces/brag](https://github.com/latent-spaces/brag) | MIT — `Copyright (c) 2026 Shunit Haviv Hakimi` | commit 069432ca |
 | `social-copywriting`, `social-scriptwriting` (+`reference/ganchos.md`), `social-carousel-design`, `social-analytics` (+`reference/perfil-rubrica.md`), `social-apify-research` | [Jakeschincariol/instagram-agent-skill](https://github.com/Jakeschincariol/instagram-agent-skill) | MIT — `Copyright (c) 2026 Jake Schincariol` | commit d03c56b |
+| `instagram-strategy`, `instagram-dm-flows` | [Jakeschincariol/instagram-agent-skill](https://github.com/Jakeschincariol/instagram-agent-skill) — `ig-dm`, `ig-reply`, `ig-plan` | MIT — `Copyright (c) 2026 Jake Schincariol` | conceitos adaptados, commit d03c56b |
+| `instagram-dm-flows` (opt-in de WhatsApp e templates) | [coreyhaines31/marketingskills](https://github.com/coreyhaines31/marketingskills) — referência de WhatsApp da skill `sms` | MIT — `Copyright (c) 2025 Corey Haines` | conceitos adaptados |
+| `youtube-scriptwriting`, `youtube-packaging`, `youtube-analytics`, `youtube-publishing` | [darkzOGx/youtube-automation-agent](https://github.com/darkzOGx/youtube-automation-agent) | MIT — `Copyright (c) 2025 YouTube Automation Agent Contributors` | commit 24f9cb5 — método, sem código |
 | `sites-scroll-motion` §5A (GSAP + ScrollTrigger) | [greensock/gsap-skills](https://github.com/greensock/gsap-skills) | MIT — `Copyright (c) 2026 GreenSock` | padrões useGSAP/context/matchMedia |
 
 ## Conteúdo adaptado de agency-agents

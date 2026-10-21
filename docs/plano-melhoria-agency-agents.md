@@ -103,7 +103,7 @@ Não criar agente para: `code-reviewer` (o `dev-qa` já tem veredicto formal), `
 | `stats-experiment-design` | `academic-statistician` | traffic-bi, brand-insights, dev-data-performance (teste A/B válido, amostra, poder) |
 | `evidence-grading` | `research-synthesist` | todos os analysts (nível de evidência, avaliação de fonte) |
 | `training-design` | `corporate-training-designer` | Mentoria / Centro de Treinamento (levantamento de necessidade, currículo, avaliação) |
-| `social-linkedin` | `marketing-linkedin-content-creator` | social (autoridade e marca pessoal, ligado ao `social-strategist`) |
+| `social-linkedin` | `marketing-linkedin-content-creator` | social (autoridade e marca pessoal, ligado ao `linkedin-strategist`) |
 | `social-youtube` | `marketing-video-optimization-specialist` | social-video (retenção, capítulos, miniatura) |
 | `exec-summary` | `support-executive-summary-generator` | pm-reporter, finance-reporter, relatórios a cliente |
 | `codebase-onboarding` | `engineering-codebase-onboarding-engineer` | Discovery Engine da `team-os` |

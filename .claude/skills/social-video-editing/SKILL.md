@@ -1,7 +1,7 @@
 ---
 name: social-video-editing
 description: "Edição de vídeo para redes sociais com ffmpeg puro — regras de correção de corte, corte por fala e silêncio, legenda .srt com transcrição local opcional, áudio (ducking e loudnorm), fluxo com lista de cortes e autoavaliação, capítulos e vídeo de lançamento. Use ao editar Reels, TikToks, Shorts ou vídeo 16:9, cortar, legendar, mixar ou exportar por plataforma."
-version: "2.0"
+version: "2.1"
 updated: "2026-10-20"
 ---
 
@@ -90,7 +90,7 @@ Música só com licença confirmada (ver `reference/launch-video.md`).
    ```
 3. **Render** seguindo as regras da seção 1.
 4. **Autoavaliação** no arquivo renderizado (não no bruto): frames a ±1,5 s de cada corte (`ffmpeg -ss <t> -i final.mp4 -frames:v 1 c01.jpg`) procurando palavra cortada, salto visual, overlay errado, legenda escondida; `ffprobe -v error -show_entries format=duration -of csv=p=0 final.mp4` contra a EDL; `ebur128` contra −14 LUFS. Errou → corrige → renderiza → reavalia, **no máximo 3 passes**; o que restar vai como pendência ao usuário.
-5. **Aprovação** de VERA (social-strategist) ou do estrategista da plataforma antes de qualquer publicação.
+5. **Aprovação** do estrategista da plataforma de destino (`<plataforma>-strategist` — ex.: VERA no Instagram) antes de qualquer publicação; o estúdio nunca aprova nem publica.
 
 ## 6. Vídeo 16:9 longo e capítulos
 

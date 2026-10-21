@@ -1,17 +1,17 @@
 ---
 name: tiktok-marketing
-description: "Estratégia de marketing no TikTok — orgânico e ads. Pilares de conteúdo, hooks nos 3 primeiros segundos, trending sounds, hashtags, cadência, specs de Spark Ads/In-Feed e métricas de watch time. Use ao planejar conteúdo TikTok, criar campanhas TikTok Ads ou otimizar performance orgânica."
-version: "2.0"
-updated: "2026-09-04"
+description: "Estratégia de TikTok orgânico — pilares de conteúdo, gancho nos 3 primeiros segundos, sons em alta com janela de ~48h, hashtags, cadência, horários e métricas de retenção. Use ao planejar pauta, escrever roteiro ou avaliar desempenho orgânico no TikTok. Anúncios e Spark Ads ficam na traffic-paid-ads-optimization."
+version: "2.1"
+updated: "2026-10-20"
 ---
 
-# TikTok Marketing — Orgânico + Ads
+# TikTok Marketing — Orgânico
 
-Usada por traffic-tiktok e traffic-copywriter.
+Usada pela squad **tiktok** (tiktok-strategist, tiktok-content, tiktok-publisher). Pacote de upload e leitura do export ficam em `tiktok-publishing`. **Anúncios** (Spark Ads, In-Feed, specs e métricas pagas) ficam em `traffic-paid-ads-optimization` (seção "TikTok Ads"), usada pelo traffic-tiktok — a fronteira é o código de autorização Spark, que o usuário gera no post orgânico.
 
 ## Princípio central
 
-TikTok é uma plataforma de **interesse**, não de seguidores: o For You distribui cada vídeo pelo comportamento de retenção da audiência, não pelo tamanho da conta. Watch time e completion mandam em tudo — orgânico e pago.
+TikTok é uma plataforma de **interesse**, não de seguidores: o For You distribui cada vídeo pelo comportamento de retenção da audiência, não pelo tamanho da conta. Tempo assistido e % de conclusão mandam em tudo.
 
 ## 1. Pilares de conteúdo
 
@@ -51,7 +51,7 @@ O algoritmo mede a taxa de quem passa dos 3 primeiros segundos. Sem hook, o rest
 
 ## 4. Hashtags e descrição
 
-- **Mix de 5-7 hashtags**: 1-2 amplas (#marketing), 2-3 de nicho (#trafegopago), 1-2 específicas do conteúdo/campanha
+- **3–5 hashtags relevantes**: 1 ampla (#marketing), 1–2 de nicho (#trafegopago), 1–2 específicas do conteúdo (regra do pack até haver fonte oficial datada que diga outra coisa)
 - Não usar #fyp/#foryou como estratégia — não influencia distribuição
 - Descrição: 1 frase com keyword do tema (TikTok indexa como busca) + pergunta que gere comentário
 
@@ -75,32 +75,9 @@ O algoritmo mede a taxa de quem passa dos 3 primeiros segundos. Sem hook, o rest
 | Seg-Sex | 7h-9h (deslocamento), 12h-13h (almoço), 19h-23h (pico) |
 | Sáb-Dom | 11h-13h e 19h-22h |
 
-## 7. TikTok Ads — formatos e specs
+## 7. Anúncios — fora desta skill
 
-### Spark Ads (recomendado como padrão)
-Impulsiona posts orgânicos (próprios ou de creators autorizados) mantendo engajamento e perfil clicável.
-- Requer código de autorização do post (válido por período definido pelo autor)
-- Herda métricas orgânicas — social proof acumulado
-- CTR e CVR tipicamente superiores ao In-Feed tradicional
-
-### In-Feed Ads (não-Spark)
-- **Vídeo:** 9:16 (1080x1920), 5-60s (recomendado 9-15s), H.264, ≤500MB
-- **Copy:** texto do anúncio até 100 caracteres; evitar texto queimado nas zonas de UI (150px topo, 380px base)
-- **CTA:** usar biblioteca de CTAs da plataforma (Saiba mais, Compre agora)
-
-### Boas práticas de criativo pago
-- Criativo nativo: parecer conteúdo, não anúncio ("Don't make ads, make TikToks")
-- Renovar criativos a cada 7-14 dias (fadiga é rápida)
-- 3-5 variações de hook por conceito para o algoritmo otimizar
-- UGC/creator-style > produção polida na maioria dos nichos
-
-### Estrutura de campanha mínima
-```
-Campanha (objetivo: tráfego/conversão/leads)
-└── Ad Group (segmentação ampla + otimização por evento do Pixel)
-    └── 3-5 criativos (hooks diferentes, mesmo conceito)
-```
-Segmentação ampla + criativo forte > hiper-segmentação. O criativo É a segmentação no TikTok.
+Spark Ads, In-Feed, specs de anúncio, estrutura de campanha e métricas pagas estão em `traffic-paid-ads-optimization` (seção "TikTok Ads") (squad traffic). Aqui a squad tiktok só marca uma peça orgânica como "candidata a Spark"; o usuário gera o código de autorização e daí em diante é do traffic-tiktok.
 
 ## 8. Métricas que importam
 
@@ -114,19 +91,17 @@ Segmentação ampla + criativo forte > hiper-segmentação. O criativo É a segm
 | Comentários | Comunidade + sinal de distribuição | responder nas 2 primeiras horas |
 | Seguidores/visualização | Conversão de perfil | >1% é forte |
 
-**Nos ads, adicionar:** CPM, CTR (>1% saudável), CPA/ROAS por criativo (não por campanha), frequência (<4 antes de renovar criativo).
-
 Vaidade sem contexto: views totais e seguidores — nunca otimizar por elas isoladamente.
 
-## 9. Checklist antes de publicar/subir campanha
+## 9. Checklist antes do pacote de upload
 
 ```
 [ ] Hook nos 3 primeiros segundos (visual + texto na tela)
 [ ] Formato 9:16 1080x1920, legendas burned-in
 [ ] Som: trending dentro da janela OU narração clara (Commercial Library se business)
-[ ] 5-7 hashtags no mix amplo/nicho/específico
+[ ] 3–5 hashtags relevantes (ampla/nicho/específica)
 [ ] Descrição com keyword de busca + gatilho de comentário
 [ ] Zonas de UI livres de texto (150px topo, 380px base)
-[ ] Ads: Pixel/Eventos verificados, 3-5 variações de criativo, Spark Ads considerado
+[ ] Rótulo de conteúdo gerado por IA marcado se houver mídia realista de IA
 [ ] Horário dentro das janelas da conta
 ```

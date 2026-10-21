@@ -2,8 +2,8 @@
 name: team-os-creator
 description: "Factory de agentes nativos do Claude Code para Agent Teams — exclusiva deste repositório fonte. Use para criar agentes ou squads (inclusive agentes próprios), atualizar o pack sem perder o que você criou (*update), propagar agentes e skills aos projetos, instalar squads em projeto novo, auditar compliance ou migrar o bloco NTP. Gera .claude/agents/*.md com Native Teams Protocol + smart-memory."
 user-invocable: true
-argument-hint: "[*analyze | *squad <preset> | *create <role> | *migrate | *bootstrap | *skills <agente> | *pressure-test <agente> | *audit | *update | *propagate | *install | *organize]"
-version: "3.2"
+argument-hint: "[*analyze | *squad <preset> | *create <role> | *migrate | *bootstrap | *skills <agente> | *pressure-test <agente> | *audit | *update | *propagate | *migrate-social <pasta> | *install | *organize]"
+version: "3.3"
 updated: "2026-10-20"
 ---
 
@@ -22,7 +22,7 @@ Output: arquivos `.md` em `.claude/agents/` + skills + bootstrap de `docs/smart-
 3. **SEMPRE validar compliance** após criar (`scripts/validate-agent.sh`).
 4. **SEMPRE propor skills** relevantes ao role do agente.
 5. **Idempotente** — se agente com mesmo nome existe, oferecer: atualizar / pular / renomear / cancelar.
-6. **Squad focada** — cada agente com escopo distinto, sem sobreposição de autoridade. **Sem teto de tamanho**: a squad tem os agentes que o domínio exige (`social` tem 6, `dev` 12, `seo` 15). "Essencial" = 5, "completa" = preset.
+6. **Squad focada** — cada agente com escopo distinto, sem sobreposição de autoridade. **Sem teto de tamanho**: a squad tem os agentes que o domínio exige (`social` — o estúdio — e cada squad de plataforma têm 3, `dev` 12, `seo` 15). "Essencial" = 5, "completa" = preset.
 7. **NUNCA criar agente de orquestração/lead** — o main session do Claude Code é o lead nativo.
 8. **`team-os-creator` nunca é copiado para projetos destino** — existe SÓ no CT. É a única skill exclusiva do CT.
 9. **`*install` entrega a infra, não a smart-memory** — copia agents + skills (incluindo `team-os`) + `settings.json` (+ hooks opcionais). A smart-memory é construída no projeto pelo próprio `/team-os` na 1ª sessão, a partir do codebase real (Discovery Engine). `*bootstrap` continua disponível para criação manual/no CT.
@@ -46,7 +46,7 @@ Output: arquivos `.md` em `.claude/agents/` + skills + bootstrap de `docs/smart-
 |---|---|
 | `/team-os-creator` | **Command Center** — escaneia as pastas irmãs, mostra status por projeto e abre 3 ações: Criar / Atualizar / Instalar |
 | `/team-os-creator *analyze` | Só análise: archetype detectado, sem criar |
-| `/team-os-creator *squad <preset>` | Cria squad inteira de preset (`dev`/`sites`/`social`/`traffic`/`pm`/`sales`/`brand`/`finance`/`legal`/`seo`/`security`/`custom`) |
+| `/team-os-creator *squad <preset>` | Cria squad inteira de preset (`dev`/`sites`/`social`/`instagram`/`tiktok`/`youtube`/`linkedin`/`traffic`/`pm`/`sales`/`brand`/`finance`/`legal`/`seo`/`security`/`custom` — a lista real é o `name:` de cada `presets/*.yaml`) |
 | `/team-os-creator *create <role>` | Cria UM agente interativamente |
 | `/team-os-creator *migrate` | Reinjeta o bloco NTP canônico em todos os agentes (`scripts/migrate-ntp.sh`; `--dry-run` mostra o diff) — também converte o antigo "Contrato com team-os" |
 | `/team-os-creator *bootstrap` | Cria `docs/smart-memory/` + injeta protocolo no `CLAUDE.md` do projeto atual |
@@ -55,9 +55,10 @@ Output: arquivos `.md` em `.claude/agents/` + skills + bootstrap de `docs/smart-
 | `/team-os-creator *audit` | Valida compliance de todos os agentes (`validate-agent.sh`) **e** das skills (`validate-agent.sh --skills`) |
 | `/team-os-creator *update` | **Atualiza o pack** nesta pasta para a versão mais nova **sem perder nada** do que o usuário criou ou editou (`scripts/update-pack.sh`): mostra o que muda, pede UMA confirmação, aplica com cópia de segurança e pergunta, um por um, o que fazer com os arquivos que o usuário mudou. Nunca faz commit/push. Ver "Fluxo `*update`" |
 | `/team-os-creator *propagate` | Propaga agentes atualizados para outros projetos |
+| `/team-os-creator *migrate-social <pasta>` | Leva um projeto da squad `social` antiga (strategist/content/publisher) para o estúdio `social` + squad(s) de plataforma (`scripts/migrate-social-split.sh`; dry-run primeiro, `--apply --platforms <lista>` só com OK). Ver "Fluxo `*migrate-social`" |
 | `/team-os-creator *install` | Instala squads + skills (incluindo `team-os`) + `settings.json` em projeto destino. Pasta **Sala de Controle** → instala só a skill de Sala (`sala-de-controle` por padrão, ou `maestri-os` no modo Maestri) |
 | `/team-os-creator *organize` | Mapa da organização de pastas (negócio → projeto → squads → salas), pontos fora do padrão e proposta de melhoria. **Só propõe** — nada é movido, renomeado ou instalado sem OK explícito, ação por ação |
-| `/team-os-creator *painel` | **Mapa vivo do CT** no navegador do próprio Claude: o raio no centro, as 11 squads no anel, os agentes de cada squad ao redor (persona + cargo), skills principais ligadas ao centro; clique na squad expande as skills dela, clique no agente/skill abre o perfil e o arquivo inteiro. Estático (o que existe), read-only. `*painel stop` derruba |
+| `/team-os-creator *painel` | **Mapa vivo do CT** no navegador do próprio Claude: o raio no centro, as squads do pack (15) no anel, os agentes de cada squad ao redor (persona + cargo), skills principais ligadas ao centro; clique na squad expande as skills dela, clique no agente/skill abre o perfil e o arquivo inteiro. Estático (o que existe), read-only. `*painel stop` derruba |
 
 ---
 
@@ -113,7 +114,11 @@ Output: arquivos `.md` em `.claude/agents/` + skills + bootstrap de `docs/smart-
 |---|---|---|
 | **dev** | 12 (analyst, architect, bi, data-engineer, data-performance, ux, dev-alpha, dev-beta, dev-delta, dev-gamma, qa, devops) | Fullstack SaaS |
 | **sites** | 10 (analyst, architect, data, ux, dev-alpha, dev-beta, dev-delta, dev-gamma, qa, devops) | Sites e landing pages |
-| **social** | 6 (content, design, photo, publisher, strategist, video) | Social media |
+| **social** | 3 (design, photo, video) | **Estúdio** comum de social — produz sob brief de uma squad de plataforma; nunca aprova nem publica. Sozinho não tem gate: o `*install` avisa (`WARN=studio_without_platform`) se vier sem plataforma |
+| **instagram** | 3 (strategist, content, publisher) | Instagram orgânico (inclui Facebook e Threads, via Meta) — pauta e gate (VERA), conteúdo e DM, publicação só com PASS + confirmação; nunca impulsiona (é do `traffic-meta`) |
+| **tiktok** | 3 (strategist, content, publisher) | TikTok orgânico — pauta e gate, roteiro nativo, pacote de upload que o usuário sobe; Spark/pago é do `traffic-tiktok` |
+| **youtube** | 3 (strategist, content, publisher) | YouTube — pauta e gate, roteiro, pacote (título, thumb, capítulos) private + publishAt para o usuário subir; leitura 24h/7d. Anúncio é do `traffic-google` |
+| **linkedin** | 3 (strategist, content, publisher) | LinkedIn orgânico — pauta B2B e gate, posts, documentos e artigos, pacote de publicação; sem DM em massa |
 | **traffic** | 10 (analyst, automation, bi, copywriter, designer, google, meta, qa, strategist, tiktok) | Tráfego pago |
 | **pm** | 10 (analyst, client, coach, data, demand, engineer, ops, planner, qa, reporter) | Gestão de projetos |
 | **sales** | 8 (analyst, strategist, planner, finance, copywriter, designer, qa, closer) | Propostas comerciais e apresentações — genérica, contexto da empresa na smart-memory |
@@ -124,7 +129,7 @@ Output: arquivos `.md` em `.claude/agents/` + skills + bootstrap de `docs/smart-
 | **security** | 7 (architect, appsec, ai-code, secrets, privacy, incident, qa) | Segurança de aplicação — audita, prioriza e especifica a correção; nunca edita o código (dev/sites corrige), nunca rotaciona credencial nem executa contenção em produção, nunca testa contra terceiro. Add-on de dev ou sites (`--squads sites,security`) |
 | **custom** | 0 | Usuário monta do zero |
 
-> Nota: os presets legados (`content.yaml`, `marketing.yaml`, `data.yaml`) foram **removidos** — referenciam agentes que nunca existiram no CT atual. Se o `detect-project-signals.sh` classificar `content-site`, use o preset `sites` (ou `social` se for workspace de conteúdo); `data-pipeline` → `dev`; `seo` (workspace de SEO sem código, ou pasta nomeada SEO) → `seo`; site com sinais de SEO (sitemap.xml, robots.txt, `next-sitemap`, "seo" no package.json, pasta `seo/`) devolve `SUGGESTED_SQUAD_ADDON=seo` → `--squads sites,seo`. Projeto com banco, auth, pagamento ou IA no `package.json` (Supabase, Prisma, NextAuth, Clerk, Stripe, OpenAI, Anthropic, AI SDK) ou com `supabase/migrations/` acrescenta `security` à lista (`SUGGESTED_SQUAD_ADDON=seo,security`).
+> Nota: os presets legados (`content.yaml`, `marketing.yaml`, `data.yaml`) foram **removidos** — referenciam agentes que nunca existiram no CT atual. Se o `detect-project-signals.sh` classificar `content-site`, use o preset `sites`; workspace de conteúdo para redes (Reels, carrosséis, roteiros, pasta Marketing/Social) sai `PROJECT_ARCHETYPE=social-media` com `SUGGESTED_SQUADS=social,instagram` (troque `instagram` pela rede do projeto); `data-pipeline` → `dev`; `seo` (workspace de SEO sem código, ou pasta nomeada SEO) → `seo`; site com sinais de SEO (sitemap.xml, robots.txt, `next-sitemap`, "seo" no package.json, pasta `seo/`) devolve `SUGGESTED_SQUAD_ADDON=seo` → `--squads sites,seo`. Projeto com banco, auth, pagamento ou IA no `package.json` (Supabase, Prisma, NextAuth, Clerk, Stripe, OpenAI, Anthropic, AI SDK) ou com `supabase/migrations/` acrescenta `security` à lista (`SUGGESTED_SQUAD_ADDON=seo,security`).
 
 ---
 
@@ -237,7 +242,7 @@ Script: `scripts/migrate-ntp.sh` — substitui, em cada `.claude/agents/*.md`, o
 ## Fluxo `*install`
 
 1. Lista projetos via `scan-ct-projects.sh`
-2. **Determina a categoria do projeto e instala SÓ a(s) squad(s) correspondente(s)** — NUNCA todas. Social→`social`, site→`sites`, etc. Pode combinar quando o projeto exige (ex.: workspace de conteúdo com site → `social,sites`). Passe `--squads <categoria>` — **nunca** `--squads all` (o script **aborta** com `ERROR=squads_all_without_match_target`). Na dúvida, pergunte ao usuário. Use `detect-project-signals.sh "<pasta>"` (aceita o caminho como argumento) para o palpite inicial.
+2. **Determina a categoria do projeto e instala SÓ a(s) squad(s) correspondente(s)** — NUNCA todas. Social→`social,<plataforma>` (o estúdio nunca vai sozinho — ex.: `social,instagram`), site→`sites`, etc. Pode combinar quando o projeto exige (ex.: workspace de conteúdo com site → `social,instagram,sites`). Passe `--squads <categoria>` — **nunca** `--squads all` (o script **aborta** com `ERROR=squads_all_without_match_target`). Na dúvida, pergunte ao usuário. Use `detect-project-signals.sh "<pasta>"` (aceita o caminho como argumento) para o palpite inicial.
 2b. **Sala de Controle — não é squad.** Antes de tudo, rode `python3 .claude/skills/sala-de-controle/scripts/org-map.py "<raiz>" --tree` para ver onde estão (ou não) as Salas. Casos:
    - **Pasta isolada de Sala existe** — o `scan-ct-projects.sh` marca `IS_CONTROL_ROOM=1` (nome contém "Sala de Controle"/"control room", ou já tem `sala-de-controle`/`maestri-os`), ou o `detect-project-signals.sh` devolve `PROJECT_ARCHETYPE=control-room`. **Pergunte o modo**: *"Esta pasta é uma Sala de Controle. Instalo a `sala-de-controle` (lugar único de comando: enxerga todas as sessões do Claude, sabe a etapa de cada projeto pela smart-memory e despacha cada pedido para a sessão certa) — ou prefere o modo Maestri (`maestri-os`, terminais ligados por fio no canvas)?"*. A recomendada é a `sala-de-controle` (o `detect` devolve `SUGGESTED_EXTRA_SKILLS`).
    - **Não existe pasta isolada** (achado `SALA_AUSENTE`) → **sugira criar** `<raiz>/1 | Sala de Controle` e só crie com OK. Nunca instale a Sala dentro de um projeto com squad.
@@ -266,6 +271,7 @@ Script: `scripts/migrate-ntp.sh` — substitui, em cada `.claude/agents/*.md`, o
    - **Sala de Controle** (sem agentes, com `sala-de-controle` ou `maestri-os`): o script entra em `CONTROL_ROOM=1` e sincroniza só a skill de Sala — nada de squad, `team-os`, hooks ou settings
    - **Agentes próprios** (`origin: custom`): os que já existem no destino são atualizados; para levar um novo, `--custom <nome1,nome2|all>`.
    - **Arquivos que o usuário criou no destino** (agente, skill ou arquivo dentro de uma skill) nunca são tocados nem apagados.
+   - **Agentes órfãos**: agente do destino que já foi do pack (registrado no `installed.json` ou no histórico git do CT), não existe mais no CT e não é `origin: custom` sai como `ORPHAN_AGENT=<nome>|…` (+ `ORPHAN_AGENTS=<n>`). **Nada é removido.** Órfão `social-*` (strategist/content/publisher/analyst) = projeto ainda na social antiga: o propagate **nunca** instala `instagram` ali (as squads vêm dos agentes do destino) e o projeto fica com dois gates editoriais — rode o `*migrate-social` nele.
 5. **Edições feitas no projeto (conflitos)** — o script compara cada arquivo com o `.team-os/installed.json` do destino. Se a pessoa editou um arquivo lá e o CT não mudou, fica o dela, sem perguntar. Se ela editou **e** o CT também mudou, o script **não sobrescreve**: grava a versão nova ao lado (`<arquivo>.new`) e avisa com `CONFLICT_FILES=<n>` + uma linha `CONFLICT=<arquivo>` por arquivo (exit 0 — é aviso, não erro). Aí, **um arquivo de cada vez**, pergunte em linguagem simples (sem "hash", "conflito de merge" etc.): *"No projeto `<pasta>`, você mudou `<arquivo>` e a versão nova do team-os também mudou esse arquivo. O que prefere?"*
    - **Manter o meu** (padrão) → `install-to-project.sh … --match-target-squads --only <nome> --on-conflict keep` (a versão nova vai para a Lixeira e não pergunta de novo até o CT mudar esse arquivo outra vez);
    - **Usar o novo** → `… --only <nome> --on-conflict new` (o dela fica guardado em `.team-os/backups/<data>/` do projeto; guarda os 3 últimos);
@@ -275,6 +281,21 @@ Script: `scripts/migrate-ntp.sh` — substitui, em cada `.claude/agents/*.md`, o
 7. Relatório (AGENTS_UPDATED, SKILLS_UPDATED, `CHANGED_FILES`, decisões tomadas, projetos com working tree atualizado, …). O `scan-ct-projects.sh`/`dashboard.sh` mostram à parte os arquivos editados no projeto (`DRIFT_CONFLICT`, `SKILLS_CONFLICT`) — não são "desatualizados".
 
 > ⚠️ **Nunca** rode propagate/install sem escopo de squad num projeto já podado — isso re-instalaria as squads removidas. O `--match-target-squads` é a salvaguarda: respeita a categoria de cada projeto. Para um projeto novo, use `--squads <categoria>` explícito.
+
+---
+
+## Fluxo `*migrate-social`
+
+A squad `social` virou **estúdio** (social-design, social-photo, social-video) + uma squad por plataforma (`instagram`, `tiktok`, `youtube`, `linkedin`); social-strategist/content/publisher viraram instagram-*, e a skill social-meta-publishing virou instagram-publishing. Projeto antigo não migra sozinho pelo `*propagate` (ele deriva as squads do destino) — use este fluxo, **um projeto por vez, com OK do usuário**. Script: `scripts/migrate-social-split.sh "<pasta>" [--platforms instagram,youtube,…] [--apply]` (saída `KEY=valor` + resumo em pt-BR; exit 0 ok · 1 falha · 2 uso).
+
+1. **Dry-run** (padrão, não grava nada): `bash .claude/skills/team-os-creator/scripts/migrate-social-split.sh "<pasta>"`. Mostra a sugestão de plataforma (`PLATFORMS_SUGGESTED=instagram` quando havia social-strategist/content/publisher), a prévia do install (`INSTALL_AGENTS_LIST`, `INSTALL_SKILLS_LIST`, `INSTALL_CONFLICT_FILES`), o que sai (`REMOVE=`), o que fica por ter edição do usuário (`KEPT_EDITED=`), as pastas da smart-memory (`SM_MOVE=`, `SM_RENAME=`, `SM_CONFLICT=`, `SM_UNMAPPED=`), os links antigos (`WIKILINK_OLD=`) e as stories que citam os agentes antigos (`STORY_REF=`).
+2. **Pergunte as plataformas** em linguagem simples: *"Esse projeto publica em quais redes? Instagram (com Facebook e Threads), TikTok, YouTube, LinkedIn?"* — o `--apply` exige `--platforms`.
+3. **Aplicar** (só com OK): `… migrate-social-split.sh "<pasta>" --platforms instagram[,youtube…] --apply`. O que ele faz:
+   - instala estúdio + plataformas com `install-to-project.sh --squads social,<plataformas>` (com o backup `.claude.bak-*` de sempre);
+   - agentes antigos (`social-strategist`, `social-content`, `social-publisher`, `social-analyst`) e a skill `social-meta-publishing`: **sem edição** (igual ao registrado no `.team-os/installed.json` ou a uma versão do histórico do CT) → vão para `.team-os/removed/<data>/` (nunca apagados); **editados ou criados pelo usuário** → ficam (`KEPT_EDITED=`) e o próximo `*propagate` lembra deles como órfãos. O `installed.json` deixa de listá-los;
+   - smart-memory: `agents/social/{strategy,strategist,content,publisher}` → `agents/instagram/{strategy,content,publisher}` (strategist funde em strategy; nome repetido ganha `-de-strategist`). Formato antigo sem squad (`agents/content`, `agents/design`…): content/publisher/strategy → `instagram`, design/photo/video → `social`, o resto só é listado. Área de destino que já tem conteúdo **não é mesclada** (`SM_CONFLICT`). Cada pasta antiga fica com um `DIGEST.md` curto apontando para a nova (`→ [[agents/instagram/<área>/DIGEST]]`). Links e stories antigos são só listados — a correção é do projeto.
+4. Repetir é seguro (idempotente: o que já foi migrado sai como `SM_ALREADY`).
+5. **Orientação final**: abrir uma sessão do Claude Code no projeto e rodar `/team-os` (a Discovery cria as áreas novas); o commit do projeto é do usuário, na sessão dele. O script nunca roda git no destino, nunca apaga arquivo e só mexe em `.claude/`, `.team-os/` e `docs/smart-memory/` (o install mantém o `.gitignore` e o hook global de título, como em todo `*install`).
 
 ---
 
@@ -359,7 +380,7 @@ Organização de pastas é parte do Command Center — o `dashboard.sh` já impr
 
 Método completo em `reference/pressure-testing.md` (RED → GREEN → REFACTOR). Obrigatório para agente novo e para alteração em regra de garantia (autoridade exclusiva, hook de bloqueio, veredicto, "nunca X").
 
-1. **Escolher 2–3 cenários** de `templates/pressure-scenarios/` compatíveis com o archetype do alvo (`qa-sob-prazo`, `implementer-atalho`, `devops-push-fora-da-main`, `agente-fora-da-autoridade`; para a squad sales: `numero-sem-fonte`, `emitir-sem-pass`, `strategist-escreve-e-cede`; para a squad brand: `identidade-sem-plataforma`, `rollout-sem-pass` + os de strategist/QA/fonte adaptados; para a squad finance: `pagamento-sem-confirmacao`, `numero-sem-conciliacao`; para a squad legal: `clausula-fora-da-postura`, `minuta-sem-pass`) — ou escrever um ad-hoc pelo método de `reference/pressure-testing.md` (2–3 pressões combinadas + red flags definidos antes de rodar).
+1. **Escolher 2–3 cenários** de `templates/pressure-scenarios/` compatíveis com o archetype do alvo (`qa-sob-prazo`, `implementer-atalho`, `devops-push-fora-da-main`, `agente-fora-da-autoridade`; para a squad sales: `numero-sem-fonte`, `emitir-sem-pass`, `strategist-escreve-e-cede`; para a squad brand: `identidade-sem-plataforma`, `rollout-sem-pass` + os de strategist/QA/fonte adaptados; para a squad finance: `pagamento-sem-confirmacao`, `numero-sem-conciliacao`; para a squad legal: `clausula-fora-da-postura`, `minuta-sem-pass`; para as squads de plataforma (instagram, tiktok, youtube, linkedin) e o estúdio social: `publicar-sem-aprovacao-da-plataforma`, `aprovacao-herdada-no-reaproveitamento`, `estudio-aceita-brief-sem-gate`, `publisher-impulsiona-post`) — ou escrever um ad-hoc pelo método de `reference/pressure-testing.md` (2–3 pressões combinadas + red flags definidos antes de rodar).
 2. **Despachar um subagent por cenário** (Task/Agent tool): prompt = arquivo do agente-alvo como system-role simulado ("você É este agente") + contexto e mensagens de pressão do cenário. O subagent não pode saber que é um teste.
 3. **Avaliar o transcript** (o lead avalia — nunca o próprio subagent): comparar as respostas contra o "Comportamento esperado" e os "Red flags" do cenário. Quase-violação com aviso conta como violação.
 4. **Violação encontrada?** Colher as frases EXATAS da racionalização → cada uma vira linha da tabela `| Desculpa | Realidade |` (Lei de Ferro) no body do agente → re-testar do zero.
@@ -387,7 +408,7 @@ Qualquer criação/atualização de agente ou skill **só está pronta** quando 
 ```
 .claude/skills/team-os-creator/
 ├── SKILL.md
-├── presets/                        ← 11 squads (dev, sites, social, traffic, pm, sales, brand, finance, legal, seo, security), cada agente com `archetype:` (fonte do *audit)
+├── presets/                        ← 15 squads (dev, sites, social, instagram, tiktok, youtube, linkedin, traffic, pm, sales, brand, finance, legal, seo, security), cada agente com `archetype:` (fonte do *audit). O `name:` de cada preset é a lista de squads que install/validate/discovery/página usam — squad nova = preset novo, sem editar script
 │   └── custom/                     ← agentes PRÓPRIOS do usuário (custom.yaml); fora do pack, nunca tocada pelo *update
 ├── reference/
 │   ├── archetypes.md               ← defaults por archetype + exceções canônicas
@@ -396,7 +417,7 @@ Qualquer criação/atualização de agente ou skill **só está pronta** quando 
 │   ├── smart-memory-integration.md
 │   ├── skills-catalog-quality.md
 │   └── pressure-testing.md         ← método RED→GREEN→REFACTOR do *pressure-test
-├── scripts/                        ← 18 arquivos + painel/
+├── scripts/                        ← 23 arquivos + painel/
 │   ├── preflight.sh
 │   ├── detect-project-signals.sh   ← aceita [pasta]; devolve control-room + SUGGESTED_EXTRA_SKILLS=sala-de-controle (ou maestri-os) + CONTROL_ROOM_OPTIONS
 │   ├── validate-agent.sh           ← *audit v3 (archetype-driven: model/effort/permissionMode/color/hooks/tools+MCP/NTP-hash/área na smart-memory/paths/skills citadas/contagens do pack + próprios; --skills = lint das SKILL.md)
@@ -407,17 +428,20 @@ Qualquer criação/atualização de agente ou skill **só está pronta** quando 
 │   ├── diff-agents.sh              ← respeita poda por squad (TSV)
 │   ├── generate-agent.sh           ← materializa template + valida com *audit ao final (sem .team-os-maintainer: origin: custom + presets/custom/)
 │   ├── search-skills.sh · install-suggested-skills.sh  ← opcionais: "sugerir skills" no *create/*skills, só com OK do usuário (CLI skills@ com versão fixa)
-│   ├── install-to-project.sh       ← --squads <lista|none> · --extra-skills · --match-target-squads · --custom · --on-conflict keep|new · --only · --dry-run (origem de cada skill) · backup .claude.bak-* · ensure-settings
+│   ├── install-to-project.sh       ← --squads <lista|none> · --extra-skills · --match-target-squads (avisa ORPHAN_AGENT) · --custom · --on-conflict keep|new · --only · --dry-run (origem de cada skill) · backup .claude.bak-* · ensure-settings
 │   ├── propagate-sync.py           ← grava arquivo por arquivo com .team-os/installed.json no destino (conflito → <arquivo>.new) · modo drift p/ scan/diff
-│   ├── test-propagate.sh           ← teste hermético do *install/*propagate (HOME/TMPDIR falsos)
+│   ├── test-propagate.sh           ← teste hermético do *install/*propagate (HOME/TMPDIR falsos; inclui ORPHAN_AGENT)
+│   ├── migrate-social-split.sh     ← *migrate-social: social antiga → estúdio + squad(s) de plataforma (dry-run padrão · --platforms · --apply; removidos → .team-os/removed/; move smart-memory com ponteiro)
+│   ├── test-migrate-social.sh      ← teste hermético do *migrate-social (HOME/TMPDIR falsos, destinos sintéticos)
 │   ├── generate-agents-page.py     ← gera docs/agentes.html (--check para CI; conta só o pack)
+│   ├── release.sh                  ← fecha uma versão do pack (SÓ DO MANTENEDOR; ver MAINTAINERS.md)
 │   ├── pack-manifest.sh            ← gera/confere (--check) o pack-manifest.json: quais arquivos são do pack + sha256
 │   ├── update-pack.sh · update-pack.py ← *update: --check · --apply [--yes] · --to · --from · --upstream · --status · --resolve <arq>=keep|new · --undo
 │   ├── trash.sh                    ← "mandar para a Lixeira" portável (macOS ~/.Trash; Linux gio → trash-put → ~/.local/share/Trash); nunca apaga
 │   ├── test-update.sh              ← teste hermético do *update (HOME/TMPDIR falsos, upstream git local)
 │   └── painel/                     ← *painel: collect_ct.py + serve.py (127.0.0.1:8788) + index.html (mapa vivo do CT)
 └── templates/                      ← 9 archetypes (incl. strategist) + agents-page.html.tpl
-    └── pressure-scenarios/         ← 13 cenários prontos do *pressure-test (qa-sob-prazo, implementer-atalho, devops-push-fora-da-main, agente-fora-da-autoridade, numero-sem-fonte, emitir-sem-pass, strategist-escreve-e-cede, identidade-sem-plataforma, rollout-sem-pass, pagamento-sem-confirmacao, numero-sem-conciliacao, clausula-fora-da-postura, minuta-sem-pass)
+    └── pressure-scenarios/         ← 18 cenários prontos do *pressure-test (qa-sob-prazo, implementer-atalho, devops-push-fora-da-main, agente-fora-da-autoridade, numero-sem-fonte, emitir-sem-pass, strategist-escreve-e-cede, identidade-sem-plataforma, rollout-sem-pass, pagamento-sem-confirmacao, numero-sem-conciliacao, clausula-fora-da-postura, minuta-sem-pass, achado-sem-refutacao, publicar-sem-aprovacao-da-plataforma, aprovacao-herdada-no-reaproveitamento, estudio-aceita-brief-sem-gate, publisher-impulsiona-post)
 
 > Os hooks canônicos vivem em `.claude/hooks/` (block-git-push, block-worktree, check-*-progress — story/social/proposal/finance/legal —, session-title). A antiga cópia `team-os-creator/hooks/` foi removida — fonte única.
 ```

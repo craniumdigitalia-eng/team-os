@@ -106,14 +106,36 @@ want() { # $1=path-absoluto-dentro-da-SM
 AREAS=""
 add_area() { case " $AREAS " in *" $1 "*) : ;; *) AREAS="$AREAS${AREAS:+ }$1" ;; esac; }
 
-KNOWN_SQUADS="dev sites social traffic pm sales brand finance legal seo security"
+# Squads conhecidas — nunca lista escrita à mão em outro lugar. Fontes, em ordem:
+#   1. presets/*.yaml do pack (campo `name:`), quando o script roda dentro do CT;
+#   2. fallback fixo abaixo (o destino não tem presets);
+#   3. prefixo dos agentes do destino que declaram a linha "Área na smart-memory" (squads
+#      novas do pack e agentes próprios entram sem editar este arquivo).
+KNOWN_SQUADS_FALLBACK="dev sites social instagram tiktok youtube linkedin traffic pm sales brand finance legal seo security"
+KNOWN_SQUADS=""
+add_squad() { case " $KNOWN_SQUADS " in *" $1 "*) : ;; *) KNOWN_SQUADS="$KNOWN_SQUADS${KNOWN_SQUADS:+ }$1" ;; esac; }
+_DISC_DIR="$(cd "$(dirname "$0")" 2>/dev/null && pwd)"
+for _pdir in "$TARGET/.claude/skills/team-os-creator/presets" "$_DISC_DIR/../../team-os-creator/presets"; do
+  for _y in "$_pdir"/*.yaml; do
+    [ -f "$_y" ] || continue
+    _n="$(sed -n 's/^name:[[:space:]]*["'\'']\{0,1\}\([a-z][a-z0-9]*\)["'\'']\{0,1\}[[:space:]]*$/\1/p' "$_y" | head -1)"
+    [ -n "$_n" ] && add_squad "$_n"
+  done
+done
+for _s in $KNOWN_SQUADS_FALLBACK; do add_squad "$_s"; done
+for _af in "$TARGET/.claude/agents/"*-*.md; do
+  [ -f "$_af" ] || continue
+  grep -q '^\*\*Área na smart-memory:\*\*' "$_af" 2>/dev/null || continue
+  _b="$(basename "$_af" .md)"; add_squad "${_b%%-*}"
+done
 
 # Fallback por squad — usado SÓ para agente sem a linha "Área na smart-memory".
 squad_areas() { # $1=squad → áreas (sem o prefixo da squad)
   case "$1" in
     dev)     echo "research qa ux bi data-engineer data-performance" ;;
     sites)   echo "research qa ux data-engineer" ;;
-    social)  echo "content design photo video publisher strategist" ;;
+    social)  echo "design photo video" ;;   # estúdio comum (sob brief de uma squad de plataforma)
+    instagram|tiktok|youtube|linkedin) echo "strategy content publisher" ;;
     traffic) echo "traffic qa copy automation bi design research meta google tiktok strategy" ;;
     pm)      echo "analyst client coach data demand engineer ops planner qa reporter" ;;
     sales)   echo "discovery strategy planning finance copy design qa closer" ;;

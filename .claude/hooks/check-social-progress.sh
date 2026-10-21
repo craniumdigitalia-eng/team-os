@@ -1,20 +1,26 @@
 #!/usr/bin/env bash
 # .claude/hooks/check-social-progress.sh
-# TaskCompleted hook — quality gate de publicação de conteúdo social.
+# TaskCompleted hook — quality gate de publicação de conteúdo social (todas as plataformas).
 # Exit 2 NEGA a conclusão (a task volta a in_progress e o teammate recebe o stderr).
 #
 # Payload real do evento (doc oficial de hooks): stdin JSON com task_id, task_subject,
 # task_description (opcional), teammate_name, team_name + campos comuns.
 # Chaves primárias: task_subject/task_description; fallback: title|subject|name|description|body|...
 #
-# Dispara quando a task é de PUBLICAÇÃO social — por caminho
+# Vale para o estúdio `social` e para as squads de plataforma (instagram, tiktok, youtube,
+# linkedin) — o nome do arquivo fica check-social-progress.sh porque já está registrado no
+# settings.json dos projetos destino.
+#
+# Dispara quando a task é de PUBLICAÇÃO — por caminho
 # (docs/smart-memory/agents/[<squad>/]{content,design,photo,video,publisher}, com ou sem o
-# segmento de squad) OU por vocabulário ("publicar post/reel/story/carrossel", "agendar
-# publicação", "publish reel", "schedule post"...) — e a descrição precisa conter evidência de
-# aprovação editorial ("aprovado pela VERA/strategist") antes de fechar.
+# segmento de squad) OU por vocabulário ("publicar post/reel/story/carrossel/Short", "agendar
+# publicação", "agendar post", "publicar no LinkedIn", "subir vídeo", "upload do vídeo",
+# "estreia no YouTube", "publish reel", "schedule post"...) — e a descrição precisa conter
+# evidência de aprovação editorial do estrategista da plataforma ("aprovado pela VERA",
+# "PASS do KAIROS") antes de fechar.
 #
 # Negação NÃO conta como aprovação: "não aprovado", "ainda não aprovado", "não foi aprovado",
-# "desaprovado", "reprovado", "not approved", "unapproved".
+# "desaprovado", "reprovado", "not approved", "unapproved", "sem PASS", "aguardando PASS".
 # Caso contrário → exit 0 (não bloqueia tasks genéricas).
 #
 # Defensivo: JSON malformado ou sem python3 → exit 0 (nunca quebra o fluxo).
@@ -49,21 +55,30 @@ texts = []
 collect(data, texts)
 blob = "\n".join(texts)
 
-SQUAD = r"(?:(?:sales|dev|sites|social|traffic|pm|brand|finance|legal|seo|security)/)?"
+SQUAD = r"(?:(?:sales|dev|sites|social|instagram|tiktok|youtube|linkedin|traffic|pm|brand|finance|legal|seo|security)/)?"
 path_ref = re.search(r"docs/smart-memory/agents/" + SQUAD + r"(content|design|photo|video|publisher)\b", blob) is not None
 
-SOCIAL_NOUN = r"(?:posts?|reels?|stor(?:y|ies)|carross[eé]is|carrossel|carousels?|feed|v[íi]deos?|conte[úu]dos?|campanha|instagram|facebook|tiktok|linkedin|youtube|threads|meta|redes? sociais?|social)"
+PLATFORM = r"(?:instagram|facebook|tiktok|linkedin|youtube|threads)"
+# "Short" do YouTube só com S maiúsculo ou no plural ("publish a short summary" não é publicação)
+SHORT = r"(?-i:Shorts?|shorts)"
+SOCIAL_NOUN = r"(?:posts?|reels?|stor(?:y|ies)|carross[eé]is|carrossel|carousels?|feed|v[íi]deos?|" + SHORT + r"|tiktoks?|conte[úu]dos?|campanha|" + PLATFORM + r"|meta|redes? sociais?|social)"
+# Subir/upload: só com objeto de vídeo (não "subir o deploy", nem "subir campanha")
+UPLOAD_NOUN = r"(?:v[íi]deos?|" + SHORT + r"|reels?|tiktoks?|epis[óo]dios?)"
 
 # Ato de publicação (infinitivo/imperativo/substantivo — não "publicado" como histórico de revisão)
 publish_act = (
     re.search(r"\b(?:publicar|postar|agendar|programar|publish|schedule)\b\s+(?:\w+\s+){0,3}" + SOCIAL_NOUN + r"\b", blob, re.I)
     or re.search(r"\b(?:agendar|programar)\s+(?:a\s+|uma\s+|as\s+)?publica[cç](?:[aã]o|[oõ]es)\b", blob, re.I)
     or re.search(r"\bschedule\s+(?:the\s+|a\s+)?(?:post|publication|reel|story)\b", blob, re.I)
-    or re.search(r"\bpost\s+(?:it\s+|this\s+|the\s+\w+\s+)?(?:to|on)\s+(?:instagram|facebook|tiktok|linkedin|youtube|threads)\b", blob, re.I)
+    or re.search(r"\bpost\s+(?:it\s+|this\s+|the\s+\w+\s+)?(?:to|on)\s+" + PLATFORM + r"\b", blob, re.I)
+    or re.search(r"\b(?:subir|upload(?:ar)?|uploading|carregar)\b\s+(?:\w+\s+){0,3}" + UPLOAD_NOUN + r"\b", blob, re.I)
+    or re.search(r"\bupload\s+(?:do|da|dos|das|de|of)\s+(?:\w+\s+){0,2}" + UPLOAD_NOUN + r"\b", blob, re.I)
+    or re.search(r"\b(?:agendar|programar|marcar|configurar)\s+(?:a\s+|uma\s+|the\s+)?(?:estreia|premiere)\b", blob, re.I)
+    or re.search(r"\b(?:estreia|premiere)\s+(?:\w+\s+){0,3}(?:no|do|on|em)\s+youtube\b", blob, re.I)
 )
 if path_ref:
     # Com caminho social, basta o verbo de publicação
-    publish_act = publish_act or re.search(r"\bpublicar\b|\bpublish\b|\bpublica[cç][aã]o\b|\bagendar\b|\bschedule\b", blob, re.I)
+    publish_act = publish_act or re.search(r"\bpublicar\b|\bpublish\b|\bpublica[cç][aã]o\b|\bagendar\b|\bschedule\b|\bupload\b|\bsubir\b|\bestreia\b", blob, re.I)
 
 if not publish_act:
     print("OK"); sys.exit(0)
@@ -73,8 +88,11 @@ clean = re.sub(r"\b(?:ainda\s+)?n[ãa]o\s+(?:foi\s+|est[áa]\s+|esta\s+|ainda\s+
 clean = re.sub(r"\b(?:des|re)aprovad[oa]s?\b", " ", clean, flags=re.I)
 clean = re.sub(r"\bsem\s+aprova[cç][aã]o\b|\baguardando\s+aprova[cç][aã]o\b|\bpendente\s+de\s+aprova[cç][aã]o\b", " ", clean, flags=re.I)
 clean = re.sub(r"\bnot\s+(?:yet\s+)?approved\b|\bunapproved\b|\bdisapproved\b", " ", clean, flags=re.I)
+# PASS do gate da plataforma (VERA, KAIROS, RIFF, STRATA) — maiúsculo; "sem/aguardando/não tem PASS" não conta
+clean = re.sub(r"\b(?:sem|aguardando|pendente\s+de|falta|faltando|no|without|awaiting)\s+(?:o\s+|the\s+)?PASS\b", " ", clean, flags=re.I)
+clean = re.sub(r"\bn[ãa]o\s+(?:\w+\s+){0,2}PASS\b", " ", clean, flags=re.I)
 
-if re.search(r"\baprovad[oa]s?\b|\bapproved\b", clean, re.I):
+if re.search(r"\baprovad[oa]s?\b|\bapproved\b", clean, re.I) or re.search(r"\bPASS\b", clean):
     print("OK"); sys.exit(0)
 
 print("BLOCK")
@@ -85,11 +103,13 @@ case "$RESULT" in
     {
       echo "🚫 Task de publicação social só fecha com aprovação editorial registrada."
       echo ""
-      echo "A task é de publicação social (post, reel, story, carrossel, agendamento), mas a"
-      echo "descrição não contém evidência de aprovação da VERA/strategist — negação"
-      echo "(\"não aprovado\", \"reprovado\") não conta."
-      echo "Adicione à descrição a evidência (ex.: \"Aprovado pela VERA em 2026-09-05 —"
-      echo "agents/social/strategist/approvals.md\") antes de concluir — sem aprovação editorial, nada é publicado."
+      echo "A task é de publicação (post, reel, story, carrossel, Short, vídeo, agendamento, upload,"
+      echo "estreia), mas a descrição não contém evidência de aprovação do estrategista da"
+      echo "plataforma (VERA no Instagram, KAIROS no YouTube, RIFF no TikTok, STRATA no LinkedIn) —"
+      echo "negação (\"não aprovado\", \"reprovado\", \"sem PASS\") não conta, e aprovação de outra"
+      echo "plataforma não se transfere."
+      echo "Adicione à descrição a evidência (ex.: \"PASS da VERA em 2026-09-05 —"
+      echo "agents/instagram/strategy/approvals.md\") antes de concluir — sem aprovação editorial, nada é publicado."
     } >&2
     exit 2 ;;
   OK) exit 0 ;;
