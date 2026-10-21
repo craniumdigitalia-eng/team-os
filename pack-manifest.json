@@ -2,7 +2,7 @@
  "name": "team-os",
  "version": "2.4.0",
  "upstream": "https://github.com/joaoguirunas/team-os",
- "generated": "2026-10-21T12:37:58Z",
+ "generated": "2026-10-21T13:40:05Z",
  "files": {
   ".claude/agents/brand-analyst.md": "64b5af18f63d9618760cf7e0aa37a6a2534a8009441f2395fcf5c330ff1284a3",
   ".claude/agents/brand-architect.md": "1bee3e3d4bf16c62c5318fad7726513af53ba243d0b33af03fd5cc0c0637b64e",
@@ -721,7 +721,7 @@
   ".claude/skills/team-os-creator/scripts/release.sh": "ed25a05253dabfcb25fe401fb99724e0c018a705834e3f9f7b89e8ce103ae9ef",
   ".claude/skills/team-os-creator/scripts/scan-ct-projects.sh": "3afcf5c79e5ce19947cd809557d5b37b9cfbe44f800391ff1d7acbd42cb7bcf8",
   ".claude/skills/team-os-creator/scripts/search-skills.sh": "55621e200d356907092a67b0ad50f55308a0487ec5d5503f3b2548ec413bdf7b",
-  ".claude/skills/team-os-creator/scripts/test-hooks.sh": "4fd6d17a7f7b950730538f3362491ba6e25b0ba9424e15f04c1e689cd7a09f6c",
+  ".claude/skills/team-os-creator/scripts/test-hooks.sh": "90c84b6a0bdb12a74e2eb234f69b87d18170e11ffb477219f9030f612351d4fe",
   ".claude/skills/team-os-creator/scripts/test-migrate-sala.sh": "04042a10befb21dc9d50d77fefeabddf8cc7af17e16cd0ed45cc2fabf157e48d",
   ".claude/skills/team-os-creator/scripts/test-migrate-social.sh": "16afd7cfe7ad68e81172009a49d695b7a141f627409486dec289bd59195e629b",
   ".claude/skills/team-os-creator/scripts/test-propagate.sh": "70f3bdaf1a4d9ff2fcfa467def2e39cd5e3d94e83fb46eae6c31d82d9883ed9f",
@@ -844,11 +844,11 @@
   ".claude/skills/youtube-publishing/SKILL.md": "266fed6b0f7325c5568c4d61f6914b4b7554e5ad22c6327ae21b2e0107de9e8b",
   ".claude/skills/youtube-scriptwriting/SKILL.md": "77c4aedb5911b5ccd0f5f9ff09cfc9f89f913ad3cf2f762ecfabc5916548459f",
   "CHANGELOG.md": "5a539aecc1116bd77245305d90da72253f1a9b2eacb99898ad87bfad609f4b9d",
-  "CLAUDE.md": "425adda18f03a099c7da276fc96027312c822b4296de4f6a1186b7441bc0e5bd",
+  "CLAUDE.md": "e9cb5902fb4eda8be3e2f05a89d84e03e3243dabf9ff4e8d60c18151d5a50590",
   "CONTRIBUTING.md": "73f6ec17dfbf4930968ff0d7c2e62442203e01653d09379295413f54fb992e8f",
   "LICENSE": "9c975ba958127912f398c40d76067ab2e313e5aaf807d010c7adb14060dc700b",
   "MAINTAINERS.md": "4bcde50640e1335efb0833e9ee50105de05f0d9e590bc1214c3931653dd770c6",
-  "README.md": "5046ced49a9d0cfe3d0b0ae2c6496b0797f8b2a4824b224e8a4fe0aa3049da18",
+  "README.md": "946a4130ddfbff368e38c6814cf82ec5c6ac221d79b471a3d2ab832e270f765b",
   "THIRD_PARTY_NOTICES.md": "d099853107add6a0651830d0ad37b49a9941d30c1e1614025ab0026879c7349c",
   "VERSION": "2ad7b0c3f0ede58c3165b7a8a5479e890a758d39bfe8683eaef50ce6afad7232"
  }

@@ -2,9 +2,58 @@
 
 ### Pack de orquestração para Claude Code Agent Teams — *by João Guirunas*
 
-**111 agentes e 124 skills** organizados em 15 squads (Dev, Sites, Social — estúdio comum, Instagram, TikTok, YouTube, LinkedIn, Traffic, PM, Sales, Brand, Finance, Legal, SEO, Security), com a skill `/team-os` para orquestrar sessões, a `/team-os-creator` para gerar e instalar squads em qualquer projeto, e a **Sala de Controle** (`/sala-de-controle`, mora no próprio CT) — um lugar único de comando que lê todas as sessões e projetos, manda cada pedido para a sessão certa e abre o painel ao vivo dos agentes em produção. Todo agente segue o **Native Teams Protocol** — autônomo, com smart-memory integrada (formato Obsidian) e coordenação peer-to-peer.
+**O team-os transforma o Claude Code num time de especialistas.** São **111 agentes e 124 skills** em **15 squads** (Dev, Sites, SEO, Security, Social — estúdio comum, Instagram, TikTok, YouTube, LinkedIn, Traffic, PM, Sales, Brand, Finance e Legal), prontos para trabalhar em paralelo com o recurso **Agent Teams** do Claude Code. Cada agente tem um papel com fronteira clara (quem planeja, quem produz, quem aprova, quem publica), uma memória compartilhada que persiste entre sessões e regras de qualidade embutidas.
 
-> Este repositório é a **fonte da verdade**: edite agentes e skills **aqui**, audite com `/team-os-creator *audit` e propague para os projetos destino com `/team-os-creator *propagate`. Nunca edite agentes direto no destino.
+**Para quem é:** quem já usa o Claude Code (no app, aba **Code**, ou no terminal) e quer tocar vários projetos com times de IA em vez de uma conversa só — produto e software, sites, conteúdo orgânico e tráfego pago, propostas comerciais, marca, financeiro e jurídico do dia a dia. Serve para quem trabalha sozinho, para agências e consultorias com vários clientes e para equipes que querem um método repetível. Você não precisa saber criar agentes: instala as squads que o projeto pede e conversa em português.
+
+> Este repositório é o **CT — Centro de Treinamento**, a **fonte da verdade** do pack: agentes e skills são editados **aqui**, auditados com `/team-os-creator *audit` e levados aos projetos com `/team-os-creator *propagate`. Nunca edite agentes direto num projeto.
+
+---
+
+## Como o pack se organiza
+
+Três skills fazem o pack funcionar. Uma vai para todo projeto; duas ficam só no CT.
+
+| Peça | Onde mora | O que faz |
+|---|---|---|
+| **`/team-os`** | Em **todo projeto** (o `*install` leva) | Bootstrap e orquestração da sessão. É o 1º comando de cada sessão: liga o Agent Teams, roda o **Discovery Engine** (lê o código e monta a smart-memory na 1ª vez), pergunta o objetivo, propõe o time do tamanho do trabalho e cria as tasks. Tem `*grill` (sabatina para objetivo vago), `*compact` (enxuga a memória) e sugere automações sem aplicar nada sem OK. → [§3](#3-skill-principal-team-os) |
+| **`/team-os-creator`** | **Só no CT** | A factory do pack. O **Command Center** mostra cada projeto da pasta pai (team-os instalada? agentes? desatualizado?) e oferece criar, atualizar, instalar e organizar. Comandos: `*create`/`*squad`, `*audit`, `*install`, `*propagate`, `*update`, `*painel` (mapa do pack em `127.0.0.1:8788`), `*migrate-social`, `*migrate-sala` e `*feedback`. → [§4](#4-skill-principal-team-os-creator) |
+| **`/sala-de-controle`** | **Só no CT** | O lugar único de comando. Enxerga **todas as sessões do Claude Code da máquina**, sabe a etapa de cada projeto pela smart-memory dele, despacha cada pedido para a sessão certa e abre o **painel dos agentes em produção** (`127.0.0.1:8787`). Lê e roteia, **nunca executa em outro projeto**; a memória dela fica no CT, fora do git. → [§6](#sala-de-controle--sala-de-controle-mora-no-ct) |
+
+```mermaid
+flowchart LR
+    GH["GitHub — pack oficial"] -- "*update" --> CT
+
+    subgraph CT["CT — Centro de Treinamento (fonte da verdade)"]
+        PK[("111 agentes · 124 skills · 15 squads")]
+        CR["/team-os-creator<br/>cria · audita · instala · propaga"]
+        SC["/sala-de-controle<br/>lê sessões · despacha · painel 8787"]
+        CR --- PK
+    end
+
+    CR -- "*install / *propagate" --> PA
+    CR -- "*install / *propagate" --> PB
+
+    subgraph PA["Projeto A — ex.: site"]
+        A1["/team-os"] --> A2["squads sites + seo"]
+        A2 --> A3[("smart-memory")]
+    end
+
+    subgraph PB["Projeto B — ex.: marketing"]
+        B1["/team-os"] --> B2["squads social + instagram + traffic"]
+        B2 --> B3[("smart-memory")]
+    end
+
+    SC -. "lê sessões e etapa" .-> PA
+    SC -. "despacha pedido" .-> PB
+```
+
+Em volta dessas três peças, quatro mecanismos valem para todos os agentes:
+
+- **Native Teams Protocol** — o contrato que todo agente carrega, byte a byte igual: a smart-memory é a fonte da verdade, o trabalho passa pela TaskList nativa, os agentes conversam direto entre si (peer-to-peer) e ninguém cria sub-time. → [§1](#1-conceitos-fundamentais) · [§8](#8-modelo-de-coordenação)
+- **Smart-memory** — `docs/smart-memory/` em cada projeto, no formato do Obsidian (frontmatter, wikilinks, tags). Leitura em camadas: cada agente lê o índice, o `DIGEST.md` da sua área e as stories ativas, nunca pastas inteiras; o frio vai para `_archive/` com `*compact`. → [§11](#11-estrutura-do-repositório)
+- **Hooks de qualidade e de economia de tokens** — 14 hooks: push só pelo devops, task vaga recusada, publicação/envio/pagamento só com PASS e confirmação do usuário, leitura de memória com orçamento, mensagem entre agentes curta e aviso de contexto grande. → [§10](#10-hooks-de-qualidade)
+- **Política de modelos Híbrida** — `opus` fixo onde o raciocínio decide (28 agentes: arquitetos, planejadores, QAs e estrategistas); `inherit` no resto (83), que segue o `/model` da sua sessão. → [§9](#9-política-de-modelos-híbrido)
 
 ---
 
@@ -25,6 +74,9 @@ Times de IA superam uma sessão única quando o trabalho tem partes independente
 
 ## Índice
 
+- [Como o pack se organiza](#como-o-pack-se-organiza) — `/team-os`, `/team-os-creator`, `/sala-de-controle` e o diagrama
+- [Por que team-os?](#por-que-team-os)
+- [Squads](#squads) — as 15 squads, personas e como combinar
 - ⭐ [the team-os Method](#-the-team-os-method) — a metodologia
 - [Instalar e atualizar](#instalar-e-atualizar) — baixar, instalar, `*update`, onde ficam os meus agentes
 1. [Conceitos fundamentais](#1-conceitos-fundamentais)
@@ -32,7 +84,7 @@ Times de IA superam uma sessão única quando o trabalho tem partes independente
 3. [Skill principal: `/team-os`](#3-skill-principal-team-os)
 4. [Skill principal: `/team-os-creator`](#4-skill-principal-team-os-creator)
 5. [Os 111 agentes e suas skills](#5-os-111-agentes-e-suas-skills)
-6. [Catálogo de skills de apoio](#6-catálogo-de-skills-de-apoio)
+6. [Catálogo completo de skills](#6-catálogo-completo-de-skills) — as 124, com para que serve e quem usa · [Sala de Controle](#sala-de-controle--sala-de-controle-mora-no-ct)
 7. [Tutorial passo a passo](#7-tutorial-passo-a-passo)
 8. [Modelo de coordenação](#8-modelo-de-coordenação)
 9. [Política de modelos (Híbrido)](#9-política-de-modelos-híbrido)
@@ -41,6 +93,39 @@ Times de IA superam uma sessão única quando o trabalho tem partes independente
 12. [Troubleshooting](#12-troubleshooting)
 13. [Manutenção do CT](#13-manutenção-do-ct)
 - [Licença](#licença)
+
+---
+
+## Squads
+
+Cada projeto recebe só as squads de que precisa (`/team-os-creator *install --squads sites,seo`, por exemplo). As 15 squads, com as personas dos agentes na ordem do preset — os perfis completos estão em [§5](#5-os-111-agentes-e-suas-skills) e na página [`docs/agentes.html`](./docs/agentes.html):
+
+| Squad | Papel | Agentes (personas) | Como entra no projeto |
+|---|---|---|---|
+| **`dev`** (12) | Software complexo (SaaS): arquitetura, front, back, dados/BI, hardening, QA e devops | Lyra, Zael, Vela+Astra, Nova, Rex, Sera, Kron, Axis, Grav, Byte, Kairo, Sigma | Base (projeto de software); combine com `security` |
+| **`sites`** (10) | Sites e landing pages em Next.js ou Astro, do UX ao deploy | Zael-S, Lyra-S, Vela-S, Nova-S, Rex-S, Sera-S, Kron-S, Axis-S, Grav-S, Byte-S | Base (site); combine com `seo` e/ou `security` |
+| **`seo`** (15) | Auditoria e otimização de busca, inclusive busca por IA — audita e recomenda, não implementa | THOTH, PTAH, NEITH, KHNUM, GEB, SHU, NUT, HORUS, HEKA, BASTET, ANUBIS, HAPI, SESHAT, WADJET, MAAT | Add-on de `sites` (handoff do fix para a squad sites) |
+| **`security`** (7) | Segurança de aplicação: ameaças, appsec, código gerado por IA, segredos, privacidade e incidentes | MIMIR, HEIMDALL, HUGIN, VÁR, FRIGG, VIDAR, FORSETI | Add-on de `dev` ou `sites` (dev/sites corrige) |
+| **`social`** (3) | Estúdio comum de produção: arte, foto e vídeo, só sob brief — não aprova nem publica | AEON, IRIS, FLUX | Add-on de `instagram`, `tiktok`, `youtube` e/ou `linkedin` (sozinha não tem gate) |
+| **`instagram`** (3) | Instagram, página do Facebook e Threads: pauta, copy, DM/ManyChat e publicação via Meta | VERA, LYRIS, PULSE | Plataforma; instale com `social` |
+| **`tiktok`** (3) | TikTok orgânico: pauta, sons em alta, roteiro nativo e pacote de upload | RIFF, BEAT, LOOP | Plataforma; instale com `social` |
+| **`youtube`** (3) | Canal do YouTube: pauta de 90 dias, roteiro longo e Shorts, pacote e leitura do canal | KAIROS, ECHO, ORBIT | Plataforma; instale com `social` |
+| **`linkedin`** (3) | LinkedIn B2B, perfil pessoal e página: posts, PDF, artigos e pacote de publicação | STRATA, QUILL, RELAY | Plataforma; instale com `social` |
+| **`traffic`** (10) | Tráfego pago em Google, Meta e TikTok: estratégia, criativo, setup, QA e atribuição | Axar, Lyrath, Bytax, Florix, Koprath, Pixrek, Gorix, Zukar, Tokris, Gathar | Base; usa o estúdio `social` para criativo quando instalado |
+| **`pm`** (10) | Gestão de projetos e portfólio: demandas, sprints, operação diária, reuniões e QA de entregas | Zynath, Serak, Nexar, Draketh, Varek, Faelor, Aevon, Eshara, Lyrith, Thyron | Base (operação e portfólio) |
+| **`sales`** (8) | Propostas e apresentações comerciais: intake, tese, números com fonte, copy, PDF e follow-up | ATLAS, ATHENA, DAEDALUS, LIBRA, CALLIOPE, HELIOS, ARGUS, PEITHO | Base (comercial) |
+| **`brand`** (8) | Reposicionamento de marca: pesquisa, plataforma, voz, identidade visual, medição e implantação | SIRIUS, POLARIS, ORION, LYRA, AURORA, VEGA, ALTAIR, RIGEL | Base; o kit de marca alimenta sites, social, traffic e sales |
+| **`finance`** (8) | Gestão financeira: conciliação, fechamento, caixa de 13 semanas, cobrança, fiscal e relatório | NILO, AMAZONAS, DANUBIO, GANGES, TEJO, RENO, SENA, TIGRE | Base (back-office) |
+| **`legal`** (8) | Jurídico do dia a dia: pesquisa, postura, minutas, registro de contratos, LGPD e conflitos | VERITAS, PRUDENTIA, LEX, CONCORDIA, FIDES, CLEMENTIA, AEQUITAS, IUSTITIA | Base (back-office) |
+
+**Regra das squads de plataforma.** Conteúdo orgânico é dividido em um **estúdio comum** e quatro squads de plataforma:
+
+- **`social`** é o estúdio — AEON (arte e Key Visual, via Stitch), IRIS (foto com IA, via Freepik) e FLUX (vídeo com ffmpeg e avatar HeyGen). Produz só sob brief de uma plataforma com pauta aprovada (ou do `traffic-strategist`, para anúncio); nunca aprova nem publica.
+- **`instagram`** (VERA · LYRIS · PULSE, inclui Facebook e Threads), **`tiktok`** (RIFF · BEAT · LOOP), **`youtube`** (KAIROS · ECHO · ORBIT) e **`linkedin`** (STRATA · QUILL · RELAY) seguem o mesmo trio: o **strategist** define a pauta e é o gate (PASS/CONCERNS/FAIL escrito), o **content** escreve, o **publisher** publica ou monta o pacote para você subir — sempre com PASS **e** a sua confirmação.
+- **Aprovação não se transfere entre plataformas:** uma peça aprovada no Instagram passa de novo pelo gate do TikTok antes de ir para lá.
+- **Impulsionar é sempre da squad `traffic`:** boost na Meta é do `traffic-meta`, Spark Ads do `traffic-tiktok`, anúncio no YouTube do `traffic-google`. Os publishers orgânicos nunca gastam.
+
+Projetos de antes dessa divisão (squad `social` antiga, com strategist/content/publisher) migram com `/team-os-creator *migrate-social` — simula primeiro, aplica só com OK.
 
 ---
 
@@ -364,6 +449,8 @@ Credenciais (token, key, project-ref) nunca vão no agente nem na smart-memory �
 /team-os-creator *update               → atualiza o pack para a versão mais nova sem perder o que você criou ou editou (ver [Instalar e atualizar](#instalar-e-atualizar))
 /team-os-creator *propagate            → propaga agentes/skills atualizados para os destinos (sempre --match-target-squads)
 /team-os-creator *feedback             → junta as linhas [skill-feedback] dos projetos (scripts/feedback-scan.sh, só leitura), agrupa por skill/agente e propõe a melhoria no CT — aplica só com OK
+/team-os-creator *migrate-social <pasta> → leva um projeto da squad social antiga para o estúdio social + squad(s) de plataforma (migrate-social-split.sh; simula primeiro, --apply --platforms só com OK)
+/team-os-creator *migrate-sala <pasta>  → leva uma pasta de Sala de Controle antiga (fora do CT) para o CT (migrate-sala-to-ct.sh; simula primeiro, --apply só com OK)
 /team-os-creator *install              → instala squads + skills (incl. team-os) + settings.json + hooks num projeto destino
 /team-os-creator *organize             → árvore negócio → projeto → squads + proposta de organização (só propõe)
 /team-os-creator *painel               → mapa do pack no navegador do Claude: squads, agentes (persona + cargo), skills; clique abre perfil e arquivo (127.0.0.1:8788)
@@ -632,47 +719,224 @@ A coluna **Skills relacionadas** é um mapa de skills **recomendadas/disponívei
 
 ---
 
-## 6. Catálogo de skills de apoio
+## 6. Catálogo completo de skills
 
-### Catálogo por área
+As **124 skills** do pack, todas diretórios reais e versionados em `.claude/skills/` (repositório self-contained). Gerado a partir dos arquivos do pack: **para que serve** resume a `description` da skill; **usada por** são os agentes que a citam no próprio arquivo (o `*install` leva a um projeto exatamente as skills citadas pelos agentes instalados, mais a `team-os`).
 
-124 skills, todas diretórios reais e versionados (repositório self-contained).
+Índice rápido: Orquestração (3) · Transversais (15) · Dev (10) · Dados e IA (6) · Sites (9) · SEO (27) · Security (4) · Social (13) · Instagram (3) · TikTok (2) · YouTube (4) · LinkedIn (2) · Traffic (4) · Sales (6) · Brand (6) · Finance (5) · Legal (5) = **124**.
 
-**Dev (10):** `dev-api-design`, `dev-database-patterns`, `dev-debugging`, `dev-defuddle`, `dev-error-handling`, `dev-git-workflow`, `dev-security-patterns`, `dev-technical-writing`, `dev-testing-strategy`, `dev-typescript-patterns`
+#### Orquestração (CT) (3)
 
-**Data & ML (6):** `ai-ml-data-science`, `ai-ml-timeseries`, `data-analytics-engineering`, `data-lake-platform`, `data-sql-optimization`, `data-supabase-patterns`
+| Skill | Para que serve | Usada por |
+|---|---|---|
+| **`team-os`** | Bootstrap e orquestração da sessão: Agent Teams, smart-memory (Discovery), proposta de time, `*grill`, `*compact`. Vai para todo projeto | `dev-architect`, `pm-data`, `sites-architect`, `traffic-strategist` |
+| **`team-os-creator`** | Factory do pack, só no CT: cria, audita, instala, propaga e atualiza agentes e skills; Command Center e mapa do pack (8788) | você, numa sessão no CT (nenhum agente) |
+| **`sala-de-controle`** | Sala de Controle, só no CT: lê todas as sessões e a etapa de cada projeto, despacha pedidos e abre o painel ao vivo (8787) | você, numa sessão no CT (nenhum agente) |
 
-**Sites (9):** `sites-canvas-design`, `sites-copy`, `sites-deployment`, `sites-frontend-stack`, `sites-page-cro`, `sites-scroll-motion`, `sites-seo-keywords`, `sites-seo-technical`, `sites-ux-interaction`
+#### Transversais (qualquer squad) (15)
 
-> Fusões 2026-09: `sites-copy` absorve content-strategy + copywriting + copy-editing; `sites-frontend-stack` absorve frontend-design + tailwind-design-system + shadcn-ui; `sites-web-accessibility` foi absorvida por `accessibility` (WCAG 2.2).
+| Skill | Para que serve | Usada por |
+|---|---|---|
+| **`verify-before-done`** | Evidência antes de afirmação: verificação obrigatória antes de dizer que algo está pronto ou corrigido | 53 agentes de 12 squads — brand (todos, 8) · finance (todos, 8) · legal (todos, 8) · dev (5) · sales (5) · sites (5) · pm (4) · linkedin (todos, 3) · youtube (todos, 3) · tiktok (2) · security (1) · traffic (1) |
+| **`copy-humanize`** | Checklist para tirar a "cara de IA" de texto em pt-BR: tiques, clichês, painel de 5 sinais e ajuste por canal | 7 agentes de 7 squads — brand (1) · instagram (1) · linkedin (1) · sales (1) · tiktok (1) · traffic (1) · youtube (1) |
+| **`deep-research`** | Pesquisa multi-fonte com rastreio de citações, evidência persistida e relatório estruturado | 9 agentes de 8 squads — finance (2) · brand (1) · dev (1) · instagram (1) · legal (1) · sales (1) · sites (1) · youtube (1) |
+| **`doc-to-markdown`** | Converter PDF, DOCX, XLSX, PPTX, ODT, RTF e HTML em Markdown na própria máquina; nada sai dela | `finance-analyst`, `legal-analyst`, `legal-drafter`, `sales-analyst` |
+| **`ui-craft`** | Ofício de interface sem cara de IA: tokens, ~30 sinais a evitar, tipografia, movimento com propósito e gate visual | 6 agentes de 2 squads — dev (3) · sites (3) |
+| **`ui-ux-pro-max`** | Banco pesquisável de UI/UX: estilos, paletas, pares de fonte, regras de UX e guias por stack | 5 agentes de 5 squads — brand (1) · dev (1) · sales (1) · sites (1) · traffic (1) |
+| **`web-design-guidelines`** | Revisar UI contra as Vercel Web Interface Guidelines, com violações em formato arquivo:linha | `brand-designer`, `dev-ux`, `sites-qa`, `sites-ux` |
+| **`accessibility`** | Auditar e corrigir acessibilidade WCAG 2.2 com evidência (Lighthouse/axe, teclado, leitor de tela) | `dev-ux`, `sites-qa`, `sites-ux` |
+| **`core-web-vitals`** | Diagnosticar e corrigir LCP, INP e CLS com dado de campo × laboratório e correção por framework | `dev-dev-delta`, `seo-performance`, `sites-dev-delta` |
+| **`nextjs-react-best-practices`** | Performance em React e Next.js: waterfalls, bundle, Server Components, data fetching e re-renders | `dev-dev-alpha`, `seo-performance`, `sites-dev-alpha` |
+| **`testing-playwright-e2e`** | Testes E2E com Playwright: locators resilientes, fixtures, auth, mocking de rede e combate a flaky | `dev-qa`, `sites-qa` |
+| **`negotiation`** | Preparar e conduzir negociação: empatia tática, perguntas calibradas, BATNA e método Ackerman (Voss) | 5 agentes de 3 squads — legal (2) · sales (2) · finance (1) |
+| **`pricing`** | Estratégia de preço e empacotamento: tiers, freemium, métrica de valor, Van Westendorp e pricing page | `brand-strategist`, `finance-strategist`, `sales-finance`, `sales-strategist` |
+| **`presentation-design`** | Desenhar e avaliar apresentações que comunicam: estrutura, slides e revisão | `sales-designer`, `sales-qa` |
+| **`startup-financial-modeling`** | Modelo financeiro de 3–5 anos para startup: receita, custos, caixa, burn, runway e cenários | `finance-planner`, `finance-strategist`, `sales-finance` |
 
-**Social — método comum a 2+ plataformas (13):** `social-analytics`, `social-apify-research`, `social-carousel-design`, `social-cinematic-composition`, `social-copywriting`, `social-editorial-validation`, `social-format-specs`, `social-freepik-generation`, `social-heygen-avatar`, `social-key-visual`, `social-scriptwriting`, `social-stitch-workflow`, `social-video-editing`
+#### Dev (10)
 
-**Instagram (3):** `instagram-strategy`, `instagram-dm-flows`, `instagram-publishing` (era `social-meta-publishing`)
+| Skill | Para que serve | Usada por |
+|---|---|---|
+| **`dev-api-design`** | Design de APIs: REST, tRPC, contratos, versionamento e respostas de erro padronizadas | 7 agentes de 3 squads — dev (3) · sites (3) · security (1) |
+| **`dev-database-patterns`** | Padrões de banco: migrations seguras, índices, detecção de N+1, soft delete e pooling | `dev-data-engineer`, `sites-data` |
+| **`dev-debugging`** | Depuração pela causa raiz: reproduzir, localizar, reduzir, corrigir e proteger com teste de regressão | `dev-dev-beta`, `dev-dev-delta`, `dev-qa`, `sites-dev-delta` |
+| **`dev-defuddle`** | Extrair Markdown limpo de páginas web (Defuddle CLI), sem nav, anúncios e barras laterais | 7 agentes de 6 squads — dev (2) · brand (1) · finance (1) · legal (1) · sales (1) · sites (1) |
+| **`dev-error-handling`** | Resiliência: retry, circuit breaker, timeouts, error boundaries, logs estruturados e observabilidade | `dev-dev-delta`, `sites-dev-delta` |
+| **`dev-git-workflow`** | Fluxo git: estratégia de branch, conventional commits, templates de PR, merge e autoridade de push | `dev-devops`, `sites-devops` |
+| **`dev-security-patterns`** | Segurança de app: auth, autorização, RLS, OWASP top 10, segredos e armadilhas de código gerado por IA | 11 agentes de 3 squads — security (5) · dev (3) · sites (3) |
+| **`dev-technical-writing`** | Documentação técnica: ADRs, specs de módulo e decision logs em Markdown com Mermaid | 12 agentes de 8 squads — pm (3) · finance (2) · legal (2) · brand (1) · dev (1) · sales (1) · seo (1) · sites (1) |
+| **`dev-testing-strategy`** | Estratégia de testes: pirâmide, cobertura mínima, unit × integração × E2E e mocking | 6 agentes de 2 squads — dev (3) · sites (3) |
+| **`dev-typescript-patterns`** | TypeScript idiomático: types × interfaces, generics, discriminated unions e padrões de domínio | 6 agentes de 2 squads — dev (3) · sites (3) |
 
-**TikTok (2):** `tiktok-marketing` (só orgânico — a parte de anúncios foi para `traffic-paid-ads-optimization`), `tiktok-publishing`
+#### Dados e IA (6)
 
-**YouTube (4):** `youtube-scriptwriting`, `youtube-packaging`, `youtube-analytics`, `youtube-publishing`
+| Skill | Para que serve | Usada por |
+|---|---|---|
+| **`ai-ml-data-science`** | Ciência de dados e ML: EDA, feature engineering, modelagem, avaliação e handoff para produção | `dev-data-performance` |
+| **`ai-ml-timeseries`** | Previsão de séries temporais: LightGBM, Transformers, validação temporal e deploy | `dev-data-performance` |
+| **`data-analytics-engineering`** | Analytics engineering: modelos dbt, definição de métricas e camada semântica para BI | 7 agentes de 6 squads — pm (2) · brand (1) · dev (1) · finance (1) · legal (1) · seo (1) |
+| **`data-lake-platform`** | Data lake e lakehouse: ingestão, CDC, Iceberg/Delta/Hudi, Trino/DuckDB e governança | `dev-bi` |
+| **`data-sql-optimization`** | Otimização de SQL em OLTP: EXPLAIN, índices, schema, migrations e alta disponibilidade | `dev-bi`, `pm-data` |
+| **`data-supabase-patterns`** | Postgres e Supabase: índices, RLS performática, pooling, locking e diagnóstico com EXPLAIN | 5 agentes de 4 squads — security (2) · dev (1) · pm (1) · sites (1) |
 
-**LinkedIn (2):** `linkedin-strategy`, `linkedin-publishing`
+#### Sites (9)
 
-> Regra de prefixo: método usado por 2+ plataformas = `social-*`; de uma plataforma só = `<plataforma>-*`; transversal = sem prefixo, entra por citação no agente.
+| Skill | Para que serve | Usada por |
+|---|---|---|
+| **`sites-canvas-design`** | Visual que CSS não resolve: Canvas HTML5 e SVG para gráficos, partículas e fundos custom | `sites-ux` |
+| **`sites-copy`** | Copy de site: estratégia de conteúdo, frameworks (AIDA, PAS, StoryBrand) e revisão editorial | 6 agentes de 4 squads — sites (3) · brand (1) · sales (1) · seo (1) |
+| **`sites-deployment`** | Deploy de Next.js ou Astro em Vercel, Netlify e Cloudflare Pages, com CI/CD e release | `sites-devops` |
+| **`sites-frontend-stack`** | Stack de site: Next.js App Router ou Astro, Tailwind v4, shadcn/ui e Motion | `sites-architect`, `sites-dev-alpha`, `sites-ux` |
+| **`sites-page-cro`** | Conversão de página: estrutura de landing, hierarquia, provas, CTAs e redução de fricção | `seo-sxo`, `sites-dev-gamma` |
+| **`sites-scroll-motion`** | Scroll cinematográfico, parallax, GSAP e 3D, sempre com prefers-reduced-motion | `sites-dev-alpha`, `sites-dev-gamma`, `sites-ux` |
+| **`sites-seo-keywords`** | Pesquisa de keywords: intenção de busca, clustering e mapeamento de termos por página | `seo-cluster`, `sites-analyst` |
+| **`sites-seo-technical`** | SEO técnico no código (Next.js ou Astro): meta tags, schema, sitemap, robots e Core Web Vitals | 6 agentes de 2 squads — sites (5) · seo (1) |
+| **`sites-ux-interaction`** | UX e interação de site: header sticky, nav mobile, micro-interações e animação de entrada | `sites-dev-alpha`, `sites-ux` |
 
-**Traffic (4):** `traffic-paid-ads-optimization`, `traffic-analytics-tracking`, `traffic-google-ads-mcp`, `traffic-ga4-mcp`
+#### SEO (27)
 
-**Sales (6):** `sales-discovery-intake`, `sales-proposal-planning`, `sales-pricing-payback`, `sales-proposal-copy`, `sales-deck-production`, `sales-enablement`
+| Skill | Para que serve | Usada por |
+|---|---|---|
+| **`seo`** | Orquestradora da squad SEO e runtime Python (setup, doctor): auditoria, página, técnico, schema, conteúdo, GEO | squad `seo` inteira (15) |
+| **`seo-ahrefs`** | Dados Ahrefs via MCP: domínios de referência, backlinks, keywords orgânicas e Content Explorer | `seo-backlinks` |
+| **`seo-audit`** | Auditoria SEO completa: rastreia até 500 páginas, aciona até 14 especialistas e gera health score | `seo-architect`, `seo-qa` |
+| **`seo-backlinks`** | Perfil de backlinks: domínios de referência, âncoras, links tóxicos e gap contra concorrentes | `seo-backlinks` |
+| **`seo-bing`** | Bing Webmaster Tools e IndexNow: visibilidade no Bing (base do Copilot) e submissão de URLs | `seo-google` |
+| **`seo-cluster`** | Clusters semânticos pela sobreposição real de SERP, hub-and-spoke com matriz de links internos | `seo-cluster` |
+| **`seo-competitor-pages`** | Páginas de comparação e alternativas ("X vs Y") com matriz de features, schema e conversão | `seo-sxo` |
+| **`seo-content`** | Qualidade de conteúdo e E-E-A-T, prontidão para citação por IA e limpeza final do rascunho | `seo-content`, `seo-geo`, `seo-qa` |
+| **`seo-content-brief`** | Briefs de conteúdo competitivos: palavras por seção, scoring de concorrentes e templates por página | `seo-cluster`, `seo-content` |
+| **`seo-dataforseo`** | Dados de SEO ao vivo via MCP DataForSEO: SERP, keywords, backlinks, local e menções em LLMs | `seo-backlinks` |
+| **`seo-drift`** | "Git para SEO": baseline dos elementos críticos e detecção de regressão depois de deploy | `seo-drift` |
+| **`seo-ecommerce`** | SEO de e-commerce: Google Shopping, marketplace, schema de produto e preços de concorrentes | `seo-ecommerce` |
+| **`seo-flow`** | Framework FLOW (Find → Leverage → Optimize → Win): SEO guiado por evidência com prompts por estágio | `seo-architect` |
+| **`seo-geo`** | GEO: visibilidade em AI Overviews, ChatGPT e Perplexity — crawlers de IA, llms.txt e citabilidade | `seo-geo` |
+| **`seo-google`** | APIs Google: Search Console, PageSpeed, CrUX (25 semanas), Indexing API e GA4 orgânico | `seo-google` |
+| **`seo-hreflang`** | Hreflang e SEO internacional: auditoria, validação de idioma/região e implementação correta | `seo-sitemap` |
+| **`seo-image-gen`** | Imagens de IA para SEO (OG, hero, produto, infográfico) via Gemini/nanobanana — depende de MCP | `seo-content` |
+| **`seo-images`** | Imagens para SEO e performance: alt text, peso, formato, responsivas, lazy loading e CLS | `seo-ecommerce`, `seo-performance` |
+| **`seo-local`** | SEO local: Google Business Profile, NAP, citações, avaliações, schema local e multi-localidade | `seo-local` |
+| **`seo-maps`** | Inteligência de mapas: geo-grid de ranking, GBP via API, avaliações e raio de concorrentes | `seo-local` |
+| **`seo-page`** | Análise profunda de uma única URL: on-page, conteúdo, meta tags, schema, imagens e performance | `seo-technical` |
+| **`seo-plan`** | Plano estratégico de SEO: templates por setor, análise competitiva, conteúdo e roadmap | `seo-architect` |
+| **`seo-programmatic`** | SEO programático: páginas em escala a partir de dados, padrões de URL e proteção contra index bloat | `seo-sitemap` |
+| **`seo-schema`** | Detectar, validar e gerar Schema.org em JSON-LD | `seo-ecommerce`, `seo-schema` |
+| **`seo-sitemap`** | Analisar ou gerar sitemaps XML com templates por setor | `seo-sitemap` |
+| **`seo-sxo`** | Search Experience: lê a SERP ao contrário, acha descasamento de tipo de página e pontua por persona | `seo-sxo` |
+| **`seo-technical`** | SEO técnico em 9 categorias: rastreio, indexação, segurança, URL, mobile, CWV, schema, JS e IndexNow | 5 agentes — seo (5) |
 
-**Brand (6):** `brand-research`, `brand-platform`, `brand-verbal-identity`, `brand-visual-system`, `brand-tracking`, `brand-rollout`
+#### Security (4)
 
-**Finance (5):** `finance-cash-flow`, `finance-bookkeeping`, `finance-receivables-payables`, `finance-tax-compliance`, `finance-reporting`
+| Skill | Para que serve | Usada por |
+|---|---|---|
+| **`security-audit-method`** | Régua comum da squad Security: escopo, severidade, achado SEC-{NN}, três estados e fechamento por nova varredura | squad `security` inteira (7) |
+| **`security-incident-response`** | Resposta a incidente: SEV1–SEV4, primeira hora, evidência, contenção planejada, rotação e post-mortem | `security-incident`, `security-secrets` |
+| **`security-privacy-data-map`** | Mapa técnico de dados pessoais: onde mora, quem lê, para onde vai, retenção e exclusão provada | `security-privacy` |
+| **`security-threat-modeling`** | Modelagem de ameaças leve: ativos, fronteiras, STRIDE por fronteira e requisitos testáveis | `security-architect` |
 
-**Legal (5):** `legal-research`, `legal-contract-drafting`, `legal-clause-library`, `legal-compliance-lgpd`, `legal-contract-lifecycle`
+#### Social — método comum (estúdio e plataformas) (13)
 
-**SEO (27, incorporado do pacote [claude-seo](https://github.com/AgriciDaniel/claude-seo) v2.3.1, MIT):** `seo` (orquestradora + runtime Python em `scripts/`, `schema/`, `data/`, `pdf/`), `seo-audit`, `seo-page`, `seo-plan`, `seo-technical`, `seo-content`, `seo-content-brief`, `seo-schema`, `seo-sitemap`, `seo-hreflang`, `seo-programmatic`, `seo-images`, `seo-image-gen`, `seo-geo`, `seo-sxo`, `seo-competitor-pages`, `seo-cluster`, `seo-local`, `seo-maps`, `seo-backlinks`, `seo-ahrefs`, `seo-ecommerce`, `seo-google`, `seo-bing`, `seo-drift`, `seo-dataforseo`, `seo-flow`
+| Skill | Para que serve | Usada por |
+|---|---|---|
+| **`social-analytics`** | Métricas sociais: outlier sobre a mediana da conta, retenção em 3 s, KPIs por objetivo e relatório | 12 agentes de 5 squads — traffic (6) · instagram (todos, 3) · brand (1) · linkedin (1) · tiktok (1) |
+| **`social-apify-research`** | Pesquisa de tendências e concorrentes via Apify, com referências escolhidas pelo múltiplo de outlier | `instagram-content`, `tiktok-content`, `traffic-analyst` |
+| **`social-carousel-design`** | Carrossel: capa de até 6 palavras, uma ideia por slide, CTA único e alt text, feito no Stitch | `instagram-content`, `linkedin-content`, `social-design`, `traffic-designer` |
+| **`social-cinematic-composition`** | Composição cinematográfica para foto e vídeo: enquadramento, color grading e linguagem visual | `social-photo`, `traffic-designer` |
+| **`social-copywriting`** | Copy social: linha antes do "mais", termos de busca, uma ação por post, CTA e hashtags enxutas | 7 agentes de 5 squads — linkedin (2) · traffic (2) · instagram (1) · tiktok (1) · youtube (1) |
+| **`social-editorial-validation`** | Gate editorial comum: qualidade, estratégia, compliance, valor original, mídia sintética e direitos | 7 agentes de 5 squads — traffic (3) · instagram (1) · linkedin (1) · tiktok (1) · youtube (1) |
+| **`social-format-specs`** | Specs técnicas por plataforma: dimensões, duração, peso, codecs e zonas seguras | 11 agentes de 6 squads — traffic (4) · linkedin (2) · tiktok (2) · instagram (1) · social (1) · youtube (1) |
+| **`social-freepik-generation`** | Fotos com IA via Freepik: prompts eficazes, estilos fotográficos e specs por formato | `social-photo`, `traffic-designer` |
+| **`social-heygen-avatar`** | Vídeo com avatar de IA via HeyGen: talking-head, image-to-video, dublagem e escolha de voz | `social-video` |
+| **`social-key-visual`** | Key Visual de campanha: paleta, tipografia e elemento central para todas as peças derivadas | `brand-designer`, `social-design`, `traffic-designer` |
+| **`social-scriptwriting`** | Roteiro de vídeo curto: 3 ganchos com nota, fala e texto de tela separados, loop final | 5 agentes de 4 squads — traffic (2) · instagram (1) · tiktok (1) · youtube (1) |
+| **`social-stitch-workflow`** | Fluxo de design no Google Stitch: projeto, design system, telas, variantes e exportação | `social-design` |
+| **`social-video-editing`** | Edição com ffmpeg: corte por fala e silêncio, legenda .srt, ducking/loudnorm e capítulos | `social-video` |
 
-**Security (4):** `security-audit-method`, `security-threat-modeling`, `security-incident-response`, `security-privacy-data-map`
+#### Instagram (3)
 
-**Design & geral — transversais (15):** `ui-ux-pro-max`, `ui-craft`, `web-design-guidelines`, `accessibility`, `core-web-vitals`, `copy-humanize`, `doc-to-markdown`, `deep-research`, `nextjs-react-best-practices`, `testing-playwright-e2e`, `verify-before-done`, `negotiation`, `pricing`, `presentation-design`, `startup-financial-modeling`
+| Skill | Para que serve | Usada por |
+|---|---|---|
+| **`instagram-dm-flows`** | Fluxos de DM (ManyChat por palavra-chave) e triagem de comentários — a squad escreve, o humano configura | `instagram-content`, `instagram-strategist` |
+| **`instagram-publishing`** | Publicação orgânica via Meta (Instagram, Facebook, Threads) com PASS da VERA + confirmação; nunca impulsiona | `instagram-publisher`, `traffic-meta` |
+| **`instagram-strategy`** | Estratégia orgânica no Instagram: pilares, papel de cada formato, mix, cadência e pauta | `instagram-content`, `instagram-strategist` |
+
+#### TikTok (2)
+
+| Skill | Para que serve | Usada por |
+|---|---|---|
+| **`tiktok-marketing`** | TikTok orgânico: pilares, gancho nos 3 primeiros segundos, sons em alta (~48h), cadência e retenção | `tiktok-content`, `tiktok-publisher`, `tiktok-strategist`, `traffic-tiktok` |
+| **`tiktok-publishing`** | Pacote de upload do TikTok para o usuário subir (arquivo, legenda, som, capa, rótulo de IA) e leitura de métricas | `tiktok-publisher`, `tiktok-strategist` |
+
+#### YouTube (4)
+
+| Skill | Para que serve | Usada por |
+|---|---|---|
+| **`youtube-analytics`** | Leitura do canal em 24h/7d contra a mediana, retenção por cena e A/B de título/thumb com z ≥ 1,96 | `youtube-publisher`, `youtube-strategist` |
+| **`youtube-packaging`** | Pacote do vídeo: título, texto de thumb, descrição, capítulos, tags e 2–3 variantes | `youtube-content`, `youtube-publisher`, `youtube-strategist` |
+| **`youtube-publishing`** | Prontidão e pacote private + publishAt para o usuário subir no Studio (claims, direitos, mídia sintética) | `youtube-publisher`, `youtube-strategist` |
+| **`youtube-scriptwriting`** | Roteiro longo e Shorts: 5 estruturas, gancho de 0–5 s, pontos de retenção e claims com fonte | `youtube-content`, `youtube-strategist` |
+
+#### LinkedIn (2)
+
+| Skill | Para que serve | Usada por |
+|---|---|---|
+| **`linkedin-publishing`** | Pacote de publicação do LinkedIn sem automação: texto, PDF 1080×1350, alt text, destino e métricas exportadas | `linkedin-publisher`, `linkedin-strategist` |
+| **`linkedin-strategy`** | Estratégia B2B no LinkedIn: tese, pilares, perfil pessoal × página, cadência, formatos e social selling | `linkedin-content`, `linkedin-strategist` |
+
+#### Traffic (4)
+
+| Skill | Para que serve | Usada por |
+|---|---|---|
+| **`traffic-analytics-tracking`** | Analytics de campanha: GA4, GTM, plano de eventos, UTMs e atribuição multi-touch | `traffic-automation`, `traffic-bi`, `traffic-qa` |
+| **`traffic-ga4-mcp`** | MCP oficial do GA4: relatórios, validação realtime pré-launch, funis e dicionário de métricas | 5 agentes — traffic (5) |
+| **`traffic-google-ads-mcp`** | MCP oficial do Google Ads: GAQL, descoberta de contas, limites read-only e handoff para mutations | 5 agentes — traffic (5) |
+| **`traffic-paid-ads-optimization`** | Tráfego pago: brief, estrutura de conta, budget, retargeting por funil e escala para Google, Meta, LinkedIn, TikTok | 6 agentes — traffic (6) |
+
+#### Sales (6)
+
+| Skill | Para que serve | Usada por |
+|---|---|---|
+| **`sales-deck-production`** | Artefato final da proposta: HTML com print CSS → PDF headless, variante deck e checagem do PDF | `sales-designer`, `sales-qa` |
+| **`sales-discovery-intake`** | Reunião, transcrição ou e-mails viram ficha de intake: dores, stack, sinais de compra, decisor e pendências | `sales-analyst`, `sales-planner` |
+| **`sales-enablement`** | Materiais de vendas: sales deck, one-pager, doc de objeções, ROI por deal, demo script e playbook | `sales-closer`, `sales-copywriter`, `sales-planner`, `sales-strategist` |
+| **`sales-pricing-payback`** | Economia da proposta: preço × tabela, desconto, breakeven, payback do cliente e alternativas | `sales-finance`, `sales-strategist` |
+| **`sales-proposal-copy`** | Régua editorial de proposta: voz declarativa, objeção respondida pelo enquadramento, número só com origem | `sales-closer`, `sales-copywriter`, `sales-qa` |
+| **`sales-proposal-planning`** | Planejamento interno da proposta em 9 seções, do diagnóstico à estrutura do PDF | `sales-copywriter`, `sales-planner` |
+
+#### Brand (6)
+
+| Skill | Para que serve | Usada por |
+|---|---|---|
+| **`brand-platform`** | Plataforma e arquitetura de marca: propósito, promessa, posicionamento, provas e gate de 7 pontos | 7 agentes de 4 squads — brand (4) · linkedin (1) · tiktok (1) · youtube (1) |
+| **`brand-research`** | Pesquisa para reposicionamento: auditoria da marca atual, concorrentes, territórios e públicos com fonte | `brand-analyst`, `brand-strategist` |
+| **`brand-rollout`** | Implantação do reposicionamento: pré-condições, inventário de ativos, fases e kit de handoff | `brand-architect`, `brand-rollout` |
+| **`brand-tracking`** | Medição de marca: scorecard do funil, share of voice, sentimento, linha de base e leitura do depois | `brand-insights` |
+| **`brand-verbal-identity`** | Identidade verbal: tom em escala, dizemos/não dizemos, mensagens, manifesto, tagline e naming | `brand-qa`, `brand-rollout`, `brand-voice` |
+| **`brand-visual-system`** | Identidade visual: direções, cor com contraste medido, tipografia, grid, imagem e brandbook | `brand-designer`, `brand-qa`, `brand-rollout`, `sites-ux` |
+
+#### Finance (5)
+
+| Skill | Para que serve | Usada por |
+|---|---|---|
+| **`finance-bookkeeping`** | Escrituração gerencial: plano de contas, conciliação item a item, DRE e fechamento com `#id` | 5 agentes — finance (5) |
+| **`finance-cash-flow`** | Plano de caixa de 13 semanas: entradas, saídas, gap, cenários, reserva, runway e burn | `finance-controller`, `finance-planner`, `finance-reporter`, `finance-strategist` |
+| **`finance-receivables-payables`** | Contas a receber e a pagar: régua de cobrança, aging e lote de pagamento preparado (humano executa) | `finance-billing`, `finance-qa` |
+| **`finance-reporting`** | Relatório mensal para sócios e dicionário de indicadores, todo número com `#id` do fechamento | 5 agentes — finance (5) |
+| **`finance-tax-compliance`** | Obrigações fiscais: calendário, apuração preparatória com fonte e pacote para o contador | `finance-tax` |
+
+#### Legal (5)
+
+| Skill | Para que serve | Usada por |
+|---|---|---|
+| **`legal-clause-library`** | Biblioteca de modelos e cláusulas `M{N}.{c}` por relação, com variantes de piso e teto | `legal-architect`, `legal-drafter`, `legal-ops`, `legal-qa` |
+| **`legal-compliance-lgpd`** | LGPD: mapa de dados, bases legais, política e termos, direitos do titular e incidentes | `legal-compliance`, `legal-qa` |
+| **`legal-contract-drafting`** | Redação e revisão de contratos, aditivos e NDAs: 15 blocos, matriz de desvios e versionamento | `legal-drafter`, `legal-qa`, `legal-strategist` |
+| **`legal-contract-lifecycle`** | Ciclo de vida do contrato: registro, vigência, assinatura travada, envio, aditivo, notificação e dossiê | `legal-architect`, `legal-compliance`, `legal-disputes`, `legal-ops` |
+| **`legal-research`** | Pesquisa jurídica com fonte primária e data; separa achado, leitura e recomendação — não é parecer | `legal-analyst`, `legal-disputes`, `legal-drafter`, `legal-strategist` |
+
+> Regra de prefixo: método usado por 2+ plataformas = `social-*`; de uma plataforma só = `<plataforma>-*`; transversal = sem prefixo, entra por citação no agente. Fusões 2026-09: `sites-copy` absorve content-strategy + copywriting + copy-editing; `sites-frontend-stack` absorve frontend-design + tailwind-design-system + shadcn-ui; `sites-web-accessibility` foi absorvida por `accessibility` (WCAG 2.2). Antigas: `instagram-publishing` era `social-meta-publishing`; a parte de anúncios da `tiktok-marketing` foi para `traffic-paid-ads-optimization`.
+
+### De onde vêm as skills
 
 > **Novas 2026-10 (Fase 3):** `copy-humanize` (checklist anti-"cara de IA" em pt-BR — tiques, léxico, painel de 5 sinais, ajuste por canal; citada por todo agente que escreve texto final), `ui-craft` (postura e piso de ofício de interface — tokens, anti-padrões, animação, microdetalhes, testes swap/squint; para UX, devs de frontend e designers), `core-web-vitals` (LCP/INP/CLS com evidência de campo × laboratório e correção por framework), `dev-debugging` (depuração pela causa raiz com teste de regressão red-green-revert), `doc-to-markdown` (PDF/DOCX/XLSX/PPTX/ODT/RTF/HTML → Markdown na própria máquina via `scripts/convert.sh`; nada sai da máquina). Créditos em [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md).
 >

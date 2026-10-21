@@ -52,7 +52,7 @@ Editar agente/skill no CT
 → validate-agent.sh            (= *audit; 111/111 do pack)
 → validate-agent.sh --skills   (lint das 124 skills)
 → test-hooks.sh                (544/544)
-→ test-propagate.sh            (120/120)
+→ test-propagate.sh            (127/127)
 → generate-agents-page.py      (regenera docs/agentes.html — obrigatório após mudar agente ou skill)
 → /team-os-creator *propagate  (--match-target-squads)
 ```
