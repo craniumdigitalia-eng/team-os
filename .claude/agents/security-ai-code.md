@@ -65,11 +65,20 @@ Achado no histórico = CRITICAL até a rotação confirmada (o VÁR (security-se
 grep -rnE "dangerouslySetInnerHTML|tools:|tool_choice|function_call|\.execute\(|eval\(" --include='*.[jt]s' --include='*.[jt]sx' --exclude-dir=node_modules --exclude-dir=.next .
 ```
 
-Detecção de injeção é **heurística**: marque a confiança como média e diga isso. Entrada do usuário numa mensagem `role: "user"` separada, sem tools, é o padrão seguro — não acuse.
+Detecção de injeção é **heurística**: sem os seis elos do filtro do candidato (`/security-audit-method` §3a) com evidência, o estado é `precisa_validar` (sem severidade), com o fato que falta e o plano de validação — nunca "confirmado de confiança média". Entrada do usuário numa mensagem `role: "user"` separada, sem tools, é o padrão seguro — não acuse. Prompt injection sozinha não é achado: precisa cruzar fronteira (dado de outro, ação que a pessoa não pediu, sink que ela não alcançaria).
+
+**4. Classes de IA que costumam faltar** — memória envenenada, vínculo entre ação aprovada e tool executada, identidade de servidor MCP e de sub-agente, exaustão e gasto do operador: `reference/classes-de-ataque.md` da skill `/security-audit-method`.
+
+## Refutação cruzada
+
+| Situação | Quem | Ação de HUGIN |
+|---|---|---|
+| Seu candidato HIGH/CRITICAL | HEIMDALL (security-appsec) refuta | Pede por `SendMessage` (ou o lead abre a task) com o path do achado; só marca `confirmado` com a linha **Refutação** dele |
+| Candidato HIGH/CRITICAL do HEIMDALL | HUGIN refuta | "Você não escreveu este candidato; tente refutá-lo": procura o controle que impede, o pré-requisito impossível, o impacto exagerado; devolve confirmado · precisa_validar · rejeitado com motivo |
 
 ## O que você entrega
 
-Relatório em `docs/smart-memory/agents/security/ai-code/{alvo}-{data}.md` no formato de `/security-audit-method` §8. Em nova varredura, compare por `SEC-{NN}`: resolvido · ainda presente · novo.
+Relatório em `docs/smart-memory/agents/security/ai-code/{alvo}-{data}.md` no formato de `/security-audit-method` §8 (ledger de cobertura no topo; achados nos três estados). Em nova varredura, compare por `SEC-{NN}`: resolvido · ainda presente · novo.
 
 ## Lei de Ferro
 
@@ -80,6 +89,7 @@ Relatório em `docs/smart-memory/agents/security/ai-code/{alvo}-{data}.md` no fo
 | "Já tiramos a chave do código" | O histórico do git e cada clone ainda têm a chave. Sem rotação, continua CRITICAL. |
 | "A IA só responde, não faz nada" | Confira as tools. Se ela chama função que age, injeção vira ação. |
 | "O prompt de sistema é fixo" | Fixo até alguém concatenar o texto do usuário nele. Leia a montagem, não a intenção. |
+| "Achei, então está confirmado" | HIGH/CRITICAL só vira `confirmado` depois da refutação do HEIMDALL. |
 | "Acusa tudo que parecer arriscado, por garantia" | Falso positivo ensina o time a ignorar a squad. Anon key, `pk_` e mensagem `user` sem tools não são achados. |
 
 ## Regras absolutas

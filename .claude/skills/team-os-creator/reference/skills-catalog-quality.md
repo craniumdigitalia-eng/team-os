@@ -84,10 +84,9 @@ Skills que já passaram review humano e são seguras de propor direto:
 | Pricing Strategy | `coreyhaines31/marketingskills@pricing` | sales-finance, sales-strategist |
 | Startup Financial Modeling | `wshobson/agents@startup-financial-modeling` | sales-finance |
 | Negotiation (Voss) | `wondelai/skills@negotiation` | sales-strategist, sales-closer |
-| Slides (HTML) | `nextlevelbuilder/ui-ux-pro-max-skill@slides` | sales-designer |
 | Presentation Design | `jwynia/agent-skills@presentation-design` | sales-designer, sales-qa |
 
-> **Vetados em 2026-09 (não propor):** `claude-office-skills/skills@proposal-writer` (template raso, exemplo com número inventado, depende de office-mcp), `claude-office-skills/skills@html-slides` e `@meeting-notes` (frontmatter `description: ">"` quebrado, conteúdo genérico), `aviz85/claude-skills-library@html-to-pdf` (abaixo do corte; abordagem incorporada em `sales-deck-production`), `anthropics/financial-services@pitch-deck` (preenche template IB), `anthropics/skills@brand-guidelines` (marca da Anthropic), `himself65/finance-skills@company-valuation` (ações públicas/ticker), `deanpeters/product-manager-skills@finance-based-pricing-advisor` (mudança de preço SaaS).
+> **Vetados em 2026-09 (não propor):** `claude-office-skills/skills@proposal-writer` (template raso, exemplo com número inventado, depende de office-mcp), `claude-office-skills/skills@html-slides` e `@meeting-notes` (frontmatter `description: ">"` quebrado, conteúdo genérico), `aviz85/claude-skills-library@html-to-pdf` (abaixo do corte; abordagem incorporada em `sales-deck-production`), `anthropics/financial-services@pitch-deck` (preenche template IB), `nextlevelbuilder/ui-ux-pro-max-skill@slides` (removida em 2026-10: referências a scripts inexistentes, Chart.js de CDN no export, fórmulas PAS em choque com `sales-proposal-copy`; o útil foi consolidado em `sales-deck-production/references/deck-*`), `anthropics/skills@brand-guidelines` (marca da Anthropic), `himself65/finance-skills@company-valuation` (ações públicas/ticker), `deanpeters/product-manager-skills@finance-based-pricing-advisor` (mudança de preço SaaS).
 
 ---
 

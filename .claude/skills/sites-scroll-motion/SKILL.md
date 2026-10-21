@@ -1,7 +1,7 @@
 ---
 name: sites-scroll-motion
-description: "Scroll cinematográfico, parallax, animações avançadas e cenas 3D para websites — do CSS puro ao Three.js WebGPU. Use ao implementar efeitos de scroll, parallax, animações scroll-triggered ou cenas 3D em sites que pedem experiência imersiva, em Next.js ou Astro."
-version: "1.2"
+description: "Scroll cinematográfico, parallax, animações avançadas e cenas 3D para websites — do CSS puro, Motion e GSAP + ScrollTrigger ao Three.js WebGPU, com prefers-reduced-motion obrigatório. Use ao implementar efeitos de scroll, parallax, seções presas (pin/scrub), animações scroll-triggered ou cenas 3D em sites que pedem experiência imersiva, em Next.js ou Astro."
+version: "1.3"
 updated: "2026-10-20"
 ---
 
@@ -83,6 +83,12 @@ Objetivo de movimento
     │
     ├── Seção com efeito sticky + scroll-driven
     │     └── min-h-[150vh] + sticky child + Framer Motion useScroll    [→ Seção 5]
+    │
+    ├── Sequência longa amarrada ao scroll (timeline com várias etapas, pin, scrub,
+    │   vários elementos coordenados no mesmo trecho)
+    │     ├── Motion/useScroll já resolve (1-3 valores, sem pin)? → fique nele [→ Seção 5]
+    │     └── Precisa de pin + scrub + timeline coordenada → GSAP + ScrollTrigger [→ Seção 5A]
+    │     (NÃO use GSAP para reveal simples, hover ou fade — CSS/Motion bastam e pesam menos)
     │
     ├── CSS nativo de scroll snapping
     │     └── scroll-snap-type y proximity + scroll-snap-align start    [→ Seção 3]
@@ -318,6 +324,76 @@ const cardsY   = useTransform(cardsProgress,  [0, 1], [60, 0]);
 // Easing (determinístico, previsível para scroll-driven)
 <motion.div style={{ opacity }} /> // useTransform já usa linear por padrão
 ```
+
+---
+
+## Seção 5A — GSAP + ScrollTrigger (timeline longa, pin, scrub)
+
+**Quando usar:** um trecho da página vira uma "cena" — a seção fica presa (`pin`) enquanto várias
+etapas acontecem em ordem, com o progresso amarrado ao scroll (`scrub`). **Quando NÃO usar:** reveal,
+fade, hover, parallax de 1 elemento — CSS ou Motion resolvem sem mais uma dependência. GSAP não é o
+padrão do pack; é a ferramenta para o caso acima. Licença: GSAP e todos os plugins (inclusive
+ScrollTrigger e SplitText) são gratuitos, também para uso comercial, pelo pacote público `gsap` no npm.
+
+**React / Next.js — `useGSAP` (pacote `@gsap/react`):** escopo no container e limpeza automática no
+unmount (tweens, timelines e ScrollTriggers criados dentro do hook são revertidos). Componente com
+`'use client'`; registre os plugins uma vez, fora do componente.
+```tsx
+'use client'
+import { useRef } from 'react'
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { useGSAP } from '@gsap/react'
+gsap.registerPlugin(ScrollTrigger, useGSAP)
+
+export function CenaProduto() {
+  const root = useRef<HTMLElement>(null)
+  useGSAP(() => {
+    const mm = gsap.matchMedia()
+    mm.add({ motion: '(prefers-reduced-motion: no-preference)', reduce: '(prefers-reduced-motion: reduce)' }, (ctx) => {
+      if (ctx.conditions!.reduce) { gsap.set('.etapa', { autoAlpha: 1, y: 0 }); return } // Regra zero
+      gsap.timeline({
+        scrollTrigger: { trigger: root.current, start: 'top top', end: '+=200%', pin: true, scrub: 1,
+                         invalidateOnRefresh: true, markers: process.env.NODE_ENV === 'development' },
+      })
+        .from('.etapa-1', { y: 60, autoAlpha: 0 })
+        .from('.etapa-2', { x: () => -window.innerWidth * 0.2, autoAlpha: 0 }) // função = recalcula no refresh
+        .to('.etapa-1', { autoAlpha: 0.3 }, '<')
+    })
+  }, { scope: root }) // seletores '.etapa-*' só valem dentro de root
+  return <section ref={root}>…</section>
+}
+```
+Handlers criados depois (clique, timer) que animam: envolva com `contextSafe` do `useGSAP` para
+entrarem na limpeza.
+
+**Fora do React (vanilla, Astro):** `gsap.context(() => { … }, raiz)` agrupa tudo; em troca de
+página (View Transitions do Astro, SPA) chame `ctx.revert()` para matar tweens e ScrollTriggers.
+
+**`gsap.matchMedia()` + Regra zero:** `prefers-reduced-motion: reduce` é sempre uma condição do
+`matchMedia` — no ramo reduzido o conteúdo fica na posição final, sem pin e sem scrub. Use o mesmo
+`matchMedia` para breakpoints (ex.: pin só em `(min-width: 768px)`; no mobile, seções empilhadas).
+Quando a condição muda, o GSAP reverte o ramo antigo sozinho.
+
+**`ScrollTrigger.refresh()`:** posições são medidas na criação. Se imagens sem dimensão, fontes web
+ou conteúdo assíncrono mudam a altura depois, chame `ScrollTrigger.refresh()` após
+`document.fonts.ready` e o `load` das imagens (ou dê `width`/`height` às imagens — melhor ainda).
+Crie os triggers na ordem em que aparecem na página (ou use `refreshPriority`).
+
+**Pin sem quebrar layout:** o `pin` envolve o elemento num spacer com a altura do trecho (`end`);
+não aplique `pin` em elemento com `transform` no pai nem dentro de container com `overflow: hidden`
+que não seja o scroller. Em flex/grid, teste o `pinSpacing` (padrão `true`; `false` só quando a
+sobreposição é intencional). Confira em 390px e 1440px que nada pula ao entrar/sair do pin.
+
+**`markers`:** só em desenvolvimento (condição acima). Marcador em produção é bug de QA.
+
+**Não fazer:**
+- Animar `width`, `height`, `top`, `left`, `margin` — use `x`, `y`, `scale`, `autoAlpha` (compositor, sem reflow).
+- Criar ScrollTrigger dentro de loop/`forEach` sem escopo de limpeza (`useGSAP`/`gsap.context`) — vaza trigger a cada re-render ou navegação.
+- Valor dependente da viewport sem `invalidateOnRefresh: true` + valor em função — o resize deixa a cena com medidas velhas.
+- Usar `scrub` e `toggleActions` no mesmo trigger — escolha um.
+- Aninhar ScrollTrigger em tween que já está dentro de timeline com ScrollTrigger — o trigger fica na timeline.
+- Esquecer o ramo reduzido do `matchMedia` — QA reprova (Regra zero).
 
 ---
 
@@ -762,6 +838,7 @@ Para protótipos e demos HTML sem Next.js/Vite:
 | Progress bar de scroll | `div` width = scrollY / scrollHeight | ⬤○○ |
 | Cards que deslizam com scroll | Framer Motion useScroll + useTransform | ⬤⬤○ |
 | Seção sticky + scroll-driven | Framer Motion + min-h-[150vh] | ⬤⬤○ |
+| Cena presa com várias etapas (pin + scrub) | GSAP timeline + ScrollTrigger + matchMedia | ⬤⬤○ |
 | Mouse parallax (CSS vars) | `--mx`, `--my` + translate | ⬤⬤○ |
 | Câmera 3D com scroll | CameraRig keyframe pattern (R3F) | ⬤⬤⬤ |
 | Planetas com atmosfera | Planet.tsx (Three.js R3F) | ⬤⬤⬤ |

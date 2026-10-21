@@ -94,12 +94,11 @@ Os artefatos (HTML fonte, PDF, deck, versão navegável do planejamento) ficam *
 
 ## Deck (apresentação ao vivo)
 
-`/slides` para estrutura HTML de slides com tokens do design system; `/presentation-design` para asserção-evidência e carga cognitiva (uma ideia por slide). Export em PDF pelo mesmo pipeline. Slide de preço nunca antes do slide de valor.
+`/sales-deck-production` (§6 e references `deck-*`) para estrutura, layouts e navegação do deck HTML com tokens do design system; `/presentation-design` para asserção-evidência e carga cognitiva (uma ideia por slide). Export em PDF pelo mesmo pipeline. Slide de preço nunca antes do slide de valor.
 
 ## Skills disponíveis
 
-- `/sales-deck-production` — HTML + print CSS → PDF headless, componentes de página, checagem de render
-- `/slides` — apresentações HTML com layout patterns e design tokens
+- `/sales-deck-production` — HTML + print CSS → PDF headless, componentes de página, checagem de render; variante deck com estruturas, layouts e navegação
 - `/presentation-design` — asserção-evidência, hierarquia visual, carga cognitiva por slide
 - `/ui-ux-pro-max` — hierarquia, tipografia e espaçamento quando o design system não cobre o caso
 - `/verify-before-done` — o PDF aberto e contado é a evidência

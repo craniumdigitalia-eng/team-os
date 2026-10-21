@@ -1,7 +1,7 @@
 ---
 name: seo-page
 description: "Análise SEO profunda de uma única página — elementos on-page, qualidade de conteúdo, meta tags técnicas, schema, imagens e performance. Use ao pedir 'analise esta página', 'check page SEO', 'single URL' ou quando o usuário fornecer uma URL para revisão."
-version: "2.3.2"
+version: "2.3.3"
 updated: "2026-10-20"
 user-invocable: true
 argument-hint: "[url]"
@@ -63,6 +63,9 @@ metadata:
 - Flag potential LCP issues (huge hero images, render-blocking resources)
 - Flag potential INP issues (heavy JS, no async/defer)
 - Flag potential CLS issues (missing image dimensions, injected content)
+
+### Página nova (antes de publicar)
+Para página que ainda vai ao ar, use o checklist de página nova em `seo-google/references/rankings-push.md` (3 links internos de entrada, canonical, sitemap, conteúdo no HTML do servidor, indexação pedida uma vez só).
 
 ## Output
 

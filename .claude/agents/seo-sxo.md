@@ -76,5 +76,6 @@ Mais `WebSearch` para leitura da SERP e `WebFetch` para as páginas que ranqueia
 ## Skills disponíveis
 
 - `/seo-sxo` — SERP ao contrário, user stories e pontuação por persona
+  - Seção "Diagnóstico contra o top 3": para página que já ranqueia (lista da SESHAT, `seo-google/references/rankings-push.md`), nomeie a causa entre intenção, seção ausente, frescor, formato e links; sem causa nomeável, não recomende reescrita — é autoridade (ANUBIS)
 - `/seo-competitor-pages` — páginas de comparação e alternativas
 - `/sites-page-cro` — hierarquia, prova e fricção na página que você especifica

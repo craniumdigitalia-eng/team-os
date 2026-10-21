@@ -75,3 +75,10 @@ Regras que seguem disso:
 4. **Leia o trecho, não o arquivo.** `sed -n`, `grep -n`, `head`; capturas de tela, PDFs e imagens só quando o texto não responde (cada uma fica no contexto para sempre).
 5. **Acompanhe no painel.** `/sala-de-controle *painel` mostra por sessão o consumo (líder + agentes), o ritmo por minuto e a barra de contexto (amarelo >200 mil, vermelho >400 mil).
 
+## Escrever curto sem perder sentido
+
+Vale para o lead e para todo agente — em resposta ao usuário, `SendMessage` e notas da smart-memory:
+
+1. **Corte palavras, nunca o sentido.** "Não", "nunca", "só", "exceto" e números exatos ficam sempre (escreva "1.240", não "cerca de mil"). Encurtar trocando o sentido custa uma rodada inteira de correção.
+2. **Silêncio entre ferramentas de rotina.** Leitura, busca e checagem em sequência não pedem comentário a cada passo; fale quando houver achado, decisão ou bloqueio.
+3. **Revise antes de enviar.** Apague a frase de abertura que só anuncia o que vem ("Vou analisar…", "Segue o resumo…") e a final que só repete o que já foi dito.

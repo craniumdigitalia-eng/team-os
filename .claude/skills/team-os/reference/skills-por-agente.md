@@ -40,7 +40,7 @@ team-os SEMPRE inclui no spawn prompt as skills relevantes para cada tipo de age
 | **sales-planner** | `/sales-proposal-planning`, `/sales-discovery-intake`, `/dev-technical-writing` |
 | **sales-finance** | `/sales-pricing-payback`, `/startup-financial-modeling`, `/pricing` |
 | **sales-copywriter** | `/sales-proposal-copy`, `/sales-enablement`, `/sites-copy` |
-| **sales-designer** | `/sales-deck-production`, `/slides`, `/presentation-design`, `/ui-ux-pro-max` |
+| **sales-designer** | `/sales-deck-production` (com a variante deck), `/presentation-design`, `/ui-ux-pro-max` |
 | **sales-qa** | `/sales-proposal-copy`, `/sales-deck-production`, `/presentation-design` |
 | **sales-closer** | `/negotiation`, `/sales-enablement`, `/sales-proposal-copy` |
 | **brand-analyst** | `/brand-research`, `/deep-research`, `/dev-defuddle` |

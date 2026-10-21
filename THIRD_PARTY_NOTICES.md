@@ -50,19 +50,19 @@ o texto integral da MIT é o mesmo de [LICENSE](./LICENSE), trocando-se o titula
 
 | Skill | Autor | Licença | Origem / observação |
 |---|---|---|---|
-| `accessibility` | Addy Osmani | MIT — `Copyright (c) 2026 Addy Osmani` (LICENSE conferido em 2026-10-20) | https://github.com/addyosmani/web-quality-skills — adaptada (skill `accessibility`); conteúdo baseado em WCAG 2.2 (W3C) e Lighthouse |
-| `deep-research` | 199 Biotechnologies | MIT (README, "modify as needed") | https://github.com/199-biotechnologies/claude-deep-research-skill |
-| `negotiation` | Wondel.ai sp. z o.o. | MIT — `Copyright (c) 2025 Wondel.ai sp. z o.o.` (LICENSE conferido em 2026-10-20) | https://github.com/wondelai/skills (commit 0dea03f; `metadata.author: wondelai`, v1.5.0) |
+| `accessibility` | Addy Osmani | MIT — `Copyright (c) 2026 Addy Osmani` (LICENSE conferido em 2026-10-20) | https://github.com/addyosmani/web-quality-skills — adaptada (skill `accessibility`), sincronizada com a v2.0 (commit afa8da9) e reescrita em pt-BR em 2026-10-20; conteúdo baseado em WCAG 2.2 (W3C) e Lighthouse |
+| `deep-research` | 199 Biotechnologies | MIT (declarado só no README, "modify as needed"; **repositório sem arquivo LICENSE**) | https://github.com/199-biotechnologies/claude-deep-research-skill — base commit f2f2c0f (v3.0); adaptação CT 3.0.1-ct em 2026-10-20 (pt-BR, caminhos, ledger de afirmações, fontes oficiais BR) |
+| `negotiation` | Wondel.ai sp. z o.o. | MIT — `Copyright (c) 2025 Wondel.ai sp. z o.o.` (LICENSE conferido em 2026-10-20) | https://github.com/wondelai/skills (commit 0dea03f; `metadata.author: wondelai`, v1.5.0) — traduzida e adaptada em pt-BR em 2026-10-20 (sem links de afiliado; regras do pack) |
 | `presentation-design` | jwynia | MIT | origem não declarada em URL (`metadata.author: jwynia`, v1.0) |
-| `slides` | Next Level Builder (`metadata.author: claudekit`) | MIT — `Copyright (c) 2024 Next Level Builder` (LICENSE conferido em 2026-10-20) | https://github.com/nextlevelbuilder/ui-ux-pro-max-skill (skill `slides` do mesmo repositório da `ui-ux-pro-max`) |
+| `sales-deck-production` (references `deck-layout-patterns.md`, `deck-slide-strategies.md`, `deck-navigation.md`) | Next Level Builder | MIT — `Copyright (c) 2024 Next Level Builder` (LICENSE conferido em 2026-10-20) | adaptado da skill `slides` de https://github.com/nextlevelbuilder/ui-ux-pro-max-skill — a `slides` foi consolidada em 2026-10-20 |
 | `startup-financial-modeling` | não declarado (corpo menciona adaptação ao "Codex 8 KB skill body cap") | **licença upstream não localizada; verificar antes de redistribuir** | origem não declarada |
-| `ui-ux-pro-max` | Next Level Builder | MIT — `Copyright (c) 2024 Next Level Builder` (LICENSE conferido em 2026-09-25) | https://github.com/nextlevelbuilder/ui-ux-pro-max-skill — inclui dados derivados de Google Fonts (licenças por família em `data/google-font-licenses.json`) e Phosphor Icons (`data/phosphor-icons-upstream.json`, MIT) |
+| `ui-ux-pro-max` | Next Level Builder | MIT — `Copyright (c) 2024 Next Level Builder` (LICENSE conferido em 2026-09-25; sincronizada com o upstream v2.15.0 em 2026-10-20) | https://github.com/nextlevelbuilder/ui-ux-pro-max-skill — inclui dados derivados de Google Fonts (licenças por família em `data/google-font-licenses.json`) e Phosphor Icons (`data/phosphor-icons-upstream.json`, MIT) |
 | `ai-ml-data-science` | não declarado | **licença upstream não localizada; verificar antes de redistribuir** | importada em 2026-06-18 (commit 65743d2) sem metadados de origem; cita `data/sources.json` |
 | `ai-ml-timeseries` | não declarado | **licença upstream não localizada; verificar antes de redistribuir** | idem |
 | `data-analytics-engineering` | não declarado | **licença upstream não localizada; verificar antes de redistribuir** | idem |
 | `data-lake-platform` | não declarado | **licença upstream não localizada; verificar antes de redistribuir** | idem |
 | `data-sql-optimization` | não declarado | **licença upstream não localizada; verificar antes de redistribuir** | idem |
-| `web-design-guidelines` | João Guirunas (skill); guidelines: Vercel Labs | MIT (skill); guidelines MIT — `Copyright (c) 2025 Vercel Labs` (LICENSE conferido em 2026-10-20) | https://github.com/vercel-labs/web-interface-guidelines — `guidelines-cache.md` **é cópia vendorizada** dessas guidelines |
+| `web-design-guidelines` | João Guirunas (skill); guidelines: Vercel Labs | MIT (skill); guidelines MIT — `Copyright (c) 2025 Vercel Labs` (LICENSE conferido em 2026-10-20) | https://github.com/vercel-labs/web-interface-guidelines — `guidelines-cache.md` **é cópia vendorizada** dessas guidelines, fixada no commit 4ecfb9fb8d1d3b7009674869b3aaee2f904042e1 (2026-10-05) |
 
 ## marketingskills (Corey Haines)
 
@@ -81,6 +81,21 @@ Repositório [coreyhaines31/marketingskills](https://github.com/coreyhaines31/ma
 | Skill | Origem | Licença | Como entrou no pack |
 |---|---|---|---|
 | `verify-before-done` | [obra/superpowers](https://github.com/obra/superpowers) — `skills/verification-before-completion` | MIT — `Copyright (c) 2025 Jesse Vincent` (LICENSE conferido em 2026-10-20) | adaptada (reescrita em pt-BR no padrão do pack) |
+
+## Métodos adaptados (2026-10)
+
+Conceitos e métodos reescritos em pt-BR no padrão do pack (texto próprio, sem código copiado), com crédito às fontes:
+
+| Onde no pack | Fonte | Licença | Observação |
+|---|---|---|---|
+| `team-os` — modo `*grill` (Fase 3) | [mattpocock/skills](https://github.com/mattpocock/skills) — `grilling`/`grill-me` | MIT | rodadas de perguntas com resposta recomendada |
+| `seo-google/references/rankings-push.md`; `seo-sxo` (Diagnóstico contra o top 3) | [coreyhaines31/marketingskills](https://github.com/coreyhaines31/marketingskills) — `seo-audit/references/rankings-push.md` | MIT — `Copyright (c) 2025 Corey Haines` | commit e85f3cb |
+| `seo-geo` (Medir visibilidade real) | coreyhaines31/marketingskills — `ai-seo` | MIT — `Copyright (c) 2025 Corey Haines` | commit 001fd4e |
+| `security-audit-method` (filtro do candidato, três estados, refutação cruzada, ledger de cobertura, classes de ataque) e agentes `security-*` | [cloudflare/security-audit-skill](https://github.com/cloudflare/security-audit-skill) | MIT — `Copyright (c) 2025-2026 Cloudflare, Inc.` | commit c1c8a8c1 |
+| `social-video-editing` (regras de correção, corte por silêncio, legenda, áudio, autoavaliação) | [browser-use/video-use](https://github.com/browser-use/video-use) | MIT — `Copyright (c) 2026 Browser Use` | commit 43cfc56 |
+| `social-video-editing/reference/launch-video.md` | [latent-spaces/brag](https://github.com/latent-spaces/brag) | MIT — `Copyright (c) 2026 Shunit Haviv Hakimi` | commit 069432ca |
+| `social-copywriting`, `social-scriptwriting` (+`reference/ganchos.md`), `social-carousel-design`, `social-analytics` (+`reference/perfil-rubrica.md`), `social-apify-research` | [Jakeschincariol/instagram-agent-skill](https://github.com/Jakeschincariol/instagram-agent-skill) | MIT — `Copyright (c) 2026 Jake Schincariol` | commit d03c56b |
+| `sites-scroll-motion` §5A (GSAP + ScrollTrigger) | [greensock/gsap-skills](https://github.com/greensock/gsap-skills) | MIT — `Copyright (c) 2026 GreenSock` | padrões useGSAP/context/matchMedia |
 
 ## Conteúdo adaptado de agency-agents
 

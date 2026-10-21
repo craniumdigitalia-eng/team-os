@@ -1,7 +1,7 @@
 ---
 name: social-editorial-validation
 description: "Validação editorial de conteúdo social — checklist de qualidade, alinhamento estratégico e compliance. Use ao revisar conteúdo antes de publicar, validar alinhamento com a estratégia da marca, checar compliance ou emitir aprovação editorial de posts e campanhas."
-version: "1.1"
+version: "1.2"
 updated: "2026-10-20"
 ---
 
@@ -21,7 +21,7 @@ updated: "2026-10-20"
 - [ ] Hook eficaz (para-scroll nos primeiros 3 segundos/linhas)
 - [ ] Sem erros ortográficos ou gramaticais
 - [ ] CTA claro e específico
-- [ ] Hashtags relevantes e em número adequado (10-15)
+- [ ] Hashtags: 3–5 relevantes e específicas, ou nenhuma (regra provisória até haver fonte oficial datada da plataforma — revisar)
 - [ ] Emojis usados estrategicamente (não decorativamente)
 - [ ] Comprimento adequado à plataforma
 

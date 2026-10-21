@@ -24,8 +24,7 @@ Extract 3-4 key quantitative findings for dashboard display at top.
 
 Use Python script:
 ```bash
-cd ~/.claude/skills/deep-research
-python scripts/md_to_html.py [markdown_report_path]
+python3 "${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/deep-research/scripts/md_to_html.py" [markdown_report_path]
 ```
 
 **Script outputs two parts:**
@@ -72,32 +71,38 @@ NOTE: This step is optional for speed. Basic [N] citations are sufficient.
 ### Step 6: Verify HTML
 
 ```bash
-python scripts/verify_html.py --html [html_path] --md [md_path]
+python3 "${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/deep-research/scripts/verify_html.py" --html [html_path] --md [md_path]
 ```
-- Pass: Proceed to open
-- Fail: Fix errors and re-run
+- Pass: proceed
+- Fail: fix errors and re-run
 
-### Step 7: Open in Browser
-```bash
-open [html_path]
-```
+### Step 7: Tell the user where it is
+Report the HTML path to the user. Do not auto-open files.
 
 ---
 
-## PDF Generation
+## PDF Generation (optional)
 
-**Option A: WeasyPrint Direct (Preferred)**
+**Option A (preferred): headless browser via `sales-deck-production`**
 
-1. Create print-optimized HTML following `./reference/weasyprint_guidelines.md`
-2. Critical CSS:
-   - `page-break-inside: avoid` on tables, boxes
-   - `page-break-after: avoid` on headings
-   - `orphans: 3; widows: 3` on paragraphs
-   - Use `display: table` not Flexbox/Grid
-   - Font sizes in pt (10pt body, 8pt citations)
-3. Generate: `weasyprint [html_path] [pdf_path]`
-4. Open: `open [pdf_path]`
+If the `sales-deck-production` skill is installed in the project, reuse its exporter (Playwright or Puppeteer, whichever is installed; waits for fonts and images; exits non-zero if a font or image fails to load):
 
-**Option B: generating-pdf Skill**
+```bash
+# once, in the project: npm i -D playwright && npx playwright install chromium   (or: npm i -D puppeteer)
+node "${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/sales-deck-production/scripts/html-to-pdf.mjs" \
+  [html_path] [pdf_path] [--format A4|Letter] [--landscape]
+```
 
-Use Task tool with general-purpose agent, invoke generating-pdf skill.
+Print CSS still matters: `page-break-inside: avoid` on tables and boxes, `page-break-after: avoid` on headings, `orphans: 3; widows: 3` on paragraphs.
+
+**Option B (alternative): WeasyPrint**
+
+Only if `command -v weasyprint` exists (it is not a dependency of this skill). Follow `./reference/weasyprint_guidelines.md` (use `display: table` instead of Flexbox/Grid, sizes in pt), then:
+
+```bash
+weasyprint [html_path] [pdf_path]
+```
+
+**Neither available:** deliver Markdown + HTML only and say so in the final message.
+
+In every case, report the PDF path to the user — do not auto-open it.

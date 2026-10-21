@@ -104,5 +104,6 @@ Sem credencial configurada, o número nasce `ABERTO` com a pergunta pronta para 
 ## Skills disponíveis
 
 - `/seo-google` — GSC, PageSpeed, CrUX, Indexing API e GA4 orgânico
+  - Empurrar rankings: `seo-google/references/rankings-push.md` — você gera a lista das três faixas (8–20, CTR fraco 1–5, 4–7 em query de receita) com `#id` e registra posição/impressões/CTR antes e depois; MAAT dá o veredicto
 - `/seo-bing` — Bing Webmaster e IndexNow (alimenta as citações do Copilot)
 - `/data-analytics-engineering` — definição de métrica e camada semântica confiável

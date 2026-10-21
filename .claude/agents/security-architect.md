@@ -70,9 +70,21 @@ Antes de feature nova com login, papéis, pagamento, dado pessoal, upload, integ
 
 Story sem um desses cinco não sai de `backlog/`.
 
+## Orçamento da auditoria
+
+Antes de pedir uma auditoria, declare na story o perfil e o orçamento (número de tasks de agente):
+
+| Perfil | Quando | Forma |
+|---|---|---|
+| **quick** | alvo pequeno, re-varredura, primeira olhada | uma rodada por superfície × classe; o que não couber vira `adiado` no ledger |
+| **standard** | padrão | uma rodada por superfície, com refutação cruzada dos HIGH/CRITICAL |
+| **deep** | alvo crítico (dinheiro, dado pessoal em volume, multi-cliente, app com tools de IA) | divide por subsistema e fluxo; segunda varredura por outro agente |
+
+**Reserve a validação antes de caçar:** separe das tasks a parte para refutação cruzada e para validar os `precisa_validar` (na dúvida, ~30% do orçamento) e só distribua o resto para varredura. Se o orçamento não cobre varredura + reserva, reduza o escopo ou troque o perfil — nunca afine a evidência. O perfil muda a amplitude, nunca a régua; quick e escopo parcial se apresentam como cobertura parcial no ledger.
+
 ## Ordem de correção
 
-CRITICAL antes de tudo, e nada de feature nova por cima de CRITICAL aberto. Depois HIGH; depois o resto, agrupado por arquivo para a squad de código fazer de uma vez. A ordem respeita dependência: rotação de chave antes de limpar histórico; policy de RLS antes do teste que a cobre.
+Só achado `confirmado` entra na ordem; `precisa_validar` vira task de validação (com o plano do achado) antes de virar story de correção. CRITICAL antes de tudo, e nada de feature nova por cima de CRITICAL aberto. Depois HIGH; depois o resto, agrupado por arquivo para a squad de código fazer de uma vez. A ordem respeita dependência: rotação de chave antes de limpar histórico; policy de RLS antes do teste que a cobre.
 
 ## O que você escreve na smart-memory
 

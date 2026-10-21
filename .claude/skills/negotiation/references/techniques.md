@@ -1,432 +1,430 @@
-# Negotiation Techniques Reference
+# Referência de técnicas de negociação
 
-Complete breakdown of tactical negotiation techniques from Chris Voss's "Never Split the Difference."
+As 21 técnicas de negociação tática associadas ao método de Chris Voss (*Never Split the Difference*), em versão adaptada ao pack. Lembrete: números (piso, alvo, degraus) vêm da postura aprovada (ATHENA/PRUDENTIA) e de LIBRA; esta referência ensina a conduzir, não a decidir valor.
 
-## Table of Contents
+## Sumário
 
-1. [Mirroring](#1-mirroring)
-2. [Labeling](#2-labeling)
-3. [Tactical Empathy](#3-tactical-empathy)
-4. [Voice Control](#4-voice-control)
-5. [The Power of Apology and Pause](#5-the-power-of-apology-and-pause)
-6. [Accusation Audit](#6-accusation-audit)
-7. [Calibrated Questions](#7-calibrated-questions)
-8. [No-Oriented Questions](#8-no-oriented-questions)
-9. [Triggering "That's Right"](#9-triggering-thats-right)
-10. [Managing "Yes"](#10-managing-yes)
-11. [The Rule of Three](#11-the-rule-of-three)
-12. [Re-engagement Technique](#12-re-engagement-technique)
-13. [Managing "Fair"](#13-managing-fair)
-14. [Anchoring and Loss Aversion](#14-anchoring-and-loss-aversion)
-15. [Ackerman Bargaining Method](#15-ackerman-bargaining-method)
-16. [Leverage Types](#16-leverage-types)
+1. [Espelhamento](#1-espelhamento)
+2. [Rotulagem](#2-rotulagem)
+3. [Empatia tática](#3-empatia-tática)
+4. [Controle de voz](#4-controle-de-voz)
+5. [Pedido de desculpas e pausa](#5-pedido-de-desculpas-e-pausa)
+6. [Accusation audit](#6-accusation-audit)
+7. [Perguntas calibradas](#7-perguntas-calibradas)
+8. [Perguntas orientadas ao "não"](#8-perguntas-orientadas-ao-não)
+9. [Provocar o "é isso mesmo"](#9-provocar-o-é-isso-mesmo)
+10. [Lidar com o "sim"](#10-lidar-com-o-sim)
+11. [Regra de três](#11-regra-de-três)
+12. [Retomar contato](#12-retomar-contato)
+13. [Lidar com "justo"](#13-lidar-com-justo)
+14. [Ancoragem e aversão à perda](#14-ancoragem-e-aversão-à-perda)
+15. [Método Ackerman](#15-método-ackerman)
+16. [Tipos de alavanca](#16-tipos-de-alavanca)
 17. [Black Swans](#17-black-swans)
-18. [Counterpart Styles](#18-counterpart-styles)
-19. [Body Language and Tone](#19-body-language-and-tone)
-20. [Dynamic Silence](#20-dynamic-silence)
-21. [Pronoun Analysis](#21-pronoun-analysis)
+18. [Estilos de contraparte](#18-estilos-de-contraparte)
+19. [Linguagem corporal e tom](#19-linguagem-corporal-e-tom)
+20. [Silêncio dinâmico](#20-silêncio-dinâmico)
+21. [Leitura de pronomes](#21-leitura-de-pronomes)
 
 ---
 
-## 1. Mirroring
+## 1. Espelhamento
 
-**What it is:** Repeat the last 1-3 critical words your counterpart said, using a curious, upward-inflecting tone.
+**O que é:** repetir as últimas 1–3 palavras importantes da contraparte, em tom curioso, subindo no final.
 
-**Psychological trigger:** Creates familiarity and rapport; signals deep listening; prompts elaboration without direct questions.
+**Gatilho:** gera familiaridade, mostra escuta e faz o outro elaborar sem pergunta direta.
 
-**How to use:**
-- Listen for the key phrase or emotion-laden words
-- Repeat them back as a gentle question
-- Wait silently for them to expand
+**Como usar:**
+- Identifique a palavra-chave ou carregada de emoção
+- Devolva como pergunta suave
+- Espere em silêncio
 
-**Example:**
-> Counterpart: "We're not sure if this partnership makes sense."
-> You: "Doesn't make sense?"
-> Counterpart: "Well, what I mean is... [elaborates on concerns]"
-
----
-
-## 2. Labeling
-
-**What it is:** Identify and verbalize the counterpart's emotions or perspective using neutral phrases: "It seems like...", "It sounds like...", "It looks like..."
-
-**Psychological trigger:** Validates emotions, making them feel understood. Diffuses negative emotions by naming them; reinforces positive ones.
-
-**How to use:**
-- Observe their emotional state or concerns
-- Name it with a tentative label (avoid "I think you...")
-- Pause after labeling to let them confirm or clarify
-
-**Examples:**
-> "It seems like you're worried about the budget impact."
-> "It sounds like there's been some frustration with the timeline."
-> "It looks like this decision carries a lot of weight for your team."
-
-**Important:** After labeling, be silent. Let them respond.
+**Exemplo:**
+> Contraparte: "Não sei se essa parceria faz sentido."
+> Você: "Não faz sentido?"
+> Contraparte: "Bom, o que eu quis dizer é que... [explica a preocupação]"
 
 ---
 
-## 3. Tactical Empathy
+## 2. Rotulagem
 
-**What it is:** Consciously imagining yourself in their situation and vocalizing their perspective. Combines the mindset of sincere empathy with techniques like mirroring and labeling.
+**O que é:** nomear a emoção ou a perspectiva do outro com frases neutras: "parece que...", "dá a impressão de que...".
 
-**Psychological trigger:** When people feel understood, brain chemistry shifts toward trust and cooperation. Empathy short-circuits defensive reactions.
+**Gatilho:** valida a emoção e faz a pessoa se sentir entendida. Nomear o negativo reduz a força dele; nomear o positivo o reforça.
 
-**How to use:**
-- Before responding, ask yourself: "What is their world like right now?"
-- Articulate their situation, pressures, and fears
-- Show you understand even if you disagree
+**Como usar:**
+- Observe o estado emocional ou a preocupação
+- Nomeie de forma tentativa (evite "eu acho que você...")
+- Pare e deixe confirmar ou corrigir
 
-**Example:**
-> "I understand you're under enormous pressure to deliver this quarter, and bringing in a new vendor feels like adding risk to an already difficult situation."
+**Exemplos:**
+> "Parece que o impacto no orçamento está preocupando vocês."
+> "Dá a impressão de que o prazo virou uma fonte de frustração."
+> "Parece que essa decisão pesa bastante para o time."
 
-**Key insight:** Empathy is not agreement. You can understand their position while still advocating for your own needs.
-
----
-
-## 4. Voice Control
-
-### Late-Night FM DJ Voice
-- **When:** Critical moments, delivering key statements, de-escalating tension
-- **How:** Slow, calm, deep, downward inflection at sentence ends
-- **Effect:** Exudes confidence and calm; relaxes their brain, making them more receptive
-
-### Positive/Playful Voice
-- **When:** Default mode; building rapport; most of the conversation
-- **How:** Friendly, warm, light-hearted, with a genuine smile
-- **Effect:** Signals comfort and likability; encourages cooperation
-
-**Key insight:** Never use a high-pitched or rapid voice in negotiations—it signals anxiety or aggression.
+**Importante:** depois do rótulo, silêncio.
 
 ---
 
-## 5. The Power of Apology and Pause
+## 3. Empatia tática
 
-**What it is:** Start difficult statements with "I'm sorry..." in a slow, calm tone, then deliberately pause for 4+ seconds.
+**O que é:** imaginar-se de propósito na situação do outro e dizer essa perspectiva em voz alta. Junta a postura de empatia sincera com espelhamento e rotulagem.
 
-**Psychological trigger:** Apology disarms hostility; silence creates a vacuum the other person feels compelled to fill.
+**Gatilho:** quem se sente entendido sai da defensiva e passa a cooperar.
 
-**Sequence:**
-1. "I'm sorry..." (slow, sincere)
-2. Mirror or label their situation
-3. Silence (4+ seconds)
+**Como usar:**
+- Pergunte-se: "como está o mundo dessa pessoa agora?"
+- Descreva a situação, as pressões e os medos dela
+- Mostre que entende mesmo discordando
 
-**Example:**
-> "I'm sorry... It looks like I've let you down on this project." (Pause)
-> Counterpart: "No, it's not just you... the timing caught us off guard..."
+**Exemplo:**
+> "Imagino a pressão para entregar neste trimestre, e trazer um fornecedor novo agora parece colocar mais risco num momento que já é difícil."
 
----
-
-## 6. Accusation Audit
-
-**What it is:** Before negotiating, list and preemptively verbalize every negative thing they might think or say about you.
-
-**Psychological trigger:** Naming fears and criticisms before they do removes their power. Often triggers reassurance ("Oh, I don't think that...") or at least neutralizes objections.
-
-**How to use:**
-1. Before the meeting, brainstorm: What negatives might they think about me/my position?
-2. Early in the conversation, acknowledge these directly
-3. Watch them relax as you've addressed the elephant in the room
-
-**Example:**
-> "You probably think I'm being greedy. You may feel like I haven't listened to you in the past. And it might seem like I only care about my own interests. I understand why you might feel that way, and I want to address those concerns..."
+**Ponto-chave:** empatia não é concordância. Dá para entender a posição do outro e seguir defendendo a sua.
 
 ---
 
-## 7. Calibrated Questions
+## 4. Controle de voz
 
-**What it is:** Open-ended "How...?" and "What...?" questions that shape the conversation while giving them the illusion of control.
+### Voz de "locutor de rádio da madrugada"
+- **Quando:** momentos críticos, frases decisivas, baixar a tensão
+- **Como:** lenta, calma, grave, entonação descendo no fim da frase
+- **Efeito:** transmite segurança e acalma o outro, que fica mais receptivo
 
-**Psychological trigger:** Engages their problem-solving mind; makes them feel in control while you direct the conversation; avoids defensiveness that "Why?" creates.
+### Voz positiva e leve
+- **Quando:** padrão; a maior parte da conversa
+- **Como:** amigável, calorosa, com sorriso genuíno
+- **Efeito:** passa conforto e simpatia; estimula cooperação
 
-**Formula:**
-- Start with "How" or "What"
-- Make it neutral and collaborative
-- Avoid "Why" (sounds accusatory)
-
-**Power questions:**
-| Question | Purpose |
-|----------|---------|
-| "How am I supposed to do that?" | Pushes back without saying no |
-| "What's the biggest challenge you're facing?" | Uncovers hidden needs |
-| "What about this is important to you?" | Reveals value drivers |
-| "How can we make this work?" | Creates collaboration |
-| "What would it take to make this happen?" | Identifies obstacles |
-| "How does this affect your team?" | Shows empathy, gathers intel |
-
-**Exception for "Why":** Only use when you want them to defend something favorable to you: "Why would you ever choose our company?" (Makes them articulate your strengths.)
+**Ponto-chave:** voz aguda ou acelerada sinaliza ansiedade ou agressividade.
 
 ---
 
-## 8. No-Oriented Questions
+## 5. Pedido de desculpas e pausa
 
-**What it is:** Questions designed to elicit "No" rather than "Yes," because "No" makes people feel safe and in control.
+**O que é:** abrir uma fala difícil com "desculpe..." em tom lento e calmo, e depois pausar 4 segundos ou mais.
 
-**Psychological trigger:** Saying "No" satisfies the human need for autonomy and control. Once they've said no, they relax and engage more openly.
+**Gatilho:** o pedido de desculpas desarma; o silêncio cria um vazio que o outro sente necessidade de preencher.
 
-**How to frame:**
-- Instead of "Do you agree?", ask "Would it be unreasonable to...?"
-- Instead of "Can we move forward?", ask "Are you against trying this?"
+**Sequência:**
+1. "Desculpe..." (lento, sincero)
+2. Espelhe ou rotule a situação do outro
+3. Silêncio (4 segundos ou mais)
 
-**Tactical mislabeling:** Intentionally state something false to prompt a corrective "No":
-> "It seems like you've given up on this project?"
-> Counterpart: "No, I haven't given up. I'm just frustrated with the delays."
-
-Now you have their real concern.
-
----
-
-## 9. Triggering "That's Right"
-
-**What it is:** Summarize their position—their facts, emotions, and concerns—so accurately that they respond with "That's right."
-
-**Psychological trigger:** "That's right" signals complete understanding and creates genuine rapport. It's the moment they feel truly heard.
-
-**How to earn it:**
-1. Listen deeply throughout the conversation
-2. Paraphrase their main points, including emotional subtext
-3. Deliver as a summary: "Let me make sure I understand..."
-4. Keep refining until you get "That's right"
-
-**Example:**
-> "Let me make sure I have this: You need a solution that doesn't overrun budget, and you're concerned that our timeline could put your team in a tough spot. On top of that, you've been burned by vendors who overpromised before."
-> Counterpart: "That's right."
-
-**Warning:** "You're right" is different—it often means they're dismissing you. Keep working until you get "That's right."
+**Exemplo:**
+> "Desculpe... parece que eu deixei vocês na mão nesse projeto." (pausa)
+> Contraparte: "Não é só você... o prazo pegou a gente de surpresa..."
 
 ---
 
-## 10. Managing "Yes"
+## 6. Accusation audit
 
-**Three types of yes:**
+**O que é:** antes de negociar, listar e dizer primeiro tudo de negativo que o outro pode pensar ou dizer sobre você.
 
-| Type | What it means | How to detect |
-|------|---------------|---------------|
-| **Counterfeit Yes** | Saying yes to escape or appease | Quick, no follow-through |
-| **Confirmation Yes** | Agreeing to a minor point | "Yes, I received the email" |
-| **Commitment Yes** | True agreement with intent to act | Detailed, enthusiastic |
+**Gatilho:** dizer antes tira a força da crítica. Muitas vezes o outro tranquiliza você ("não, não penso isso"); no mínimo, a objeção perde força.
 
-**Key insight:** Only commitment yes matters. Chasing yes makes people defensive.
+**Como usar:**
+1. Antes da reunião, liste: o que de negativo podem pensar de mim ou da minha posição?
+2. No começo da conversa, diga isso abertamente
+3. Observe o outro relaxar
 
-**Strategy:** Instead of pushing for yes, make them comfortable saying no first. Once they've said no (and you've addressed it), their eventual yes is more likely to be genuine.
-
----
-
-## 11. The Rule of Three
-
-**What it is:** Get them to affirm the agreement three times, in three different ways, within the same conversation.
-
-**Psychological trigger:** Genuine agreements withstand multiple confirmations. If it falls apart on round two or three, you didn't really have a deal.
-
-**How to apply:**
-1. First yes: Direct agreement
-2. Second yes: Summarize and get "That's right"
-3. Third yes: Calibrated question about implementation: "How will your team handle...?"
-
-**Example sequence:**
-> "So we're agreed on the $50K budget?" → "Yes."
-> "Just to make sure I understand—you'll allocate $50K with delivery in Q3?" → "That's right."
-> "Great. How will you communicate this to your finance team?" → "I'll send them the PO tomorrow."
+**Exemplo:**
+> "Você deve estar achando que eu estou querendo demais. Talvez sinta que eu não ouvi vocês das outras vezes, e que só penso no meu lado. Entendo por que pode parecer isso, e quero tratar esses pontos..."
 
 ---
 
-## 12. Re-engagement Technique
+## 7. Perguntas calibradas
 
-**What it is:** When someone goes silent (email, text, or in person), ask: "Have you given up on [this project/deal]?"
+**O que é:** perguntas abertas com "como" e "o que", que conduzem a conversa enquanto o outro sente que está no controle.
 
-**Psychological trigger:** People hate being seen as quitters. This question triggers an instinctive "No" and forces them to re-engage and explain.
+**Gatilho:** coloca o outro para resolver o problema, dá a ele sensação de controle enquanto você direciona e evita a defensiva do "por quê?".
 
-**When to use:**
-- Unresponsive counterpart
-- Stalled negotiations
-- Ghosting behavior
+**Fórmula:**
+- Comece com "como" ou "o que"
+- Neutra e colaborativa
+- Sem "por quê" (soa acusatório)
 
-**Example:**
-> Subject: Quick question
-> "Have you given up on the partnership we discussed?"
+**Perguntas fortes:**
+
+| Pergunta | Para quê |
+|---|---|
+| "Como eu faria isso?" | Recusar sem dizer não |
+| "Qual é o maior desafio de vocês hoje?" | Descobrir necessidade escondida |
+| "O que nisso é importante para você?" | Revelar o que gera valor |
+| "Como a gente faz isso funcionar?" | Criar colaboração |
+| "O que seria preciso para isso acontecer?" | Identificar obstáculos |
+| "Como isso afeta o seu time?" | Mostrar empatia e colher informação |
+
+**Exceção ao "por quê":** só quando a resposta defende algo a seu favor: "por que vocês escolheriam a gente?" (o outro acaba listando os seus pontos fortes).
+
+---
+
+## 8. Perguntas orientadas ao "não"
+
+**O que é:** perguntas feitas para receber "não" em vez de "sim", porque dizer "não" dá sensação de segurança e controle.
+
+**Gatilho:** o "não" atende à necessidade de autonomia. Depois de dizer não, a pessoa relaxa e se abre.
+
+**Como formular:**
+- Em vez de "você concorda?", pergunte "seria absurdo se...?"
+- Em vez de "podemos seguir?", pergunte "você é contra testar isso?"
+
+**Rótulo errado de propósito:** dizer algo falso para provocar um "não" corretivo:
+> "Parece que vocês desistiram desse projeto?"
+> Contraparte: "Não, não desistimos. Só estamos frustrados com o atraso."
+
+Pronto: a preocupação real apareceu.
+
+---
+
+## 9. Provocar o "é isso mesmo"
+
+**O que é:** resumir a posição do outro (fatos, emoções e preocupações) com tanta precisão que ele responde "é isso mesmo".
+
+**Gatilho:** sinaliza entendimento completo e cria conexão real. É o momento em que o outro se sente ouvido.
+
+**Como conquistar:**
+1. Escute com atenção a conversa inteira
+2. Parafraseie os pontos principais, incluindo o subtexto emocional
+3. Entregue como resumo: "deixa eu ver se entendi..."
+4. Ajuste até ouvir "é isso mesmo"
+
+**Exemplo:**
+> "Deixa eu ver se entendi: vocês precisam de algo que não estoure o orçamento, têm receio de que o nosso prazo aperte o time e já se queimaram com fornecedor que prometeu demais."
+> Contraparte: "É isso mesmo."
+
+**Cuidado:** "você tem razão" é outra coisa; muitas vezes quer dizer "pode parar". Continue até o "é isso mesmo".
+
+---
+
+## 10. Lidar com o "sim"
+
+**Três tipos de "sim":**
+
+| Tipo | O que significa | Como reconhecer |
+|---|---|---|
+| **Falso** | Dito para escapar ou agradar | Rápido, sem continuidade |
+| **De confirmação** | Concorda com um detalhe | "Sim, recebi o e-mail" |
+| **De compromisso** | Acordo real, com intenção de agir | Detalhado, com energia |
+
+**Ponto-chave:** só o "sim" de compromisso vale. Caçar o "sim" deixa o outro na defensiva.
+
+**Estratégia:** em vez de empurrar para o "sim", deixe o outro confortável para dizer "não" primeiro. Depois de tratado o "não", o "sim" que vier tende a ser real.
+
+---
+
+## 11. Regra de três
+
+**O que é:** fazer o outro confirmar o acordo três vezes, de três formas diferentes, na mesma conversa.
+
+**Gatilho:** acordo real aguenta várias confirmações. Se desmancha na segunda ou terceira, não havia acordo.
+
+**Como aplicar:**
+1. Primeiro "sim": concordância direta
+2. Segundo: resuma e obtenha o "é isso mesmo"
+3. Terceiro: pergunta calibrada sobre a execução: "como o seu time vai...?"
+
+**Exemplo de sequência:**
+> "Então estamos de acordo com o orçamento de R$ 50 mil?" → "Sim."
+> "Só para confirmar: R$ 50 mil, com entrega no terceiro trimestre?" → "É isso mesmo."
+> "Ótimo. Como vocês vão levar isso para o financeiro?" → "Mando o pedido de compra amanhã."
+
+---
+
+## 12. Retomar contato
+
+**O que é:** quando o outro some (e-mail, mensagem ou ao vivo), pergunte: "vocês desistiram de [projeto/acordo]?"
+
+**Gatilho:** ninguém gosta de parecer que desistiu. A pergunta provoca um "não" instintivo e obriga o outro a voltar e explicar.
+
+**Quando usar:**
+- Contraparte sem resposta
+- Negociação parada
+- Sumiço
+
+**Exemplo:**
+> Assunto: Uma pergunta rápida
+> "Vocês desistiram da parceria que conversamos?"
 >
-> Response: "No, I haven't given up. I've just been slammed with..."
+> Resposta: "Não, não desistimos. É que a semana foi uma loucura..."
 
 ---
 
-## 13. Managing "Fair"
+## 13. Lidar com "justo"
 
-**The word "fair" can derail negotiations. Three scenarios:**
+A palavra "justo" pode descarrilar a negociação. Três cenários:
 
-### Scenario 1: "We just want what's fair"
-- **What they mean:** Making you feel guilty; implying you've been unfair
-- **Response:** "Absolutely, I want to be fair too. Let's pause—have I done something unfair? Let's talk about it."
+### Cenário 1: "Só queremos o que é justo"
+- **O que significa:** fazer você se sentir culpado, insinuar que foi injusto
+- **Resposta:** "Também quero ser justo. Vamos parar um instante: fiz algo injusto? Vamos falar sobre isso."
 
-### Scenario 2: "This is a fair offer"
-- **What they mean:** Anchoring; don't ask for more
-- **Response:** Mirror: "Fair?" (silence). Then: "How did you arrive at that figure?"
+### Cenário 2: "Essa é uma oferta justa"
+- **O que significa:** ancoragem; "não peça mais"
+- **Resposta:** espelhe: "Justa?" (silêncio). Depois: "Como vocês chegaram nesse valor?"
 
-### Scenario 3: Preempt it yourself
-- **What to say:** "My goal is for you to feel this is 100% fair. If at any point you don't, please tell me and we'll address it."
-- **Effect:** Removes "fair" as a future weapon
-
----
-
-## 14. Anchoring and Loss Aversion
-
-### Anchoring
-**What it is:** The first number mentioned skews all subsequent discussion.
-
-**How to use:**
-- If selling: Start high (higher than you expect to get)
-- If buying: Start low
-- Use ranges to anchor softly: "Similar projects run $150K-$250K" (your target is $150K)
-
-### Loss Aversion
-**What it is:** People will take greater risks to avoid losses than to achieve gains.
-
-**How to use:**
-- Emphasize what they lose by not agreeing
-- Frame the cost of inaction, not just the benefit of action
-
-**Example:**
-> "If we don't resolve this now, you'll lose three months of runway and the team's momentum."
-
-### Deadlines
-- Question every deadline: "Whose deadline is it? Is it real?"
-- Don't let artificial deadlines rush you into bad deals
-- Use legitimate deadlines strategically to create urgency
+### Cenário 3: antecipe-se
+- **O que dizer:** "Quero que você sinta que isso é totalmente justo. Se em algum momento não sentir, me diga e a gente resolve."
+- **Efeito:** tira o "justo" do arsenal do outro
 
 ---
 
-## 15. Ackerman Bargaining Method
+## 14. Ancoragem e aversão à perda
 
-Step-by-step monetary negotiation system:
+### Ancoragem
+**O que é:** o primeiro número dito puxa toda a discussão que vem depois.
 
-| Step | Action | Rationale |
-|------|--------|-----------|
-| 1 | Set your target price | Your real goal |
-| 2 | Open at **65%** of target | Extreme but not insulting anchor |
-| 3 | First raise to **85%** | Decreasing increment signals limit |
-| 4 | Second raise to **95%** | Even smaller—they feel they're squeezing you |
-| 5 | Final offer at **100%** | Use precise number ($97,350 not $97,000) |
-| 6 | Add non-monetary item | "...and I'll include a 1-year warranty" |
+**Como usar:**
+- Vendendo: comece acima do que espera fechar (âncora e degraus definidos pela postura de ATHENA e por LIBRA)
+- Comprando: comece abaixo
+- Âncora suave por faixa: "projetos parecidos ficam entre X e Y", com o seu alvo na ponta que interessa a você
 
-**Why precise numbers work:** Non-round numbers ($47,235 vs $47,000) feel calculated and final—as if you've truly pushed to your limit.
+### Aversão à perda
+**O que é:** as pessoas arriscam mais para evitar uma perda do que para obter um ganho do mesmo tamanho.
 
-**Why the final gift:** A small non-monetary add-on signals you're at your absolute maximum and makes it psychologically harder for them to ask for more.
+**Como usar:**
+- Mostre o que o outro perde se não fechar
+- Enquadre o custo de não agir, não só o benefício de agir
+
+**Exemplo:**
+> "Se a gente não resolver isso agora, vocês perdem três meses de fôlego e o ritmo do time."
+
+### Prazos
+- Questione todo prazo: "de quem é esse prazo? Ele é real?"
+- Não deixe prazo artificial empurrar você para um acordo ruim
+- Use prazo legítimo para criar urgência
 
 ---
 
-## 16. Leverage Types
+## 15. Método Ackerman
 
-Leverage is power in negotiation—often perception, not reality.
+Sistema passo a passo para negociar valor **do lado de quem compra**:
 
-| Type | Definition | How to use |
-|------|------------|------------|
-| **Positive** | You have something they want | Remind them of what they gain by dealing with you |
-| **Negative** | You can cause them pain | Mention consequences of no deal (use carefully) |
-| **Normative** | Using their beliefs/values against them | "You've always said quality matters most—would cutting corners align with that?" |
+| Passo | Ação | Por quê |
+|---|---|---|
+| 1 | Defina o preço-alvo | É a sua meta real (teto de quem paga) |
+| 2 | Abra em **65%** do alvo | Âncora forte, mas não ofensiva |
+| 3 | Primeira subida para **85%** | Incremento decrescente sinaliza limite |
+| 4 | Segunda subida para **95%** | Ainda menor; o outro sente que está espremendo você |
+| 5 | Oferta final em **100%** | Número quebrado (R$ 97.350, não R$ 97.000) |
+| 6 | Some um item não monetário | "...e incluímos um ano de garantia" |
 
-**Key question:** "Who feels they have more to lose if this falls apart?"
+**Por que número quebrado funciona:** R$ 47.235 parece calculado e final; R$ 47.000 parece ter margem.
 
-**Insight:** Even without objective power, you can create perceived leverage by uncovering what they fear or desperately want.
+**Por que o bônus no fim:** um pequeno extra não monetário sinaliza que você chegou no máximo e deixa difícil pedir mais.
+
+**Do lado vendedor (nosso caso em `sales-strategist` e `sales-closer`):** a lógica se inverte. Âncora acima do alvo, concessões em incrementos decrescentes e parada no piso da postura aprovada. Âncora, degraus e piso são definidos por ATHENA/LIBRA (ou PRUDENTIA em termos jurídicos); não use as porcentagens da tabela acima espelhadas como regra. PEITHO (`sales-closer`) e TEJO (`finance-billing`) não concedem valor: só repetem o que a postura autoriza.
+
+---
+
+## 16. Tipos de alavanca
+
+Alavanca é poder na negociação, e muitas vezes é percepção, não realidade.
+
+| Tipo | Definição | Como usar |
+|---|---|---|
+| **Positiva** | Você tem algo que o outro quer | Lembre o que ele ganha fechando com você |
+| **Negativa** | Você pode causar um prejuízo | Mencione as consequências de não fechar (com cuidado) |
+| **Normativa** | Os valores declarados do próprio outro | "Vocês sempre disseram que qualidade vem primeiro; cortar isso combina com essa ideia?" |
+
+**Pergunta-chave:** "quem sente que tem mais a perder se isso não sair?"
+
+**Ponto-chave:** mesmo sem poder objetivo, dá para criar alavanca percebida descobrindo o que o outro teme ou deseja muito.
 
 ---
 
 ## 17. Black Swans
 
-**What they are:** Hidden, game-changing pieces of information that can transform a negotiation once discovered.
+**O que são:** informações escondidas que mudam o jogo quando descobertas.
 
-**Assumption:** Every negotiation has approximately 3 Black Swans lurking.
+**Premissa:** toda negociação tem algumas escondidas (o método fala em cerca de três).
 
-**Types of Black Swans:**
-- Secret constraints (their boss said no more than X)
-- Hidden motivations (they need this deal to save their job)
-- Unknown context (their competitor just made a move)
+**Tipos:**
+- Restrição secreta (o chefe disse "no máximo X")
+- Motivação oculta (o acordo salva o emprego de alguém)
+- Contexto desconhecido (o concorrente acabou de se mexer)
 
-**How to find them:**
-- Stay curious; ask calibrated questions
-- Use tactical empathy to make them comfortable
-- Watch for anomalies—odd reactions signal hidden factors
-- Listen in unguarded moments (before/after meetings)
+**Como encontrar:**
+- Curiosidade e perguntas calibradas
+- Empatia tática para o outro se sentir à vontade
+- Atenção a anomalias: reação estranha indica fator escondido
+- Ouça os momentos sem guarda (antes e depois da reunião)
 
-**Effect:** Discovering a Black Swan can turn a stalemate into a breakthrough.
-
----
-
-## 18. Counterpart Styles
-
-### Analyst
-- **Traits:** Methodical, data-driven, prizes accuracy, hates surprises, may seem cold
-- **Fears:** Being rushed, making errors, being unprepared
-- **Adapt:** Use data and facts, be patient, give them time to process, don't pressure with tight deadlines
-
-### Accommodator
-- **Traits:** Amiable, relationship-focused, values personal connection, avoids conflict
-- **Fears:** Confrontation, damaging relationships
-- **Adapt:** Build rapport, make small talk, be friendly—but ensure you pin down specifics (they may agree too quickly just to please)
-
-### Assertive
-- **Traits:** Direct, time-conscious, wants to win, speaks fast, comfortable saying no
-- **Fears:** Wasting time, being seen as weak
-- **Adapt:** Be efficient, stand your ground, acknowledge their points, frame proposals as wins for them
-
-**Insight:** Great negotiators borrow from all three styles as needed.
+**Efeito:** um Black Swan descoberto pode transformar impasse em acordo.
 
 ---
 
-## 19. Body Language and Tone
+## 18. Estilos de contraparte
 
-**The 7-38-55 Rule:**
-- 7% of meaning: Words
-- 38% of meaning: Tone
-- 55% of meaning: Body language
+### Analítico
+- **Traços:** metódico, orientado a dados, preza precisão, detesta surpresa, pode parecer frio
+- **Medos:** ser apressado, errar, não estar preparado
+- **Adaptação:** dados e fatos, paciência, tempo para processar, sem pressão de prazo apertado
 
-**What to watch:**
-- Incongruence between words and tone/body (signals hesitation or deception)
-- Arms crossed, leaning back (defensive)
-- Leaning in, open posture (engaged)
-- Facial micro-expressions
+### Acomodador
+- **Traços:** simpático, focado na relação, valoriza conexão pessoal, evita conflito
+- **Medos:** confronto, estragar a relação
+- **Adaptação:** construa relação, converse, seja amigável, mas feche os detalhes (ele pode concordar rápido demais só para agradar)
 
-**When to observe:** Unguarded moments before/after meetings reveal true feelings.
+### Assertivo
+- **Traços:** direto, com pressa, quer ganhar, fala rápido, diz "não" com facilidade
+- **Medos:** perder tempo, parecer fraco
+- **Adaptação:** seja objetivo, mantenha a posição, reconheça os pontos dele e apresente a proposta como vitória dele
 
-**Your own signals:**
-- Keep body language open (no crossed arms, no pointing)
-- Nod to show listening
-- Maintain appropriate eye contact
-- Smile genuinely
+**Ponto-chave:** bons negociadores usam os três estilos conforme a situação.
 
 ---
 
-## 20. Dynamic Silence
+## 19. Linguagem corporal e tom
 
-**What it is:** Deliberate, extended pauses after key statements or questions.
+**A proporção 7-38-55 (palavras, tom, corpo):** é muito citada, mas vem de estudos sobre mensagens de sentimento e não é regra geral de comunicação. Use como lembrete de que tom e corpo pesam, não como percentual.
 
-**Psychological trigger:** Silence creates a vacuum people instinctively fill—often with information, concessions, or their internal reasoning.
+**O que observar:**
+- Incoerência entre palavra e tom/corpo (sinal de hesitação ou de algo não dito)
+- Braços cruzados, corpo para trás (defensiva)
+- Corpo para frente, postura aberta (engajamento)
+- Microexpressões do rosto
 
-**How to use:**
-- Make your statement or ask your question
-- Stop talking completely
-- Maintain calm, attentive presence
-- Resist the urge to fill the silence yourself
+**Quando observar:** momentos sem guarda, antes e depois da reunião, mostram o que a pessoa sente.
 
-**Effect:**
-- They reveal more information
-- They may negotiate against themselves
-- Your words carry more weight
-
-**Rule:** "He who speaks least often wins."
+**Seus próprios sinais:**
+- Postura aberta (sem braços cruzados, sem apontar o dedo)
+- Acene para mostrar escuta
+- Contato visual adequado
+- Sorriso genuíno
 
 ---
 
-## 21. Pronoun Analysis
+## 20. Silêncio dinâmico
 
-**What to listen for:**
+**O que é:** pausas deliberadas e longas depois de frases ou perguntas importantes.
 
-| Pronoun pattern | What it may indicate |
-|-----------------|---------------------|
-| Heavy "I/me/my" | May lack full authority; someone else decides |
-| "We/they/our team" | Decision-maker or representing group consensus |
-| Shift from "I" to "we" | May be invoking higher authority to deflect |
+**Gatilho:** o silêncio cria um vazio que as pessoas preenchem por instinto, muitas vezes com informação, concessão ou o próprio raciocínio.
 
-**How to use this:**
-- If they use "I" heavily, ask: "How does your team/leadership weigh in on this?"
-- If they use "we" heavily, they may have authority—but verify
+**Como usar:**
+- Faça a afirmação ou a pergunta
+- Pare de falar por completo
+- Fique calmo e atento
+- Resista à vontade de preencher o silêncio
 
-**Humanize yourself:** Use your name and their name throughout. "Look, Sarah, I really want to make this work" is more disarming than "I want to make this work."
+**Efeito:**
+- O outro revela mais
+- Pode negociar contra si mesmo
+- Suas palavras ganham peso
+
+---
+
+## 21. Leitura de pronomes
+
+**O que ouvir:**
+
+| Padrão | O que pode indicar |
+|---|---|
+| Muito "eu/meu" | Talvez não tenha autoridade total; outra pessoa decide |
+| "Nós/eles/nosso time" | Decisor ou porta-voz de um consenso |
+| Troca de "eu" para "nós" | Pode estar invocando uma autoridade acima para se esquivar |
+
+**Como usar:**
+- Se usa muito "eu", pergunte: "como o seu time ou a liderança pesa nisso?"
+- Se usa muito "nós", pode ter autoridade, mas confirme
+
+**Humanize-se:** use o seu nome e o do outro ao longo da conversa. "Olha, Sara, quero muito fazer isso dar certo" desarma mais do que "quero fazer isso dar certo".

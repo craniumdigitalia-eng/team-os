@@ -2,7 +2,7 @@
 
 ### Pack de orquestração para Claude Code Agent Teams — *by João Guirunas*
 
-**102 agentes e 112 skills** organizados em 11 squads (Dev, Sites, Social, Traffic, PM, Sales, Brand, Finance, Legal, SEO, Security), com a skill `/team-os` para orquestrar sessões, a `/team-os-creator` para gerar e instalar squads em qualquer projeto, e a **Sala de Controle** (opt-in) — um lugar único de comando que manda cada pedido para a sessão certa: `/sala-de-controle` (sessões do Claude Code) ou `/maestri-os` (terminais do [Maestri](https://maestri.app)). Todo agente segue o **Native Teams Protocol** — autônomo, com smart-memory integrada (formato Obsidian) e coordenação peer-to-peer.
+**102 agentes e 111 skills** organizados em 11 squads (Dev, Sites, Social, Traffic, PM, Sales, Brand, Finance, Legal, SEO, Security), com a skill `/team-os` para orquestrar sessões, a `/team-os-creator` para gerar e instalar squads em qualquer projeto, e a **Sala de Controle** (opt-in) — um lugar único de comando que manda cada pedido para a sessão certa: `/sala-de-controle` (sessões do Claude Code) ou `/maestri-os` (terminais do [Maestri](https://maestri.app)). Todo agente segue o **Native Teams Protocol** — autônomo, com smart-memory integrada (formato Obsidian) e coordenação peer-to-peer.
 
 > Este repositório é a **fonte da verdade**: edite agentes e skills **aqui**, audite com `/team-os-creator *audit` e propague para os projetos destino com `/team-os-creator *propagate`. Nunca edite agentes direto no destino.
 
@@ -460,7 +460,7 @@ A coluna **Skills relacionadas** é um mapa de skills **recomendadas/disponívei
 ### Traffic — Tráfego pago (10)
 | Agente | Papel | Skills relacionadas |
 |---|---|---|
-| `traffic-analyst` | Audiências, concorrência, benchmarks | `/deep-research`, `/social-analytics`, `/traffic-google-ads-mcp`, `/traffic-ga4-mcp` |
+| `traffic-analyst` | Audiências, concorrência, benchmarks | `/social-analytics`, `/traffic-google-ads-mcp`, `/traffic-ga4-mcp` |
 | `traffic-automation` | Bulk ops, APIs Google/Meta/TikTok | `/dev-api-design`, `/dev-error-handling`, `/traffic-google-ads-mcp`, `/traffic-analytics-tracking` |
 | `traffic-bi` | Atribuição, ROAS/LTV/CPA (fonte de verdade) | `/data-analytics-engineering`, `/data-sql-optimization`, `/traffic-ga4-mcp`, `/traffic-google-ads-mcp`, `/traffic-analytics-tracking` |
 | `traffic-copywriter` | Copy de anúncios, variantes A/B | `/social-copywriting`, `/tiktok-marketing`, `/traffic-paid-ads-optimization` |
@@ -468,7 +468,7 @@ A coluna **Skills relacionadas** é um mapa de skills **recomendadas/disponívei
 | `traffic-google` | Google Ads (Search, PMax, Shopping, YT) | `/social-analytics`, `/traffic-google-ads-mcp`, `/traffic-ga4-mcp`, `/traffic-paid-ads-optimization` |
 | `traffic-meta` | Meta Ads (FB + IG, Advantage+) | `/social-meta-publishing`, `/social-analytics`, `/traffic-paid-ads-optimization` |
 | `traffic-qa` | Compliance pré-launch (UTMs, pixels) | `/dev-testing-strategy`, `/traffic-analytics-tracking`, `/traffic-ga4-mcp`, `/traffic-google-ads-mcp` |
-| `traffic-strategist` | Briefings + stories de campanha (exclusivo) | `/deep-research`, `/tiktok-marketing`, `/traffic-paid-ads-optimization`, `/traffic-ga4-mcp` |
+| `traffic-strategist` | Briefings + stories de campanha (exclusivo) | `/tiktok-marketing`, `/traffic-paid-ads-optimization`, `/traffic-ga4-mcp` |
 | `traffic-tiktok` | TikTok Ads (Spark, In-Feed, TopView) | `/tiktok-marketing`, `/social-format-specs`, `/traffic-paid-ads-optimization` |
 
 ### PM — Gestão de projetos (10, personas Kaelthari)
@@ -483,7 +483,7 @@ A coluna **Skills relacionadas** é um mapa de skills **recomendadas/disponívei
 | `pm-ops` | Varek | Operações diárias (status, subtasks) | — |
 | `pm-planner` | Zynath | Sprints, roadmap, capacidade | `/data-analytics-engineering` |
 | `pm-qa` | Thyron | Auditor formal de entregas | — |
-| `pm-reporter` | Lyrith | Meeting intelligence (dailies, retros) | `/dev-technical-writing`, `/deep-research` |
+| `pm-reporter` | Lyrith | Meeting intelligence (dailies, retros) | `/dev-technical-writing` |
 
 ### Sales — Propostas e apresentações (8, personas olímpicas)
 
@@ -496,7 +496,7 @@ A coluna **Skills relacionadas** é um mapa de skills **recomendadas/disponívei
 | `sales-planner` | DAEDALUS | Story da proposta + planejamento interno de 9 seções + estrutura página a página (exclusivo) | `/sales-proposal-planning`, `/sales-discovery-intake`, `/dev-technical-writing`, `/sales-enablement` |
 | `sales-finance` | LIBRA | **Fonte única dos números**: preço vs. tabela, desconto/breakeven, payback, permuta, BP, valuation | `/sales-pricing-payback`, `/startup-financial-modeling`, `/pricing`, `/verify-before-done` |
 | `sales-copywriter` | CALLIOPE | Texto página a página — voz declarativa, compromisso conjunto, número só com `#id` da ficha | `/sales-proposal-copy`, `/sales-enablement`, `/sites-copy`, `/sales-proposal-planning` |
-| `sales-designer` | HELIOS | PDF e deck no design system do projeto — HTML + print CSS → export headless → checagem | `/sales-deck-production`, `/slides`, `/presentation-design`, `/ui-ux-pro-max`, `/verify-before-done` |
+| `sales-designer` | HELIOS | PDF e deck no design system do projeto — HTML + print CSS → export headless → checagem | `/sales-deck-production` (com a variante deck), `/presentation-design`, `/ui-ux-pro-max`, `/verify-before-done` |
 | `sales-qa` | ARGUS | Veredictos PASS/CONCERNS/FAIL/WAIVED sobre o artefato — 12 pontos (exclusivo) | `/sales-proposal-copy`, `/sales-deck-production`, `/presentation-design`, `/verify-before-done` |
 | `sales-closer` | PEITHO | Brief de reunião, follow-up, ledger de propostas, envio só com PASS + confirmação do usuário | `/negotiation`, `/sales-enablement`, `/sales-proposal-copy`, `/verify-before-done` |
 
@@ -587,7 +587,7 @@ A coluna **Skills relacionadas** é um mapa de skills **recomendadas/disponívei
 
 ### Catálogo por área
 
-112 skills, todas diretórios reais e versionados (repositório self-contained).
+111 skills, todas diretórios reais e versionados (repositório self-contained).
 
 **Dev (9):** `dev-api-design`, `dev-database-patterns`, `dev-defuddle`, `dev-error-handling`, `dev-git-workflow`, `dev-security-patterns`, `dev-technical-writing`, `dev-testing-strategy`, `dev-typescript-patterns`
 
@@ -613,7 +613,7 @@ A coluna **Skills relacionadas** é um mapa de skills **recomendadas/disponívei
 
 **Security (4):** `security-audit-method`, `security-threat-modeling`, `security-incident-response`, `security-privacy-data-map`
 
-**Design & geral (13):** `ui-ux-pro-max`, `web-design-guidelines`, `accessibility`, `deep-research`, `tiktok-marketing`, `nextjs-react-best-practices`, `testing-playwright-e2e`, `verify-before-done`, `negotiation`, `pricing`, `slides`, `presentation-design`, `startup-financial-modeling`
+**Design & geral (12):** `ui-ux-pro-max`, `web-design-guidelines`, `accessibility`, `deep-research`, `tiktok-marketing`, `nextjs-react-best-practices`, `testing-playwright-e2e`, `verify-before-done`, `negotiation`, `pricing`, `presentation-design`, `startup-financial-modeling`
 
 > **Novas (adaptadas do registry [skills.sh](https://www.skills.sh/), auditadas):** `nextjs-react-best-practices` (Vercel — performance React/Next para devs de dev/sites), `data-supabase-patterns` (Supabase — Postgres/RLS/indexing para data engineers), `testing-playwright-e2e` (E2E para os QAs), `traffic-paid-ads-optimization` e `traffic-analytics-tracking` (marketingskills — para strategist/copywriter/bi/qa da traffic), `verify-before-done` (superpowers — gate de verificação antes de declarar "pronto", uso geral de todos os agentes).
 >
@@ -625,7 +625,7 @@ A coluna **Skills relacionadas** é um mapa de skills **recomendadas/disponívei
 >
 > **Nova 2026-09 (Sala de Controle, modo Maestri):** `maestri-os` — autoral do CT, recurso opt-in para o Maestri (roteador de pedidos entre terminais; `scripts/scan-project.sh` read-only + templates de registro/compilado/histórico). Não pertence a squad; só entra via `--squads none --extra-skills maestri-os`.
 >
-> **Novas 2026-09 (squad Sales):** autorais do CT — `sales-discovery-intake`, `sales-proposal-planning`, `sales-pricing-payback`, `sales-proposal-copy`, `sales-deck-production` (com `html-to-pdf.mjs` e `check-pdf.sh`); adotadas do registry após vetting — `sales-enablement` e `pricing` (marketingskills), `startup-financial-modeling` (wshobson), `negotiation` (wondelai — framework Voss), `slides` (nextlevelbuilder, mesmo autor do `ui-ux-pro-max`), `presentation-design` (jwynia). Descartadas no vetting: `proposal-writer` (template raso com número inventado), `html-slides`/`meeting-notes` (frontmatter quebrado), `html-to-pdf` (abaixo do corte — abordagem incorporada em `sales-deck-production`).
+> **Novas 2026-09 (squad Sales):** autorais do CT — `sales-discovery-intake`, `sales-proposal-planning`, `sales-pricing-payback`, `sales-proposal-copy`, `sales-deck-production` (com `html-to-pdf.mjs` e `check-pdf.sh`); adotadas do registry após vetting — `sales-enablement` e `pricing` (marketingskills), `startup-financial-modeling` (wshobson), `negotiation` (wondelai — framework Voss), `presentation-design` (jwynia). A `slides` (nextlevelbuilder) entrou aqui e foi consolidada em `sales-deck-production` em 2026-10 (references `deck-*`). Descartadas no vetting: `proposal-writer` (template raso com número inventado), `html-slides`/`meeting-notes` (frontmatter quebrado), `html-to-pdf` (abaixo do corte — abordagem incorporada em `sales-deck-production`).
 >
 > **Nova 2026-09 (squad SEO):** pacote externo [claude-seo](https://github.com/AgriciDaniel/claude-seo) v2.3.1 (MIT, AgriciDaniel) incorporado 100% ao CT — as 25 skills do core + `seo-ahrefs` e `seo-bing` (mirrors de extensão), com o runtime Python (58 scripts: GSC, PageSpeed, CrUX, GA4, Playwright, geração de schema, drift) reidratado em `.claude/skills/seo/scripts/` e reescrito para rodar via `${CLAUDE_PROJECT_DIR}` em vez de `${CLAUDE_PLUGIN_ROOT}` (não é plugin, é skill do CT). `seo-flow`, `seo-dataforseo` e `seo-image-gen` entram como skill mas sem agente dedicado — `seo-flow` é framework de prompt, os outros dois dependem de MCP pago (DataForSEO, Gemini/nanobanana) ainda não autorizado. Os 15 agentes (personas egípcias) e a autoria do preset/bodies são do CT — pressure-tested 9/9.
 
@@ -784,7 +784,7 @@ Para forçar outro modelo num agente `inherit`, especifique no spawn: `"Spawn {n
 │   ├── check-finance-progress.sh  ← TaskCompleted: execução financeira só com PASS + confirmação do usuário
 │   ├── check-legal-progress.sh    ← TaskCompleted: saída jurídica só com PASS + confirmação do usuário
 │   └── team-os-session-title.sh   ← SessionStart: nomeia a sessão por "projeto · branch" (instalado em ~/.claude/hooks/ pelo *install)
-└── skills/              ← 112 skills (diretórios reais)
+└── skills/              ← 111 skills (diretórios reais)
     ├── sala-de-controle/        ← Sala de Controle (opt-in, sessões do Claude Code): SKILL.md + scripts/{refresh,scan-sessions,session-tail,project-context,org-map}.py + scripts/painel/{collect.py,serve.py,index.html} (mapa vivo, `*painel`) + templates/{panorama,registry,dispatches,organizacao}.md
     ├── maestri-os/              ← Sala de Controle (opt-in, recurso Maestri): SKILL.md + scripts/scan-project.sh + templates/{registry,overview,dispatches}.md
     ├── seo/                     ← orquestradora da squad SEO + runtime Python (scripts/, schema/, data/, pdf/, hooks/); .venv/ e ms-playwright/ são runtime local (gitignored)
@@ -854,7 +854,7 @@ O CT é a fonte da verdade: agentes e skills são editados **aqui** e levados ao
 ```
 1. Editar agente/skill AQUI — agentes via /team-os-creator (*create, *squad, *migrate)
 2. bash .claude/skills/team-os-creator/scripts/validate-agent.sh            → 102/102 agentes do pack conformes (= *audit)
-3. bash .claude/skills/team-os-creator/scripts/validate-agent.sh --skills   → lint das 112 skills
+3. bash .claude/skills/team-os-creator/scripts/validate-agent.sh --skills   → lint das 111 skills
 4. bash .claude/skills/team-os-creator/scripts/test-hooks.sh                → 505/505 casos dos hooks
 5. python3 .claude/skills/team-os-creator/scripts/generate-agents-page.py   → regenera docs/agentes.html
 6. /team-os-creator *propagate   → leva aos projetos destino (--match-target-squads)
@@ -862,7 +862,7 @@ O CT é a fonte da verdade: agentes e skills são editados **aqui** e levados ao
 
 **Quem mantém o pack oficial** (e só quem tem o arquivo `.team-os-maintainer` na raiz) segue um ciclo maior — manifest, CHANGELOG, commit, release e push manual. Ele está descrito em **[MAINTAINERS.md](./MAINTAINERS.md)**. Quem só usa o pack não precisa dele: para receber as versões novas, use o `*update` ([Instalar e atualizar](#instalar-e-atualizar)).
 
-**Regra de ouro:** auditoria sempre verde antes de propagar. O CI (`.github/workflows/audit.yml`) repete os passos 2-5, roda `test-update.sh` e `test-propagate.sh`, confere o `pack-manifest.json` e ainda checa: contagens "102 agentes"/"112 skills" no README e no CLAUDE.md (contadas pelo manifest — agentes e skills próprios de cada usuário não entram), zero caminho de máquina versionado e `docs/agentes.html` em dia (`--check`). Detalhes de contribuição em [CONTRIBUTING.md](./CONTRIBUTING.md); histórico em [CHANGELOG.md](./CHANGELOG.md).
+**Regra de ouro:** auditoria sempre verde antes de propagar. O CI (`.github/workflows/audit.yml`) repete os passos 2-5, roda `test-update.sh` e `test-propagate.sh`, confere o `pack-manifest.json` e ainda checa: contagens "102 agentes"/"111 skills" no README e no CLAUDE.md (contadas pelo manifest — agentes e skills próprios de cada usuário não entram), zero caminho de máquina versionado e `docs/agentes.html` em dia (`--check`). Detalhes de contribuição em [CONTRIBUTING.md](./CONTRIBUTING.md); histórico em [CHANGELOG.md](./CHANGELOG.md).
 
 **Página oficial dos agentes:** [`docs/agentes.html`](./docs/agentes.html) — apresentação navegável dos 102 agentes: card inteiro clicável abre modal de **perfil completo** (bio, matriz de autoridade, regras absolutas, skills), skills clicáveis abrem modal com versão/seções e navegação cruzada de volta aos agentes que a usam. Gerada dos arquivos reais por `python3 .claude/skills/team-os-creator/scripts/generate-agents-page.py` — **regenerar após qualquer mudança em agentes ou skills** (o CI falha se estiver desatualizada). Preview local: `npx http-server docs -p 8765` (config pronta em `.claude/launch.json`).
 

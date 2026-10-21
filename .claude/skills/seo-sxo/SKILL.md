@@ -1,7 +1,7 @@
 ---
 name: seo-sxo
 description: "Search Experience Optimization — lê a SERP do Google ao contrário para detectar descasamento de tipo de página, deriva user stories da intenção de busca e pontua páginas por persona; explica por que páginas bem otimizadas não ranqueiam. Use ao pedir 'SXO', 'page type mismatch', 'SERP analysis', 'persona scoring', 'intent mismatch' ou 'por que minha página não ranqueia'."
-version: "2.3.2"
+version: "2.4.0"
 updated: "2026-10-20"
 user-invocable: true
 argument-hint: "<url> [keyword]"
@@ -128,6 +128,18 @@ Compare the target page against SERP expectations across 7 dimensions:
 | Freshness | Last updated, date signals, content recency | 0-10 |
 
 **Total: 0-100 SXO Gap Score** (lower = larger gap, higher = better alignment)
+
+### Diagnóstico contra o top 3
+
+Para página que já ranqueia (candidata das faixas de `seo-google/references/rankings-push.md`, lista com `#id` da SESHAT), abra os três resultados acima dela e escreva, para cada um, o motivo concreto de estar na frente. Quase sempre é uma destas cinco causas:
+
+1. **Intenção** — eles respondem à pergunta que a pessoa fez; a nossa página responde a uma vizinha (ex.: query de preço respondida por página de recursos).
+2. **Seção ausente** — cobrem uma subpergunta que pulamos; o "As pessoas também perguntam" e os subtítulos do top 3 mostram o que se espera.
+3. **Frescor** — dados, prints ou ano atualizados; os nossos, não.
+4. **Formato** — têm a tabela, o passo a passo ou a ferramenta que a query pede.
+5. **Links** — recebem mais links, e mais fortes, de dentro e de fora do site.
+
+**Se não dá para nomear a causa, não recomende reescrita.** A diferença tende a ser autoridade, e o caminho é link (`seo-backlinks`, ANUBIS), não conteúdo. Cada causa nomeada sai com link e data da leitura da SERP.
 
 ### Step 6: Persona-Based Scoring
 

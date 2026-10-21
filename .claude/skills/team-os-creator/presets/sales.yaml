@@ -43,7 +43,7 @@ agents:
     role_title: Proposal Designer
     description: "HELIOS, designer da squad Sales. Produz o artefato final — PDF e deck — a partir da copy aprovada, seguindo o design system do projeto (nunca uma marca inventada): HTML com print CSS, exportação headless, checagem de páginas, fontes e overflow. Também gera a versão navegável do planejamento interno."
     color: pink
-    skills: [sales-deck-production, slides, presentation-design, ui-ux-pro-max]
+    skills: [sales-deck-production, presentation-design, ui-ux-pro-max]
   - name: sales-qa
     archetype: reviewer
     persona: ARGUS

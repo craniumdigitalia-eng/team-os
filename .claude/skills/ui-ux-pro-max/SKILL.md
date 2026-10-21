@@ -1,7 +1,7 @@
 ---
 name: ui-ux-pro-max
 description: "UI/UX design intelligence para web, mobile e desktop — banco pesquisável de estilos, paletas, pares de fonte, tipos de produto, regras de UX, presets de movimento e guias por stack. Use ao desenhar, construir, revisar ou corrigir UI/UX (landing page, dashboard, SaaS, app) ou ao escolher estilo, cor e tipografia."
-version: "2.13.1"
+version: "2.15.0"
 updated: "2026-10-20"
 source: "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill"
 ---
@@ -47,7 +47,7 @@ The search script lives inside this skill's own directory, not the project direc
 python3 "${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/ui-ux-pro-max/scripts/search.py" "<query>" --domain <domain>
 ```
 
-If `python` is not found, try `python3`, then `py -3`. Requires Python 3.x, no external dependencies (see README for install instructions if Python is missing).
+Se `python3` não existir, tente `python` e depois `py -3`. Precisa só de Python 3.x, sem dependências externas; se o Python não estiver instalado, peça ao usuário para instalá-lo (não instale nada por conta própria).
 
 ## Workflow
 
@@ -92,15 +92,18 @@ python3 "${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pw
 
 ### Step 2b: Persist Design System (Master + Overrides Pattern)
 
-To save the design system for retrieval across sessions, add `--persist` **and always pass `--output-dir` pointed at the project root** — without it, files are written relative to whatever directory the tool happens to run from:
+Para guardar o design system entre sessões, use `--persist` **sempre com `--output-dir` apontando para a área de UX da squad na smart-memory** (`docs/smart-memory/agents/<squad>/ux/`, ex.: `sites` ou `dev`). Sem `--output-dir` o script grava `design-system/` no diretório atual (em geral a raiz do projeto), fora da smart-memory — não faça isso. O script cria a pasta `design-system/<project-slug>/` **dentro** do `--output-dir`:
 
 ```bash
-python3 "${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/ui-ux-pro-max/scripts/search.py" "<query>" --design-system --persist -p "Project Name" --output-dir "<project-root>"
+python3 "${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/ui-ux-pro-max/scripts/search.py" "<query>" --design-system --persist -p "Project Name" \
+  --output-dir "${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/docs/smart-memory/agents/<squad>/ux"
 ```
 
-This creates:
-- `design-system/<project-slug>/MASTER.md` — Global Source of Truth
-- `design-system/<project-slug>/pages/` — Folder for page-specific overrides
+Isso cria (caminhos relativos a `docs/smart-memory/agents/<squad>/ux/`):
+- `design-system/<project-slug>/MASTER.md` — fonte da verdade global do design system
+- `design-system/<project-slug>/pages/` — overrides por página
+
+Depois de gravar, registre o caminho do MASTER.md no DIGEST.md da área `ux` da squad. Se o projeto já tem um `design-system/` antigo na raiz (gerado por versão anterior), leia-o e proponha ao usuário movê-lo para a smart-memory — não apague.
 
 With a page-specific override, add `--page "dashboard"` to also create `design-system/<project-slug>/pages/dashboard.md`. If Master already exists, a new page file is created without changing Master; an existing page file is skipped unless `--force` is explicitly authorized.
 
@@ -109,8 +112,8 @@ If `design-system/<project-slug>/MASTER.md` already exists, `--persist` **skips 
 Read an existing `MASTER.md` before deciding whether `--force` is justified. Never use `--force` without explicit user authorization.
 
 **Retrieval when building a specific page:**
-1. Read `design-system/<project-slug>/MASTER.md`
-2. Check if `design-system/<project-slug>/pages/<page-name>.md` exists — if so, its rules override Master
+1. Read `docs/smart-memory/agents/<squad>/ux/design-system/<project-slug>/MASTER.md`
+2. Check if `.../ux/design-system/<project-slug>/pages/<page-name>.md` exists — if so, its rules override Master
 3. Otherwise use Master rules exclusively
 
 ### Step 2c: Design Dials (optional)

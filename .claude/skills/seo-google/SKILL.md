@@ -1,7 +1,7 @@
 ---
 name: seo-google
 description: "APIs Google de SEO — Search Console (Search Analytics, URL Inspection, Sitemaps), PageSpeed Insights v5, CrUX com 25 semanas de histórico, Indexing API v3 e tráfego orgânico do GA4; dados de campo reais de Core Web Vitals e indexação. Use ao pedir 'search console', 'GSC', 'PageSpeed', 'CrUX', 'field data', 'indexing API' ou 'GA4 organic'."
-version: "2.3.2"
+version: "2.4.0"
 updated: "2026-10-20"
 user-invocable: true
 argument-hint: "[command] [url|property]"
@@ -126,6 +126,8 @@ The `totals` block comes from a separate dimensionless aggregate query because
 query-level rows can omit anonymized low-volume traffic. Treat totals as
 site-wide only when `totals_complete` is true. `--limit` caps total returned
 dimension rows, not the size of every pagination request.
+
+**Empurrar rankings:** para transformar essa saída em lista de candidatos (faixas distância de ataque 8–20, CTR fraco 1–5, perto do topo 4–7), disciplina de atribuição e checklist de página nova, siga `references/rankings-push.md`. SESHAT gera a lista com `#id`; MAAT dá o veredicto.
 
 > **AI surfaces in GSC (2026):**
 > - **Generative AI performance report** (launched 2026-06-03), a dedicated view of **AI Overviews + AI Mode** visibility. **Impressions only** (no clicks/CTR/position/query); dimensions Pages/Countries/Devices/Dates (Pacific Time); 1,000-row limit; newest data preliminary; a separate Discover gen-AI report also exists. Rolling out to a subset of properties.

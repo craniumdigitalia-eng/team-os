@@ -2,8 +2,8 @@
 name: team-os
 description: "Bootstrap e orquestração de sessão para Claude Code Agent Teams. Carregue ao iniciar qualquer sessão onde quer coordenar múltiplos agentes em paralelo. Verifica e configura o ambiente (AGENT_TEAMS, teammateMode), lê ou cria a smart-memory, pergunta o objetivo, analisa o paralelismo real e propõe um time dimensionado para máxima velocidade. Trigger: /team-os"
 user-invocable: true
-argument-hint: "[*env | *memory | *compact [--auto] | *tasks | *spawn <objetivo> | *status]"
-version: "3.1"
+argument-hint: "[*env | *memory | *compact [--auto] | *tasks | *spawn <objetivo> | *grill [objetivo] | *status]"
+version: "3.1.1"
 updated: "2026-10-20"
 ---
 
@@ -215,6 +215,16 @@ Aguardar resposta do usuário. Se o usuário responder com objetivo claro → Fa
 
 Se responder com algo vago (ex: "melhorar o app"), fazer UMA pergunta de clarificação:
 `"Qual parte? Backend, frontend, ou ambos? Novo feature ou refatoração?"`
+
+#### `*grill` — modo sabatina (opcional)
+
+Só quando o objetivo é grande ou ambíguo (vários caminhos possíveis, decisões que mudam o time) **ou** o usuário pede (`/team-os *grill`, "me sabatina"). Fora disso vale a pergunta única acima.
+1. **Monte a árvore de decisões**: cada decisão abre as que dependem dela.
+2. **Pergunte em rodadas**: numa rodada vão **todas** as perguntas cujos pré-requisitos já estão resolvidos — numeradas (P1, P2…). Pergunta que depende de outra ainda aberta fica para a rodada seguinte.
+3. **Cada pergunta traz a resposta recomendada**, escrita de forma que um "sim" a aceite: `P1 — Começamos só pelo backend? → Recomendo sim: o front depende da API.`
+4. **Fato não se pergunta**: o que está no código ou na smart-memory o lead busca sozinho (`sm-find.sh`, ou um teammate para varrer o código). Ao usuário só vão **decisões**.
+5. A cada rodada, recalcule o que ficou liberado e faça a próxima. **Termina** quando não há pergunta aberta **e** o usuário confirma o entendimento — só então Fase 4.
+Linguagem simples, sem jargão; nada de "uma pergunta por vez". (Adaptado de mattpocock/skills → grilling, MIT.)
 
 ### Fase 4 — Análise do objetivo
 
@@ -431,6 +441,8 @@ Custo é linear no nº de agentes ativos. As 8 alavancas — spawn prompt cirúr
 
 **O maior custo é contexto grande × turnos** (releitura do histórico): uma peça por agente — concluiu, `[handoff]` e o lead abre outro; o lead compacta quando o hook `context-watch.sh` avisar (200k/400k); passe path, nunca o conteúdo. Dados e regras completas na seção "Contexto grande é o maior custo" do mesmo reference.
 
+**Texto enxuto (lead e agentes):** nunca omitir "não/nunca/só" nem arredondar número exato; nada de texto entre chamadas de ferramenta de rotina; antes de enviar, cortar a frase de abertura que só anuncia e a final que só recapitula → "Escrever curto sem perder sentido" no mesmo reference.
+
 ---
 
 ## Hooks de time
@@ -457,10 +469,11 @@ Demais problemas conhecidos (resume não restaura teammates, task travada, idle-
 /team-os *compact --auto → idem, sem confirmação (mostra o plano e aplica)
 /team-os *tasks         → só mostrar task list atual
 /team-os *spawn {desc}  → Gate 0 + proposta de time para {desc}
+/team-os *grill [obj]   → sabatina em rodadas até fechar as decisões do objetivo (Fase 3)
 /team-os *status        → dashboard de status do time atual + placar (--report)
 ```
 
-> Subcomandos são **atalhos** para a fase correspondente (*env = Gate 0 + 2-A/B/C · *memory = 2-D/E + Discovery/Repair · *tasks = scan item 5 · *spawn = Gate 0 + Fases 4-5 · *status = painel + task list + `WEIGH_REPORT`). **Nenhum subcomando que spawna pula o Gate 0** (escape hatch: ferramentas de teammate já disponíveis = gate satisfeito).
+> Subcomandos são **atalhos** para a fase correspondente (*env = Gate 0 + 2-A/B/C · *memory = 2-D/E + Discovery/Repair · *tasks = scan item 5 · *spawn = Gate 0 + Fases 4-5 · *grill = Fase 3 em modo sabatina · *status = painel + task list + `WEIGH_REPORT`). **Nenhum subcomando que spawna pula o Gate 0** (escape hatch: ferramentas de teammate já disponíveis = gate satisfeito).
 
 **Dimensionamento:** a regra canônica é a da **Fase 4c** — 1 workstream independente = 1 agente; comece com 3-5; escale sem teto fixo conforme a independência real do trabalho; research adversarial = 3-5 pesquisadores. ("5-6 tasks por agente" é só o **throughput esperado** do self-claim, nunca regra de dimensionamento.)
 
