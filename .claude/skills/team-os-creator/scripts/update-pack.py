@@ -425,7 +425,39 @@ def changelog_excerpt(src, cur_ver, new_ver):
 
 # ─────────────────────────────── relatório ──────────────────────────────────
 
-def write_report(local, info, c, ts, audit, ntp, changelog, gitignore):
+def legacy_control_rooms(local):
+    """Pastas de Sala de Controle antigas na raiz (irmãs do pack ou um nível abaixo): sem agentes
+    e com a skill sala-de-controle ou maestri-os. A Sala agora mora no CT — só avisa."""
+    found = []
+    try:
+        root = os.path.dirname(os.path.abspath(local.root))
+        me = os.path.abspath(local.root)
+        cands = []
+        for n in sorted(os.listdir(root)):
+            d = os.path.join(root, n)
+            if n.startswith(".") or not os.path.isdir(d) or os.path.abspath(d) == me:
+                continue
+            cands.append(d)
+            if not os.path.isdir(os.path.join(d, ".claude")):
+                try:
+                    cands += [os.path.join(d, m) for m in sorted(os.listdir(d))
+                              if not m.startswith(".") and os.path.isdir(os.path.join(d, m))]
+                except OSError:
+                    pass
+        for d in cands:
+            sk = os.path.join(d, ".claude", "skills")
+            if not (os.path.isdir(os.path.join(sk, "sala-de-controle")) or os.path.isdir(os.path.join(sk, "maestri-os"))):
+                continue
+            ag = os.path.join(d, ".claude", "agents")
+            if os.path.isdir(ag) and any(f.endswith(".md") for f in os.listdir(ag)):
+                continue
+            found.append(d)
+    except OSError:
+        pass
+    return found
+
+
+def write_report(local, info, c, ts, audit, ntp, changelog, gitignore, legacy=None):
     L = []
     L.append("# Relatório do update — team-os\n")
     L.append(f"- Data: {now_iso()}")
@@ -466,6 +498,14 @@ def write_report(local, info, c, ts, audit, ntp, changelog, gitignore):
     if gitignore:
         L.append("- `.gitignore` ganhou a linha `.team-os/` (estado local do update)")
     L.append("")
+    if legacy:
+        migrate = local.p(os.path.join(SCRIPTS_REL, "migrate-sala-to-ct.sh"))
+        L.append(f"## Sala de Controle em pasta separada ({len(legacy)})\n")
+        L.append("A Sala de Controle agora mora no CT (`/sala-de-controle` numa sessão do CT). "
+                 "Nada foi mexido nestas pastas. Para migrar (simulação primeiro):\n")
+        for d in legacy:
+            L.append(f"- `{d}` → `bash \"{migrate}\" \"{d}\"`")
+        L.append("")
     L.append("## Verificação dos agentes (*audit)\n")
     L.append(f"- {audit['summary']}\n")
     L.append("## Se quiser desfazer\n")
@@ -690,7 +730,8 @@ def apply(local, info, man, c, base, pending, excerpt):
     audit = run_audit(local)
     out("AUDIT", audit["status"])
     out("AUDIT_SUMMARY", audit["summary"])
-    write_report(local, info, c, ts, audit, ntp, excerpt, gitignore)
+    legacy = legacy_control_rooms(local)
+    write_report(local, info, c, ts, audit, ntp, excerpt, gitignore, legacy)
 
     out("APPLIED", 1)
     out("NEW_VERSION", info["to"])
@@ -702,6 +743,10 @@ def apply(local, info, man, c, base, pending, excerpt):
     inst = local.installed() or {}
     pend = inst.get("pending", [])
     out("PENDING", len(pend))
+    migrate = local.p(os.path.join(SCRIPTS_REL, "migrate-sala-to-ct.sh"))
+    for d in legacy:
+        out("LEGACY_CONTROL_ROOM", f"{d}|Sala de Controle em pasta separada: ela agora mora no CT. "
+            f"Para migrar (simulação primeiro): bash \"{migrate}\" \"{d}\"")
     return 2 if pend else 0
 
 

@@ -2,7 +2,7 @@
 
 ### Pack de orquestração para Claude Code Agent Teams — *by João Guirunas*
 
-**111 agentes e 125 skills** organizados em 15 squads (Dev, Sites, Social — estúdio comum, Instagram, TikTok, YouTube, LinkedIn, Traffic, PM, Sales, Brand, Finance, Legal, SEO, Security), com a skill `/team-os` para orquestrar sessões, a `/team-os-creator` para gerar e instalar squads em qualquer projeto, e a **Sala de Controle** (opt-in) — um lugar único de comando que manda cada pedido para a sessão certa: `/sala-de-controle` (sessões do Claude Code) ou `/maestri-os` (terminais do [Maestri](https://maestri.app)). Todo agente segue o **Native Teams Protocol** — autônomo, com smart-memory integrada (formato Obsidian) e coordenação peer-to-peer.
+**111 agentes e 124 skills** organizados em 15 squads (Dev, Sites, Social — estúdio comum, Instagram, TikTok, YouTube, LinkedIn, Traffic, PM, Sales, Brand, Finance, Legal, SEO, Security), com a skill `/team-os` para orquestrar sessões, a `/team-os-creator` para gerar e instalar squads em qualquer projeto, e a **Sala de Controle** (`/sala-de-controle`, mora no próprio CT) — um lugar único de comando que lê todas as sessões e projetos, manda cada pedido para a sessão certa e abre o painel ao vivo dos agentes em produção. Todo agente segue o **Native Teams Protocol** — autônomo, com smart-memory integrada (formato Obsidian) e coordenação peer-to-peer.
 
 > Este repositório é a **fonte da verdade**: edite agentes e skills **aqui**, audite com `/team-os-creator *audit` e propague para os projetos destino com `/team-os-creator *propagate`. Nunca edite agentes direto no destino.
 
@@ -56,7 +56,7 @@ CAMADA 1 — CT (configuração e manutenção, no command center)
    └─ /team-os-creator  →  escaneia os projetos irmãos e mostra status (team-os? agentes? drift?)
         ├─ [1] Criar equipe       → novos agentes/squad (Native Teams Protocol + smart-memory + skills + modelo híbrido)
         ├─ [2] Atualizar equipes  → propaga o drift para os projetos
-        ├─ [3] Instalar equipe    → instala squad + skills + team-os num projeto (pasta de Sala → só a skill de Sala)
+        ├─ [3] Instalar equipe    → instala squad + skills + team-os num projeto
         └─ [4] Organizar pastas   → árvore negócio → projeto → squads, o que está fora do padrão e a proposta
    → cada projeto passa a ter: agentes + skills + /team-os  (NUNCA team-os-creator)
 
@@ -105,8 +105,7 @@ Uma pasta pai (o nome é livre, por exemplo `Projetos`) guarda o CT e todos os s
 
 ```
 Projetos/
-├── 0 | Centro de Treinamento/   ← o clone do team-os (passo 2)
-├── 1 | Sala de Controle/        ← opcional (passo 6)
+├── 0 | Centro de Treinamento/   ← o clone do team-os (passo 2) — também é a Sala de Controle
 ├── projeto-a/
 └── Minha Empresa/
     ├── Minha Empresa | Site/
@@ -172,21 +171,20 @@ Com o time rodando, o **agent panel** aparece abaixo do prompt: ↑↓ navegam, 
 
 **Você deve ver:** a proposta de time e, depois do OK, os agentes trabalhando no agent panel.
 
-#### 6. (Opcional) Crie a Sala de Controle
+#### 6. (Opcional) Abra a Sala de Controle
 
-Um lugar único para mandar pedidos para todos os projetos e ver o que cada sessão está fazendo.
+Um lugar único para mandar pedidos para todos os projetos e ver o que cada sessão está fazendo. A Sala **mora no próprio CT**: não há pasta separada nem instalação.
 
-1. Crie a pasta `1 | Sala de Controle` na pasta pai.
-2. No CT, rode `/team-os-creator *install` e escolha essa pasta. Ele reconhece a Sala e instala **só** a skill `sala-de-controle`, sem agentes (por baixo: `--squads none --extra-skills sala-de-controle`).
-3. Abra uma sessão na pasta da Sala e rode:
+Abra uma sessão nova **no CT** (deixe-a dedicada à Sala; outras sessões no CT seguem cuidando do pack) e rode:
 
 ```
 /sala-de-controle
 /sala-de-controle *organizar
-/sala-de-controle *painel
 ```
 
-**Você deve ver:** no `*organizar`, a árvore negócio → projeto → squads com o que está fora do padrão; no `*painel`, o mapa vivo em `127.0.0.1:8787`, com cada sessão, seus agentes por estado (ativo, aguardando, parado, precisa de você) e o consumo de tokens.
+**Você deve ver:** no `/sala-de-controle`, o panorama curto de todas as sessões e projetos e o painel ao vivo aberto no navegador do Claude (`127.0.0.1:8787`), com cada sessão, seus agentes por estado (ativo, aguardando, parado, precisa de você) e o consumo de tokens; no `*organizar`, a árvore negócio → projeto → squads com o que está fora do padrão.
+
+> Já tinha uma pasta `1 | Sala de Controle` de versões antigas? O `/team-os-creator` avisa e sugere `migrate-sala-to-ct.sh` (simulação primeiro; com `--apply` a memória vai para o CT e a pasta antiga para a Lixeira). Detalhes em [§6 — Sala de Controle](#sala-de-controle--sala-de-controle-mora-no-ct).
 
 #### 7. Mantenha tudo atualizado
 
@@ -354,7 +352,7 @@ Credenciais (token, key, project-ref) nunca vão no agente nem na smart-memory �
 
 ### Comandos
 ```
-/team-os-creator                       → Command Center: escaneia as pastas irmãs, status por projeto, ações Criar / Atualizar / Instalar
+/team-os-creator                       → Command Center: escaneia as pastas irmãs, status por projeto, ações Criar / Atualizar / Instalar (avisa pasta de Sala antiga e sugere migrate-sala-to-ct.sh)
 /team-os-creator *analyze              → detecta archetype/stack, sem criar
 /team-os-creator *squad <preset>       → cria uma squad inteira (dev/sites/social/instagram/tiktok/youtube/linkedin/traffic/pm/sales/brand/finance/legal/seo/security/custom)
 /team-os-creator *create <role>        → cria UM agente interativamente
@@ -367,16 +365,24 @@ Credenciais (token, key, project-ref) nunca vão no agente nem na smart-memory �
 /team-os-creator *propagate            → propaga agentes/skills atualizados para os destinos (sempre --match-target-squads)
 /team-os-creator *feedback             → junta as linhas [skill-feedback] dos projetos (scripts/feedback-scan.sh, só leitura), agrupa por skill/agente e propõe a melhoria no CT — aplica só com OK
 /team-os-creator *install              → instala squads + skills (incl. team-os) + settings.json + hooks num projeto destino
-/team-os-creator *organize             → árvore negócio → projeto → squads → salas + proposta de organização (só propõe)
-/team-os-creator *painel               → mapa vivo do CT no navegador do Claude: squads, agentes (persona + cargo), skills; clique abre perfil e arquivo (127.0.0.1:8788)
+/team-os-creator *organize             → árvore negócio → projeto → squads + proposta de organização (só propõe)
+/team-os-creator *painel               → mapa do pack no navegador do Claude: squads, agentes (persona + cargo), skills; clique abre perfil e arquivo (127.0.0.1:8788)
+```
+
+No CT também roda a **Sala de Controle** (ver [§6](#sala-de-controle--sala-de-controle-mora-no-ct)):
+
+```
+/sala-de-controle                      → lê todas as sessões/projetos, panorama curto e abre o painel ao vivo dos agentes em produção (127.0.0.1:8787)
+/sala-de-controle *painel              → reabre o painel ao vivo (*painel stop derruba)
+/sala-de-controle *organizar           → árvore negócio → projeto → squads + proposta (só propõe)
 ```
 
 **Como o `*install` funciona** (`scripts/install-to-project.sh`):
 - **Squads por categoria** — `--squads <lista>` explícito para projeto novo (`--squads all` é abortado); `--match-target-squads` (modo `*propagate`) deriva as squads do que **já existe** no destino e nunca re-adiciona squad podada.
 - **Skills derivadas dos agentes** — a lista instalada é a união de: skills citadas no body dos agentes instalados, `team-os` (sempre), `--extra-skills`, skills com prefixo da squad e as já presentes no destino. `--dry-run` imprime a origem de cada uma (`SKILL_ORIGIN=…`). Lixo (`.venv`, `ms-playwright`, `__pycache__`, `.DS_Store`…) nunca é copiado.
-- **Backup + settings** — no `*install`, se o destino já tinha `.claude/`, tudo é copiado antes para `.claude.bak-<timestamp>/` (guarda só as 3 mais recentes; as antigas vão para a Lixeira) — o `*propagate` e a Sala de Controle não fazem backup; o `settings.json` é garantido pelo `team-os/scripts/ensure-settings.sh` (merge idempotente, nunca sobrescreve valores existentes).
+- **Backup + settings** — no `*install`, se o destino já tinha `.claude/`, tudo é copiado antes para `.claude.bak-<timestamp>/` (guarda só as 3 mais recentes; as antigas vão para a Lixeira) — o `*propagate` não faz backup; o `settings.json` é garantido pelo `team-os/scripts/ensure-settings.sh` (merge idempotente, nunca sobrescreve valores existentes).
 - **Hooks** — o pacote padrão (`block-worktree`, `block-git-push`, `guard-push-branch`, `task-quality` e os 5 `check-*-progress`) é **sempre** instalado; `--include-hooks` é praticamente no-op.
-- **Sala de Controle** — `--squads none --extra-skills sala-de-controle|maestri-os` copia só a skill de Sala (+ `CLAUDE.md` mínimo), sem agentes, hooks, settings ou `team-os`.
+- **Sala de Controle não se instala** — ela mora no CT; `--extra-skills sala-de-controle` é recusado (`ERROR=sala_mora_no_ct`). Num destino que ainda é uma pasta de Sala antiga, o `*propagate` não atualiza: avisa `LEGACY_CONTROL_ROOM` e mostra o comando de migração (`migrate-sala-to-ct.sh`).
 - **Raiz dos projetos destino** (`scripts/scan-ct-projects.sh`): argumento, env `CT_ROOT`, arquivo `.team-os-root` na raiz do CT (gitignored) ou o diretório pai do git root.
 
 ### Os 9 archetypes
@@ -400,8 +406,7 @@ Credenciais (token, key, project-ref) nunca vão no agente nem na smart-memory �
 - Sempre valida com `validate-agent.sh` após criar.
 - Idempotente — se o agente existe, oferece atualizar / pular / renomear / cancelar.
 - `*install` entrega a **infra, não a smart-memory**: copia agentes + skills (incluindo `team-os`) + `settings.json` + hooks. A smart-memory é construída no destino pelo próprio `/team-os` na 1ª sessão (Discovery Engine); `*bootstrap` continua disponível para criação manual.
-- `team-os` **é distribuída** a todos os projetos (obrigatória no destino); só o `team-os-creator` fica no CT.
-- Skills de Sala de Controle (`sala-de-controle`, `maestri-os`) são opt-in: só via `*install --squads none --extra-skills`; onde já estão instaladas, o `*propagate` as mantém atualizadas.
+- `team-os` **é distribuída** a todos os projetos (obrigatória no destino); `team-os-creator` e `sala-de-controle` ficam só no CT — nunca vão para projeto.
 
 ---
 
@@ -631,7 +636,7 @@ A coluna **Skills relacionadas** é um mapa de skills **recomendadas/disponívei
 
 ### Catálogo por área
 
-125 skills, todas diretórios reais e versionados (repositório self-contained).
+124 skills, todas diretórios reais e versionados (repositório self-contained).
 
 **Dev (10):** `dev-api-design`, `dev-database-patterns`, `dev-debugging`, `dev-defuddle`, `dev-error-handling`, `dev-git-workflow`, `dev-security-patterns`, `dev-technical-writing`, `dev-testing-strategy`, `dev-typescript-patterns`
 
@@ -677,9 +682,7 @@ A coluna **Skills relacionadas** é um mapa de skills **recomendadas/disponívei
 >
 > **Novas 2026-09 (squads Finance e Legal):** autorais do CT, com templates Obsidian — `finance-cash-flow` (plano de caixa 13 semanas, forecast, runway), `finance-bookkeeping` (plano de contas, conciliação, fechamento com `#id`), `finance-receivables-payables` (régua de cobrança, aging, lote de pagamento preparado), `finance-tax-compliance` (calendário fiscal, apuração preparatória, pacote para o contador; `reference/brasil.md` sem alíquotas cravadas), `finance-reporting` (relatório mensal, dicionário de indicadores); `legal-research` (fonte primária, achado ≠ parecer; `reference/fontes-brasil.md`), `legal-contract-drafting` (anatomia em 15 blocos, matriz de desvios, revisão da contraparte), `legal-clause-library` (modelos `M{N}.{c}`, variantes com piso/teto), `legal-compliance-lgpd` (mapa de dados, bases legais, incidentes), `legal-contract-lifecycle` (registro, assinatura travada por hash, notificação, dossiê).
 >
-> **Nova 2026-09-25 (Sala de Controle):** `sala-de-controle` — autoral do CT, o lugar único de comando para as sessões do Claude Code (`scripts/refresh.py` junta `scan-sessions.py` + `session-tail.py` + `project-context.py` + `org-map.py`, todos read-only; templates de panorama/registro/histórico/organização; `*painel` = mapa vivo em `scripts/painel/` — `collect.py` + `serve.py` + `index.html`, servidor local em `127.0.0.1:8787` aberto no navegador do Claude). Coexiste com a `maestri-os`; só entra via `--squads none --extra-skills sala-de-controle`.
->
-> **Nova 2026-09 (Sala de Controle, modo Maestri):** `maestri-os` — autoral do CT, recurso opt-in para o Maestri (roteador de pedidos entre terminais; `scripts/scan-project.sh` read-only + templates de registro/compilado/histórico). Não pertence a squad; só entra via `--squads none --extra-skills maestri-os`.
+> **Nova 2026-09-25 (Sala de Controle):** `sala-de-controle` — autoral do CT, o lugar único de comando para as sessões do Claude Code (`scripts/refresh.py` junta `scan-sessions.py` + `session-tail.py` + `project-context.py` + `org-map.py`, todos read-only; templates de panorama/registro/histórico/organização; painel ao vivo em `scripts/painel/` — `collect.py` + `serve.py` + `index.html`, servidor local em `127.0.0.1:8787` aberto no navegador do Claude). Desde 2026-10 mora no CT (exclusiva do CT); a `maestri-os` foi removida do pack.
 >
 > **Novas 2026-09 (squad Sales):** autorais do CT — `sales-discovery-intake`, `sales-proposal-planning`, `sales-pricing-payback`, `sales-proposal-copy`, `sales-deck-production` (com `html-to-pdf.mjs` e `check-pdf.sh`); adotadas do registry após vetting — `sales-enablement` e `pricing` (marketingskills), `startup-financial-modeling` (wshobson), `negotiation` (wondelai — framework Voss), `presentation-design` (jwynia). A `slides` (nextlevelbuilder) entrou aqui e foi consolidada em `sales-deck-production` em 2026-10 (references `deck-*`). Descartadas no vetting: `proposal-writer` (template raso com número inventado), `html-slides`/`meeting-notes` (frontmatter quebrado), `html-to-pdf` (abaixo do corte — abordagem incorporada em `sales-deck-production`).
 >
@@ -687,30 +690,22 @@ A coluna **Skills relacionadas** é um mapa de skills **recomendadas/disponívei
 
 > **Idioma das skills vendorizadas grandes (exceção C6):** `ui-ux-pro-max` e o pacote `claude-seo` (`seo`, `seo-*`) mantêm o corpo em inglês, com `description` em pt-BR — decisão do mantenedor, para facilitar a sincronização com o upstream. Todas as demais skills são em pt-BR.
 
-**Orquestração:** `team-os` (distribuída a todos os projetos — obrigatória para rodar `/team-os` em cada sessão) · `team-os-creator` (**exclusiva do CT** — a única que não vai para os projetos) · `sala-de-controle` e `maestri-os` (**opt-in, só em Salas de Controle** — ver abaixo).
+**Orquestração (CT):** `team-os` (distribuída a todos os projetos — obrigatória para rodar `/team-os` em cada sessão) · `team-os-creator` e `sala-de-controle` (**exclusivas do CT** — nunca vão para os projetos; ver abaixo).
 
-### Sala de Controle — `sala-de-controle` (sessões do Claude Code)
+### Sala de Controle — `sala-de-controle` (mora no CT)
 
-O lugar único para dar comando: uma pasta própria — **`<raiz>/1 | Sala de Controle`**, uma só para todos os negócios —, **sem agentes e sem `team-os`**. Você fala em português normal (simples ou composto: *"destrava o deploy do site, cria um post sobre o depoimento e me traz o relatório de leads"*); a skill descobre qual projeto e qual sessão cuidam de cada parte, confirma o plano e despacha.
+O lugar único para dar comando, **dentro do próprio CT** — sem pasta separada, sem instalação. Abra uma sessão no CT e rode `/sala-de-controle`: ela lê todas as sessões e projetos, mostra um panorama curto e abre o **painel ao vivo** (`127.0.0.1:8787`) no navegador do Claude. Depois, fale em português normal (simples ou composto: *"destrava o deploy do site, cria um post sobre o depoimento e me traz o relatório de leads"*); a skill descobre qual projeto e qual sessão cuidam de cada parte, confirma o plano e despacha.
 
+- **Várias sessões no CT:** deixe uma sessão dedicada à Sala; as outras sessões do CT seguem cuidando do pack via `/team-os-creator` e, para a Sala, são destinos como qualquer outro. A Sala nunca cria agentes do pack (são modelos) nem edita arquivos do pack.
+- **Dois painéis, papéis claros:** `/sala-de-controle *painel` = **agentes em produção**, ao vivo (`127.0.0.1:8787`); `/team-os-creator *painel` = **mapa do pack** — squads, agentes, skills (`127.0.0.1:8788`). Cada um tem link para o outro no topo.
 - **Relê tudo a cada chamada** (`refresh.py`, ≈2 s): todas as sessões do Claude abertas na máquina (registro `~/.claude/sessions/` + `claude agents --json`, sem as sessões "fantasma" pré-aquecidas), o que cada uma está fazendo (últimas falas) e **a etapa de cada projeto pela smart-memory dele** — ledger da sessão → stories → `_inbox/` → DIGEST → overview.
-- **Nome padrão das sessões:** `<NOME DA PASTA> | <Título>` (ex.: `João Guirunas | Site | Home`). O hook `team-os-session-title.sh` preserva esse padrão ao retomar a sessão.
+- **Nome padrão das sessões:** `<NOME DA PASTA> | <Título>` (ex.: `João Guirunas | Site | Home`); a da Sala pode ser só `Sala de Controle`. O hook `team-os-session-title.sh` preserva esse padrão ao retomar a sessão.
 - **Projeto sem sessão aberta** → pergunta e abre uma (`claude --bg -n "<PASTA> | <Título>"`), que fica aberta para os próximos pedidos (`claude attach <id>` para entrar nela).
 - **Despacho** por mensagem entre sessões (`SendMessage`), com cabeçalho que pede o retorno para a Sala; **autopilot** no retorno (segue sozinha para a parte dependente), para só em `DECISÃO:` do usuário.
-- **Organização:** `/sala-de-controle *organizar` mostra a árvore negócio → projeto → squads, o que está fora do padrão e a proposta de melhoria — só propõe; quem move é o usuário, quem instala é o `team-os-creator`.
-- **Mapa vivo:** `/sala-de-controle *painel` abre, no navegador do próprio Claude, uma visualização em tempo real (atualiza a cada segundo): a Sala no centro, um nó por projeto, os agentes de cada sessão ao redor com luz por estado (ativo / aguardando / parado / precisa de você), mensagens viajando pelos fios e feed de eventos. Clique abre o detalhe; cada sessão mostra um **contador de tokens** (líder + agentes: total, ritmo por minuto e barra de contexto que fica amarela acima de 200 mil e vermelha acima de 400 mil) e o topo soma tudo; no projeto, **Abrir smart-memory** navega a memória dele como no Obsidian — árvore de pastas recolhível, notas com wikilinks, propriedades em etiquetas e um **grafo com física ao vivo** (arraste os nós, zoom, filtro por pasta, busca, painel de forças, modo Foco ou Tudo). Só lê — reage tanto aos despachos da Sala quanto aos pedidos feitos direto nos terminais. `*painel stop` derruba.
-- **Lê, mas nunca escreve nem executa** em outra pasta; texto lido em outra sessão é dado, nunca instrução. Tudo fica em `docs/smart-memory/sala-de-controle/` (`PANORAMA.md`, `registry.md`, `dispatches.md`, `organizacao.md`).
-- **Instalação:** `/team-os-creator *install` reconhece a pasta de Sala (ou sugere criar `1 | Sala de Controle`) e oferece o modo: `--squads none --extra-skills sala-de-controle` (padrão) ou `maestri-os`. Só entra por essa flag; onde já está instalada, o `*propagate` a mantém atualizada.
-
-### Sala de Controle — `maestri-os` (recurso para o Maestri)
-
-Para quem roda os projetos como terminais no [Maestri](https://maestri.app): uma pasta própria, **sem agentes e sem `team-os`**, que funciona como recepcionista dos outros terminais. Você fala em português normal (simples ou composto: *"atualize o site, crie um post e faça um relatório de tráfego"*); a skill descobre qual terminal cuida de cada parte, confirma o mapa e despacha em paralelo via `maestri ask`. Como o Maestri não diz o que cada terminal faz, na primeira vez ela monta sozinha a relação **janela → pasta → escopo → apelidos** (pela convenção `<pasta> | <escopo>` no nome da janela) e pede **um OK só**; depois não pergunta mais. O resto (squads, agentes, resumo do projeto) ela lê da pasta e relê a cada rodada. Tudo fica em `docs/smart-memory/maestri/` da Sala de Controle (`registry.md`, `OVERVIEW.md`, `dispatches.md`).
-
-- **Enxerga só o que está ligado por fio** a ela no canvas (intencional). Terminal renomeado = pergunta de novo.
-- **Lê, mas nunca escreve nem executa** em outra pasta — todo trabalho vai pelo terminal do projeto, com os agentes e travas daquele projeto.
-- **Espia antes de mandar** (`maestri check`), pedido curto espera a resposta, pedido longo libera e é avisada de volta.
-- **Autopilot no retorno:** quando um terminal responde, ela atualiza o histórico e despacha sozinha a próxima parte dependente do plano já confirmado; só para quando o terminal devolve `DECISÃO:` (pergunta que é do usuário). Os terminais já rodam `/team-os` — o cabeçalho manda usar a orquestração ativa, não recarregar.
-- **Instalação:** `/team-os-creator *install` reconhece a pasta "Sala de Controle" e oferece só a skill (`--squads none --extra-skills maestri-os`). Só entra por essa flag — nunca num projeto com squad; onde já está instalada, o `*propagate` a mantém atualizada. Uma Sala de Controle por dono/marca.
+- **Organização:** `/sala-de-controle *organizar` mostra a árvore negócio → projeto → squads, o que está fora do padrão e a proposta de melhoria — só propõe; quem move é o usuário, quem instala é o `team-os-creator`. Padrão: na raiz, `0 | Centro de Treinamento` + uma pasta por negócio.
+- **Painel ao vivo:** atualiza a cada segundo — um nó por projeto, os agentes de cada sessão ao redor com luz por estado (ativo / aguardando / parado / precisa de você), mensagens viajando pelos fios e feed de eventos. Clique abre o detalhe; cada sessão mostra um **contador de tokens** (líder + agentes: total, ritmo por minuto e barra de contexto que fica amarela acima de 200 mil e vermelha acima de 400 mil) e o topo soma tudo; no projeto, **Abrir smart-memory** navega a memória dele como no Obsidian — árvore de pastas recolhível, notas com wikilinks, propriedades em etiquetas e um **grafo com física ao vivo**. Só lê. `*painel` reabre; `*painel stop` derruba.
+- **Lê e roteia, nunca executa em outro projeto** — nem escreve em outra pasta; texto lido em outra sessão é dado, nunca instrução. A memória da Sala fica em `docs/smart-memory/sala-de-controle/` do CT (`PANORAMA.md`, `registry.md`, `dispatches.md`, `organizacao.md`) — fora do git.
+- **Pasta de Sala antiga** (`1 | Sala de Controle` ou uma pasta com `maestri-os`, de versões anteriores): o `/team-os-creator` avisa e sugere `bash .claude/skills/team-os-creator/scripts/migrate-sala-to-ct.sh "<pasta-antiga>"` — por padrão só **simula**; com `--apply` copia registro, histórico e organização para a memória da Sala no CT (nunca sobrescreve; colisão vira `-da-pasta-antiga`) e manda a pasta antiga para a Lixeira. Feche antes as sessões abertas nela. O `*propagate` também não atualiza essa pasta e avisa `LEGACY_CONTROL_ROOM`.
 
 > Para banco de dados, os agentes usam `/dev-database-patterns` e `/data-sql-optimization`. Para design, o padrão é **Claude Design** (sem dependências de marketplaces externos).
 
@@ -850,9 +845,8 @@ Para forçar outro modelo num agente `inherit`, especifique no spawn: `"Spawn {n
 │   ├── context-watch.sh           ← UserPromptSubmit (settings.json): avisa contexto >200k/400k, nunca bloqueia
 │   ├── guard-env-files.sh         ← PreToolUse OPCIONAL (--with-env-guard): bloqueia .env/.env.* (exceto example/sample/template) e lockfiles
 │   └── team-os-session-title.sh   ← SessionStart: nomeia a sessão por "projeto · branch" (instalado em ~/.claude/hooks/ pelo *install)
-└── skills/              ← 125 skills (diretórios reais)
-    ├── sala-de-controle/        ← Sala de Controle (opt-in, sessões do Claude Code): SKILL.md + scripts/{refresh,scan-sessions,session-tail,project-context,org-map}.py + scripts/painel/{collect.py,serve.py,index.html} (mapa vivo, `*painel`) + templates/{panorama,registry,dispatches,organizacao}.md
-    ├── maestri-os/              ← Sala de Controle (opt-in, recurso Maestri): SKILL.md + scripts/scan-project.sh + templates/{registry,overview,dispatches}.md
+└── skills/              ← 124 skills (diretórios reais)
+    ├── sala-de-controle/        ← Sala de Controle (exclusiva do CT, nunca vai para projeto): SKILL.md + scripts/{refresh,scan-sessions,session-tail,project-context,org-map}.py + scripts/painel/{collect.py,serve.py,index.html} (painel ao vivo, 8787) + templates/{panorama,registry,dispatches,organizacao}.md
     ├── doc-to-markdown/         ← SKILL.md + scripts/convert.sh (PDF/DOCX/XLSX/PPTX/ODT/RTF/HTML → Markdown na própria máquina)
     ├── seo/                     ← orquestradora da squad SEO + runtime Python (scripts/, schema/, data/, pdf/, hooks/); .venv/ e ms-playwright/ são runtime local (gitignored)
     ├── team-os/                 ← orquestração (distribuída aos projetos)
@@ -867,10 +861,10 @@ Para forçar outro modelo num agente `inherit`, especifique no spawn: `"Spawn {n
     └── team-os-creator/         ← factory de agentes (exclusiva do CT)
         ├── templates/           ← 9 templates de archetype + agents-page.html.tpl + pressure-scenarios/ (13 cenários)
         ├── reference/           ← archetypes · native-teams-protocol · smart-memory-integration · mcp-servers · skills-catalog-quality · pressure-testing
-        ├── scripts/             ← validate-agent.sh (+ --skills) · test-hooks.sh · migrate-ntp.sh · install-to-project.sh · scan-ct-projects.sh · detect-project-signals.sh · dashboard.sh · diff-agents.sh · generate-agent.sh · search-skills.sh + install-suggested-skills.sh (opcionais: sugerir skills externas no `*create`, só com OK; CLI com versão fixa) · preflight.sh · generate-agents-page.py · update-pack.sh/.py (`*update`) · pack-manifest.sh · trash.sh · release.sh (só mantenedor) · test-update.sh · test-propagate.sh · migrate-social-split.sh + test-migrate-social.sh (`*migrate-social`) · feedback-scan.sh (`*feedback`, só leitura) · painel/ (`*painel`: mapa vivo do CT)
+        ├── scripts/             ← validate-agent.sh (+ --skills) · test-hooks.sh · migrate-ntp.sh · install-to-project.sh · scan-ct-projects.sh · detect-project-signals.sh · dashboard.sh · diff-agents.sh · generate-agent.sh · search-skills.sh + install-suggested-skills.sh (opcionais: sugerir skills externas no `*create`, só com OK; CLI com versão fixa) · preflight.sh · generate-agents-page.py · update-pack.sh/.py (`*update`) · pack-manifest.sh · trash.sh · release.sh (só mantenedor) · test-update.sh · test-propagate.sh · migrate-social-split.sh + test-migrate-social.sh (`*migrate-social`) · migrate-sala-to-ct.sh + test-migrate-sala.sh (pasta de Sala antiga → CT; simula por padrão) · feedback-scan.sh (`*feedback`, só leitura) · painel/ (`*painel`: mapa do pack, 8788)
         └── presets/             ← 15 presets de squad (dev, sites, social, instagram, tiktok, youtube, linkedin, traffic, pm, sales, brand, finance, legal, seo, security)
 
-.github/workflows/audit.yml  ← CI: validate-agent.sh (+ --skills) · test-hooks.sh · test-update.sh · test-propagate.sh · test-migrate-social.sh · manifest do pack em dia · sintaxe dos scripts · 0 symlinks quebrados · contagens do README/CLAUDE.md (pelo manifest) · zero caminho de máquina · docs/agentes.html atualizado
+.github/workflows/audit.yml  ← CI: validate-agent.sh (+ --skills) · test-hooks.sh · test-update.sh · test-propagate.sh · test-migrate-social.sh · test-migrate-sala.sh · manifest do pack em dia · sintaxe dos scripts · 0 symlinks quebrados · contagens do README/CLAUDE.md (pelo manifest) · zero caminho de máquina · docs/agentes.html atualizado
 docs/agentes.html            ← página oficial dos agentes (gerada — ver §13)
 LICENSE · THIRD_PARTY_NOTICES.md · CHANGELOG.md · CONTRIBUTING.md · MAINTAINERS.md
 VERSION · pack-manifest.json  ← versão do pack e lista (com sha256) dos arquivos que são do pack; base do `*update`
@@ -921,7 +915,7 @@ O CT é a fonte da verdade: agentes e skills são editados **aqui** e levados ao
 ```
 1. Editar agente/skill AQUI — agentes via /team-os-creator (*create, *squad, *migrate)
 2. bash .claude/skills/team-os-creator/scripts/validate-agent.sh            → 111/111 agentes do pack conformes (= *audit)
-3. bash .claude/skills/team-os-creator/scripts/validate-agent.sh --skills   → lint das 125 skills
+3. bash .claude/skills/team-os-creator/scripts/validate-agent.sh --skills   → lint das 124 skills
 4. bash .claude/skills/team-os-creator/scripts/test-hooks.sh                → 544/544 casos dos hooks
 5. python3 .claude/skills/team-os-creator/scripts/generate-agents-page.py   → regenera docs/agentes.html
 6. /team-os-creator *propagate   → leva aos projetos destino (--match-target-squads)
@@ -929,7 +923,7 @@ O CT é a fonte da verdade: agentes e skills são editados **aqui** e levados ao
 
 **Quem mantém o pack oficial** (e só quem tem o arquivo `.team-os-maintainer` na raiz) segue um ciclo maior — manifest, CHANGELOG, commit, release e push manual. Ele está descrito em **[MAINTAINERS.md](./MAINTAINERS.md)**. Quem só usa o pack não precisa dele: para receber as versões novas, use o `*update` ([Instalar e atualizar](#instalar-e-atualizar)).
 
-**Regra de ouro:** auditoria sempre verde antes de propagar. O CI (`.github/workflows/audit.yml`) repete os passos 2-5, roda `test-update.sh` e `test-propagate.sh`, confere o `pack-manifest.json` e ainda checa: contagens "111 agentes"/"125 skills" no README e no CLAUDE.md (contadas pelo manifest — agentes e skills próprios de cada usuário não entram), zero caminho de máquina versionado e `docs/agentes.html` em dia (`--check`). Detalhes de contribuição em [CONTRIBUTING.md](./CONTRIBUTING.md); histórico em [CHANGELOG.md](./CHANGELOG.md).
+**Regra de ouro:** auditoria sempre verde antes de propagar. O CI (`.github/workflows/audit.yml`) repete os passos 2-5, roda `test-update.sh`, `test-propagate.sh` e `test-migrate-sala.sh`, confere o `pack-manifest.json` e ainda checa: contagens "111 agentes"/"124 skills" no README e no CLAUDE.md (contadas pelo manifest — agentes e skills próprios de cada usuário não entram), zero caminho de máquina versionado e `docs/agentes.html` em dia (`--check`). Detalhes de contribuição em [CONTRIBUTING.md](./CONTRIBUTING.md); histórico em [CHANGELOG.md](./CHANGELOG.md).
 
 **Página oficial dos agentes:** [`docs/agentes.html`](./docs/agentes.html) — apresentação navegável dos 111 agentes: card inteiro clicável abre modal de **perfil completo** (bio, matriz de autoridade, regras absolutas, skills), skills clicáveis abrem modal com versão/seções e navegação cruzada de volta aos agentes que a usam. Gerada dos arquivos reais por `python3 .claude/skills/team-os-creator/scripts/generate-agents-page.py` — **regenerar após qualquer mudança em agentes ou skills** (o CI falha se estiver desatualizada). Preview local: `npx http-server docs -p 8765` (config pronta em `.claude/launch.json`).
 

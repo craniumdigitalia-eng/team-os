@@ -14,7 +14,7 @@ import glob, json, os, re, subprocess, sys, time, unicodedata
 HERE = os.path.dirname(os.path.abspath(__file__))
 SKILL_DIR = os.path.dirname(os.path.dirname(HERE))     # .claude/skills/team-os-creator
 CT = os.path.abspath(os.path.join(SKILL_DIR, "..", "..", ".."))
-CORE_SKILLS = ["team-os", "team-os-creator", "sala-de-controle", "maestri-os"]
+CORE_SKILLS = ["team-os", "team-os-creator", "sala-de-controle"]
 
 FM_RE = re.compile(r"^---\s*\n(.*?)\n---\s*\n", re.S)
 

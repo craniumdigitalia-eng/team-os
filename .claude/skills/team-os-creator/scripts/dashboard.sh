@@ -34,14 +34,33 @@ echo "  CT (fonte): ${src_agents:-?} agentes · ${src_skills:-?} skills · ${src
 if [ "${src_custom:-0}" -gt 0 ] 2>/dev/null || [ "${src_custom_sk:-0}" -gt 0 ] 2>/dev/null; then
   echo "  Seus (fora do pack): ${src_custom:-0} agentes próprios · ${src_custom_sk:-0} skills próprias"
 fi
+echo "  Sala de Controle: no CT · /sala-de-controle abre o painel em 127.0.0.1:8787"
 echo
+
+# Pasta de Sala de Controle antiga (fora do CT): a Sala agora mora no CT — avisa e sugere a
+# migração (dry-run primeiro; nada muda sem OK do usuário).
+MIGRATE="$HERE/migrate-sala-to-ct.sh"
+legacy_rooms=0
+while IFS= read -r line; do
+  case "$line" in PROJECT=*) ;; *) continue ;; esac
+  [ "$(field "$line" IS_LEGACY_CONTROL_ROOM)" = "1" ] || continue
+  legacy_rooms=$((legacy_rooms + 1))
+  lpath="$(field "$line" PATH)"; lpath="${lpath%/}"
+  echo "  ┌─────────────────────────────────────────────────────────────────"
+  echo "  │ ⚠ Sala de Controle em pasta separada: $(field "$line" PROJECT)"
+  echo "  │   Ela agora mora no CT. Para migrar (simulação primeiro):"
+  echo "  │   bash \"$MIGRATE\" \"$lpath\""
+  echo "  └─────────────────────────────────────────────────────────────────"
+done <<EOF
+$RAW
+EOF
+[ $legacy_rooms -gt 0 ] && echo
 printf "  %-24s %-8s %-8s %-13s %s\n" "PROJETO" "team-os" "agentes" "smart-mem" "DRIFT vs CT"
 printf "  %-24s %-8s %-8s %-13s %s\n" "------------------------" "-------" "-------" "-------------" "-----------"
 
 projects=0
 need_update=0
 not_installed=0
-control_rooms=0
 
 while IFS= read -r line; do
   case "$line" in PROJECT=*) ;; *) continue ;; esac
@@ -63,29 +82,15 @@ while IFS= read -r line; do
   d_conf="$(field "$line" DRIFT_CONFLICT)"
   s_conf="$(field "$line" SKILLS_CONFLICT)"
   n_conf=$(( ${d_conf:-0} + ${s_conf:-0} ))
-  has_mos="$(field "$line" HAS_MAESTRI_OS)"
-  is_cr="$(field "$line" IS_CONTROL_ROOM)"
-  has_sala="$(field "$line" HAS_SALA_DE_CONTROLE)"
+  is_legacy="$(field "$line" IS_LEGACY_CONTROL_ROOM)"
 
   tos=$([ "$has_team_os" = "1" ] && echo "sim" || echo "--")
   sm=$([ "$has_sm" = "1" ] && echo "sim" || echo "--")
 
-  if [ "$is_cr" = "1" ]; then
-    # Sala de Controle: sem squad por design — só a skill de Sala (sala-de-controle ou maestri-os)
-    control_rooms=$((control_rooms + 1))
-    cr_skill=""
-    [ "$has_sala" = "1" ] && cr_skill="sala-de-controle"
-    [ "$has_mos" = "1" ] && cr_skill="${cr_skill:+$cr_skill+}maestri-os"
-    if [ -z "$cr_skill" ]; then
-      drift="sala de controle · vazia — instalar sala-de-controle (ou maestri-os)"
-      not_installed=$((not_installed + 1))
-    elif [ "${s_out:-0}" -gt 0 ]; then
-      drift="sala de controle · $cr_skill desatual."
-      need_update=$((need_update + 1))
-    else
-      drift="sala de controle · $cr_skill · em dia"
-    fi
-    printf "  %-24.24s %-8s %-8s %-13s %s\n" "$name" "--" "n/a" "$sm" "$drift"
+  if [ "$is_legacy" = "1" ]; then
+    projects=$((projects - 1))   # não é projeto: conta à parte no resumo
+    # Pasta de Sala antiga: não é projeto a instalar — o aviso no topo traz o comando de migração
+    printf "  %-24.24s %-8s %-8s %-13s %s\n" "$name" "--" "n/a" "$sm" "sala antiga · migrar para o CT (ver aviso acima)"
     continue
   fi
 
@@ -107,7 +112,7 @@ $RAW
 EOF
 
 echo
-echo "  Resumo: $projects projeto(s)  ·  $need_update precisam atualizar  ·  $not_installed sem squad/skill  ·  $control_rooms sala(s) de controle"
+echo "  Resumo: $projects projeto(s)  ·  $need_update precisam atualizar  ·  $not_installed sem squad/skill  ·  $legacy_rooms pasta(s) de Sala antiga"
 echo
 
 # ── Organização de pastas (negócio → projeto → squads) ───────────────────────
@@ -122,7 +127,5 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 echo "  [1] Criar equipe      → novos agentes/squad (*create / *squad)"
 echo "  [2] Atualizar equipes → propaga o drift detectado (*propagate)"
 echo "  [3] Instalar equipe   → squad + skills + team-os num projeto (*install)"
-echo "                          · pasta 'Sala de Controle' → só a skill de Sala, sem agentes:"
-echo "                            sala-de-controle (sessões do Claude) ou maestri-os (Maestri) — --squads none --extra-skills <skill>"
 echo "  [4] Organizar pastas  → árvore + pontos fora do padrão + proposta (*organize) — nada é movido sem OK"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

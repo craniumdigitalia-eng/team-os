@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Sala de Controle</title>
+<title>Agentes em produção</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -27,6 +27,8 @@
   .brand svg{height:26px;width:auto;display:block}
   .brand .w{font-size:13px;font-weight:500;letter-spacing:.02em;line-height:1}
   .brand .w small{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.22em;color:var(--bone-mute);margin-top:4px}
+  .brand a.xlink{pointer-events:auto;color:var(--bone-mute);text-decoration:none;letter-spacing:.06em;margin-left:10px;border-bottom:1px solid transparent}
+  .brand a.xlink:hover{color:var(--bone);border-bottom-color:var(--bone-mute)}
   .live{display:flex;align-items:center;gap:7px;color:var(--bone-mute);font-family:var(--mono);font-size:10.5px}
   .live i{width:6px;height:6px;border-radius:50%;background:var(--bone);animation:breathe 2.4s var(--e) infinite}
   .live.off i{background:var(--danger);box-shadow:none;animation:none}
@@ -279,7 +281,7 @@
 <div class="top bar">
   <div class="brand">
     <svg viewBox="0 0 84.54 136"><polygon fill="#3d8fff" points="69.84,0.00 0.00,78.66 36.76,79.39 11.76,135.26 83.81,60.28 43.37,58.81"/></svg>
-    <div class="w">Sala de Controle</div>
+    <div class="w">Agentes em produção<small>SALA DE CONTROLE · CT<a class="xlink" href="http://127.0.0.1:8788" target="_blank" rel="noopener" title="/team-os-creator *painel">Mapa do pack ↗</a></small></div>
   </div>
   <div class="live" id="live"><i></i><span id="clock">conectando…</span></div>
   <nav class="metrics">
@@ -574,8 +576,8 @@ function renderDrawer(n){const real=document.getElementById('dBody'),tmp=documen
 function _render(n,body){
   const lamp=document.getElementById('dLamp'),name=document.getElementById('dName'),sub=document.getElementById('dSub');
   if(n.kind==='hub'){lamp.className='lamp hub';lamp.innerHTML='<svg viewBox="0 0 84.54 136" height="26"><polygon fill="#3d8fff" points="69.84,0.00 0.00,78.66 36.76,79.39 11.76,135.26 83.81,60.28 43.37,58.81"/></svg>';name.textContent='Sala de Controle';const s=n.sess;sub.textContent=s?esc(s.name)+' · '+(s.status||''):'sem sessão aberta';
-    const salaProj=S.projects.find(p=>p.kind==='sala');
-    body.innerHTML=`<div class="sec"><div class="kicker">Agora</div><div class="now">${s?(s.tool?`<code>${esc(s.tool[0])}</code> ${esc(s.tool[1])}`:(s.turns.length?esc(s.turns[s.turns.length-1].text):'em silêncio')):'Abra uma sessão na pasta 1 | Sala de Controle e rode /sala-de-controle.'}</div></div>
+    const salaProj=S.projects.find(p=>p.kind==='ct')||S.projects.find(p=>p.kind==='sala');
+    body.innerHTML=`<div class="sec"><div class="kicker">Agora</div><div class="now">${s?(s.tool?`<code>${esc(s.tool[0])}</code> ${esc(s.tool[1])}`:(s.turns.length?esc(s.turns[s.turns.length-1].text):'em silêncio')):'Abra uma sessão no CT (0 | Centro de Treinamento) e rode /sala-de-controle.'}</div></div>
       ${s?`<div class="sec"><div class="kicker">Últimas falas</div>${turnsHtml(s.turns)}</div>`:''}
       <div class="sec"><div class="kicker">Panorama</div><div class="tiles"><div><b>${S.counts.sessions}</b><span>sessões</span></div><div><b>${S.counts.active}</b><span>ativos</span></div><div><b>${S.counts.approval}</b><span>precisam de você</span></div></div></div>
       <div class="sec"><button class="btn ghost" ${salaProj&&salaProj.smart_memory?'':'disabled'} data-vault="${esc(salaProj?salaProj.path:'')}">Memória da Sala <span>→</span></button></div>`;return;}

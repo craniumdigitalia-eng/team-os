@@ -3,18 +3,21 @@
 
 Padrão esperado (o que o team-os entende):
   <raiz>/
-  ├── 0 | Centro de Treinamento         ← CT (fonte do pack; só existe na máquina do mantenedor)
-  ├── 1 | Sala de Controle              ← UMA pasta isolada com a skill sala-de-controle (sem agentes)
+  ├── 0 | Centro de Treinamento         ← CT: fonte do pack e casa da Sala de Controle
+  │                                       (skill sala-de-controle; memória em docs/smart-memory/sala-de-controle/)
   ├── <Negócio>/                        ← contêiner: sem .claude/ nem .git próprios
-  │   ├── <Negócio> | <Projeto>         ← projeto: .claude/agents (squad) + docs/smart-memory
-  │   └── <Negócio> | Sala de Controle  ← opcional: maestri-os (modo Maestri) daquele negócio
+  │   └── <Negócio> | <Projeto>         ← projeto: .claude/agents (squad) + docs/smart-memory
   └── …
+
+A Sala de Controle mora no CT. Pasta fora do CT com a skill sala-de-controle, com a antiga
+maestri-os ou com "Sala de Controle" no nome é uma Sala antiga → achado SALA_ANTIGA, com o
+comando de migração (migrate-sala-to-ct.sh, simulação por padrão).
 
 Nunca move, renomeia nem escreve nada — só aponta e sugere. Quem executa é o usuário (ou o
 team-os-creator, com OK explícito).
 
 Usage: org-map.py [raiz] [--tree] [--json]
-  raiz default: pai da pasta atual (a Sala de Controle mora na raiz).
+  raiz default: pai da pasta atual (rodando no CT, a raiz é a pasta-mãe do CT).
 Saída padrão (TSV): ROOT=…, uma linha NODE=… por pasta, uma linha FINDING=… por problema,
 e SUMMARY=… no fim. --tree imprime a árvore legível + os achados.
 """
@@ -123,10 +126,20 @@ for top in children(ROOT):
                                     "— o team-os e a Sala de Controle esperam negócio → projeto")
 
 # ── Achados ──────────────────────────────────────────────────────────────────
-salas = [n for n in nodes if n["sala"] and not n["is_ct"]]
-maestris = [n for n in nodes if n["maestri"] and not n["is_ct"]]
+CT_PATH = next((n["path"] for n in nodes if n["is_ct"]), os.path.join(ROOT, "0 | Centro de Treinamento"))
+MIGRATE = os.path.join(CT_PATH, ".claude", "skills", "team-os-creator", "scripts", "migrate-sala-to-ct.sh")
+salas = [n for n in nodes if n["kind"] == "sala"]          # Salas antigas (fora do CT)
 for n in nodes:
     nm, biz = n["name"], n["business"]
+    if n["kind"] == "sala":
+        what = ("pasta de Sala de Controle fora do CT"
+                + (" (skill sala-de-controle)" if n["sala"] else "")
+                + (" (skill maestri-os, que saiu do pack)" if n["maestri"] else "")
+                + ("" if n["sala"] or n["maestri"] else " (sem skill)")
+                + " — a Sala agora mora no CT")
+        add_finding("SALA_ANTIGA", nm, what,
+                    f'migrar para o CT: bash "{MIGRATE}" "{n["path"]}" (simulação; --apply executa)')
+        continue
     if n["kind"] == "projeto" and n["level"] == 0:
         prefix = nm.split(" | ")[0] if " | " in nm else ""
         if prefix and prefix in containers:
@@ -138,7 +151,7 @@ for n in nodes:
         else:
             add_finding("PROJETO_SOLTO", nm, "projeto na raiz, fora de um negócio e sem prefixo de negócio",
                         f"decidir o negócio dono e mover para '<Negócio>/<Negócio> | {nm}'")
-    if n["level"] >= 1 and n["kind"] in ("projeto", "sala") and biz and not nm.startswith(biz + " | "):
+    if n["level"] >= 1 and n["kind"] == "projeto" and biz and not nm.startswith(biz + " | "):
         add_finding("NOME_FORA_DO_PADRAO", nm, f"dentro de '{biz}' mas o nome não começa com '{biz} | '",
                     f"renomear para '{biz} | {nm}'")
     if n["kind"] == "projeto" and n["agents"] == 0 and not n["is_ct"]:
@@ -150,38 +163,15 @@ for n in nodes:
     if n["kind"] == "projeto" and n["agents"] > 0 and not n["team_os"]:
         add_finding("SEM_TEAM_OS", nm, "tem agentes mas não tem a skill team-os",
                     "rodar /team-os-creator *propagate (team-os é obrigatória)")
-    if n["kind"] == "sala" and not (n["sala"] or n["maestri"]):
-        add_finding("SALA_VAZIA", nm, "pasta de Sala de Controle sem skill instalada",
-                    "instalar sala-de-controle (--squads none --extra-skills sala-de-controle) "
-                    "ou maestri-os (modo Maestri)")
-    if n["kind"] == "sala" and n["agents"] > 0:
-        add_finding("SALA_COM_AGENTES", nm, f"Sala de Controle com {n['agents']} agentes",
-                    "Sala de Controle não tem agentes por design — mover a squad para um projeto")
-    if n["sala"] and n["maestri"] and not n["is_ct"]:
-        add_finding("SALA_DUPLA", nm, "sala-de-controle e maestri-os na mesma pasta",
-                    "escolher um modo por pasta (Claude sessions ou Maestri)")
     if n["kind"] == "negocio":
         kids = [c for c in nodes if c["business"] == nm and c["level"] == 1]
         if not kids:
             add_finding("NEGOCIO_VAZIO", nm, "pasta de negócio sem projetos", "remover ou criar o primeiro projeto")
-empty_salas = [n for n in nodes if n["kind"] == "sala" and not (n["sala"] or n["maestri"])]
-if not salas and empty_salas:
-    pass  # SALA_VAZIA já aponta a pasta pronta para receber a skill
-elif not salas:
-    add_finding("SALA_AUSENTE", "(raiz)", "nenhuma pasta com a skill sala-de-controle",
-                f"criar '{ROOT}/1 | Sala de Controle' e instalar só a skill sala-de-controle")
-elif len(salas) > 1:
-    add_finding("SALAS_MULTIPLAS", ", ".join(s["name"] for s in salas),
-                f"{len(salas)} pastas com sala-de-controle — ela já enxerga todas as sessões da máquina",
-                "manter uma só, na raiz ('1 | Sala de Controle')")
-elif salas[0]["level"] > 0:
-    add_finding("SALA_FORA_DA_RAIZ", salas[0]["name"], "a sala-de-controle está dentro de um negócio",
-                "mover para a raiz ('1 | Sala de Controle') — ela atende todos os negócios")
 
 summary = {
     "negocios": sum(1 for n in nodes if n["kind"] == "negocio"),
     "projetos": sum(1 for n in nodes if n["kind"] == "projeto" and not n["is_ct"]),
-    "salas": len(salas), "maestri": len(maestris), "achados": len(findings),
+    "salas_antigas": len(salas), "achados": len(findings),
 }
 
 if AS_JSON:
@@ -194,9 +184,9 @@ elif TREE:
         if n["kind"] == "negocio":
             desc = "negócio"
         elif n["kind"] == "ct":
-            desc = "CT (fonte do pack)"
+            desc = "CT · fonte do pack e casa da Sala de Controle"
         elif n["kind"] == "sala":
-            desc = "Sala de Controle · " + ("sala-de-controle" if n["sala"] else "maestri-os" if n["maestri"] else "vazia")
+            desc = "Sala de Controle ANTIGA · " + ("sala-de-controle" if n["sala"] else "maestri-os" if n["maestri"] else "sem skill") + " · migrar para o CT"
         elif n["kind"] == "projeto":
             desc = (f"{n['agents']} agentes · {','.join(n['squads']) or 'sem squad'}"
                     + ("" if n["smart_memory"] else " · sem smart-memory"))

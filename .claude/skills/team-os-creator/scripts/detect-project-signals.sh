@@ -3,12 +3,13 @@
 # Usage: detect-project-signals.sh [pasta]   (default: pasta atual)
 # Output: key=value linhas (consumível por eval ou grep)
 
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 if [ -n "${1:-}" ]; then
   cd "$1" 2>/dev/null || { echo "ERROR=not_a_dir|PATH=$1" >&2; exit 1; }
 fi
 
 ARCHETYPE="custom"
-HAS_CONTROL_ROOM=0
+LEGACY_CONTROL_ROOM=0
 LANGUAGE="unknown"
 FRAMEWORK="none"
 HAS_FRONTEND=0
@@ -161,22 +162,25 @@ if [ "${SOCIAL_HITS:-0}" -ge 2 ] && [ "${PROPOSAL_CORE_HITS:-0}" -lt 1 ] && [ $H
   HAS_SOCIAL=1
 fi
 
-# Sala de Controle (recurso Maestri): pasta cujo nome diz "sala de controle"/"control room",
-# ou que já tem a skill maestri-os. Sem código, sem squad — só a skill opt-in.
-DIRNAME_LC=$(basename "$(pwd)" | tr '[:upper:]' '[:lower:]')
-case "$DIRNAME_LC" in *"sala de controle"*|*"sala-de-controle"*|*"control room"*|*"control-room"*) HAS_CONTROL_ROOM=1 ;; esac
-[ -d ".claude/skills/maestri-os" ] && HAS_CONTROL_ROOM=1
-[ -d ".claude/skills/sala-de-controle" ] && HAS_CONTROL_ROOM=1
+# Pasta de Sala de Controle ANTIGA: a Sala agora mora no CT (exclusiva do CT, nunca instalada em
+# projeto). Sem agentes, com a skill sala-de-controle ou maestri-os (versões anteriores do pack)
+# ou com nome de Sala → não sugere squad; sugere migrar (migrate-sala-to-ct.sh, dry-run primeiro).
+if ! ls .claude/agents/*.md >/dev/null 2>&1; then
+  DIRNAME_LC=$(basename "$(pwd)" | tr '[:upper:]' '[:lower:]')
+  case "$DIRNAME_LC" in *"sala de controle"*|*"sala-de-controle"*|*"control room"*|*"control-room"*) LEGACY_CONTROL_ROOM=1 ;; esac
+  [ -d ".claude/skills/maestri-os" ] && LEGACY_CONTROL_ROOM=1
+  [ -d ".claude/skills/sala-de-controle" ] && LEGACY_CONTROL_ROOM=1
+fi
 
 # Classificar archetype
-# Ordem importa: control-room primeiro (é declarado pelo nome/skill, não inferido);
+# Ordem importa: legacy-control-room primeiro (é declarado pelo nome/skill, não inferido);
 # depois fullstack (um SaaS com pandas no requirements não é data-pipeline — o
 # teste HAS_ML vem DEPOIS da classificação fullstack).
 # "website" = Next/Astro/landing sem backend pesado (backend + database juntos)
 # — sem ele o preset `sites` era inalcançável. "proposals" = pasta de propostas
 # comerciais sem código → preset `sales`.
-if [ $HAS_CONTROL_ROOM -eq 1 ]; then
-  ARCHETYPE="control-room"
+if [ $LEGACY_CONTROL_ROOM -eq 1 ]; then
+  ARCHETYPE="legacy-control-room"
 elif [ $HAS_FINANCE -eq 1 ]; then
   ARCHETYPE="finance"
 elif [ $HAS_LEGAL -eq 1 ]; then
@@ -214,16 +218,11 @@ SUGGESTED_SQUAD_ADDON=""
 SUGGESTED_EXTRA_SKILLS=""
 WARNING=""
 case "$ARCHETYPE" in
-  control-room)
-    # Não é squad: instala só a skill de Sala (--squads none --extra-skills <skill>).
-    # Default sala-de-controle (sessões do Claude); maestri-os se a pasta já é do Maestri.
+  legacy-control-room)
+    # Não é projeto a instalar: a Sala mora no CT. Sugere a migração (nada muda sem OK).
     SUGGESTED_PRESET="none"
-    if [ -d ".claude/skills/maestri-os" ]; then
-      SUGGESTED_EXTRA_SKILLS="maestri-os"
-    else
-      SUGGESTED_EXTRA_SKILLS="sala-de-controle"
-    fi
-    CONTROL_ROOM_OPTIONS="sala-de-controle,maestri-os" ;;
+    CT_DIR="$(cd "$SCRIPT_DIR/../../../.." 2>/dev/null && pwd)"
+    NEXT="bash \"$CT_DIR/.claude/skills/team-os-creator/scripts/migrate-sala-to-ct.sh\" \"$(pwd)\"" ;;
   fullstack-saas|data-pipeline|api-service|frontend-app)
     SUGGESTED_PRESET="dev" ;;
   website|content-site)
@@ -272,7 +271,7 @@ echo "SUGGESTED_PRESET=$SUGGESTED_PRESET"
 [ -n "$SUGGESTED_EXTRA_SKILLS" ] && echo "SUGGESTED_EXTRA_SKILLS=$SUGGESTED_EXTRA_SKILLS"
 [ -n "$SUGGESTED_SQUAD_ADDON" ] && echo "SUGGESTED_SQUAD_ADDON=$SUGGESTED_SQUAD_ADDON"
 [ -n "$SUGGESTED_SQUADS" ] && echo "SUGGESTED_SQUADS=$SUGGESTED_SQUADS"
-[ -n "${CONTROL_ROOM_OPTIONS:-}" ] && echo "CONTROL_ROOM_OPTIONS=$CONTROL_ROOM_OPTIONS"
+[ -n "${NEXT:-}" ] && echo "NEXT=$NEXT"
 [ -n "$WARNING" ] && echo "WARNING=$WARNING"
 echo "LANGUAGE=$LANGUAGE"
 echo "FRAMEWORK=$FRAMEWORK"

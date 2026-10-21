@@ -95,6 +95,8 @@ def main():
             # 1 = "<PASTA> | <Título>" · 2 = só "<PASTA>" (aceitável se for a única sessão da pasta) · 0 = fora
             if folder and name.startswith(folder + " | ") and len(name) > len(folder) + 3:
                 std = 1
+            elif name.strip().lower() == "sala de controle":
+                std = 1                       # nome da Sala aceito (decisão do usuário; a Sala mora no CT)
             elif folder and name == folder:
                 std = 2
             else:

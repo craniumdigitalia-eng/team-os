@@ -1,6 +1,6 @@
 # team-os — by João Guirunas
 
-Pack **team-os**: 111 agentes e 125 skills para Claude Code Agent Teams. (Codinome interno do repo: **CT — Centro de Treinamento**.)
+Pack **team-os**: 111 agentes e 124 skills para Claude Code Agent Teams. (Codinome interno do repo: **CT — Centro de Treinamento**.)
 
 > 📖 **Documentação completa: [README.md](./README.md)** — tutorial detalhado das skills principais (`/team-os` e `/team-os-creator`), dos 111 agentes com suas skills relacionadas, do catálogo de skills de apoio, passo a passo, modelo de coordenação, política de modelos, hooks e manutenção. Consulte o README como fonte completa; este arquivo traz só as regras operacionais essenciais.
 
@@ -14,9 +14,8 @@ Quem baixou o pack (`git clone`) cria os **próprios** agentes com `/team-os-cre
 ## As skills principais
 
 - **`/team-os`** — Bootstrap e orquestração de sessões Agent Teams. **É distribuída para todos os projetos** (obrigatória — o usuário roda `/team-os` no início de cada sessão). → [README.md §3](./README.md#3-skill-principal-team-os)
-- **`/team-os-creator`** — Factory de agentes. **Única skill exclusiva do CT** — nunca copiada para projetos destino. Comandos e flags reais em `.claude/skills/team-os-creator/SKILL.md`. → [README.md §4](./README.md#4-skill-principal-team-os-creator)
-- **`/sala-de-controle`** — **Sala de Controle** (opt-in) das sessões do Claude Code: lugar único de comando — relê todas as sessões e a etapa de cada projeto pela smart-memory, despacha cada pedido para a sessão certa e propõe a organização de pastas. Vive numa pasta isolada (`<raiz>/1 | Sala de Controle`) **sem agentes e sem `team-os`**; só via `*install --squads none --extra-skills sala-de-controle` — onde já está instalada, o `*propagate` a mantém atualizada. → [README.md §6 — Sala de Controle](./README.md#sala-de-controle--sala-de-controle-sessões-do-claude-code)
-- **`/maestri-os`** — **Sala de Controle** no modo Maestri (recurso opt-in para o Maestri): roteia pedidos entre os terminais dos projetos. Vive numa pasta própria **sem agentes e sem `team-os`**; só via `*install --squads none --extra-skills maestri-os` — onde já está instalada, o `*propagate` a mantém atualizada. → [README.md §6 — Sala de Controle](./README.md#sala-de-controle--maestri-os-recurso-para-o-maestri)
+- **`/team-os-creator`** — Factory de agentes. **Exclusiva do CT** (uma das duas, com a `sala-de-controle`) — nunca copiada para projetos destino. Comandos e flags reais em `.claude/skills/team-os-creator/SKILL.md`. → [README.md §4](./README.md#4-skill-principal-team-os-creator)
+- **`/sala-de-controle`** — **Sala de Controle** das sessões do Claude Code. **Mora no CT, exclusiva do CT** (como o `team-os-creator`; nunca vai para projeto nem se instala — `*install` recusa). Rodar numa sessão do CT lê todas as sessões e a etapa de cada projeto pela smart-memory e abre o painel ao vivo dos agentes em produção (`127.0.0.1:8787`); despacha cada pedido para a sessão certa e propõe a organização de pastas (raiz = `0 | Centro de Treinamento` + negócios). Lê e roteia, **nunca executa em outro projeto**; não cria agentes do pack. Memória em `docs/smart-memory/sala-de-controle/` do CT (fora do git). Pasta de Sala antiga → o `/team-os-creator` avisa e sugere `migrate-sala-to-ct.sh` (simula primeiro; a pasta vai para a Lixeira). → [README.md §6 — Sala de Controle](./README.md#sala-de-controle--sala-de-controle-mora-no-ct)
 
 ## Padrão de agentes
 
@@ -51,14 +50,14 @@ O CT não versiona `docs/smart-memory/` — ela nasce em cada destino na 1ª ses
 ```
 Editar agente/skill no CT
 → validate-agent.sh            (= *audit; 111/111 do pack)
-→ validate-agent.sh --skills   (lint das 125 skills)
+→ validate-agent.sh --skills   (lint das 124 skills)
 → test-hooks.sh                (544/544)
 → test-propagate.sh            (120/120)
 → generate-agents-page.py      (regenera docs/agentes.html — obrigatório após mudar agente ou skill)
 → /team-os-creator *propagate  (--match-target-squads)
 ```
 
-Scripts em `.claude/skills/team-os-creator/scripts/`. O CI (`.github/workflows/audit.yml`) repete tudo e ainda confere o manifest do pack, as contagens "111 agentes"/"125 skills" no README e aqui (contadas só no pack), zero caminho de máquina versionado (use `<raiz>/...`) e `docs/agentes.html` em dia. Mantenedor: ciclo completo em [MAINTAINERS.md](./MAINTAINERS.md).
+Scripts em `.claude/skills/team-os-creator/scripts/`. O CI (`.github/workflows/audit.yml`) repete tudo e ainda confere o manifest do pack, as contagens "111 agentes"/"124 skills" no README e aqui (contadas só no pack), zero caminho de máquina versionado (use `<raiz>/...`) e `docs/agentes.html` em dia. Mantenedor: ciclo completo em [MAINTAINERS.md](./MAINTAINERS.md).
 
 ## Comandos rápidos
 
@@ -69,8 +68,9 @@ Scripts em `.claude/skills/team-os-creator/scripts/`. O CI (`.github/workflows/a
 /team-os-creator *propagate → propagar para projetos destino
 /team-os-creator *feedback  → juntar as correções [skill-feedback] dos projetos e propor melhoria no CT
 /team-os-creator *install   → instalar squads em projeto novo
-/team-os-creator *painel    → mapa vivo do CT (squads, agentes, skills) em 127.0.0.1:8788
-/sala-de-controle *painel   → mapa vivo das sessões e agentes (só na pasta da Sala) em 127.0.0.1:8787
+/team-os-creator *painel    → mapa do pack (squads, agentes, skills) em 127.0.0.1:8788
+/sala-de-controle           → Sala de Controle no CT: lê sessões/projetos e abre o painel ao vivo (127.0.0.1:8787)
+/sala-de-controle *painel   → reabre o painel ao vivo dos agentes em produção, no CT (*painel stop derruba)
 ```
 
 > Para qualquer dúvida de uso, agentes, skills ou fluxo: **[README.md](./README.md)** é a referência completa. Licença MIT — [LICENSE](./LICENSE); terceiros em [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md); contribuição em [CONTRIBUTING.md](./CONTRIBUTING.md); mantenedor em [MAINTAINERS.md](./MAINTAINERS.md).

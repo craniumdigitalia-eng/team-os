@@ -11,7 +11,8 @@
 # sem mudança no CT (mantida em silêncio) · --on-conflict new (backup do usuário) · --only ·
 # --on-conflict keep decidido (não pergunta de novo) · agente/skill/arquivo criados no destino
 # intocados · arquivo que saiu do pack · hook editado · agente próprio com/sem --custom ·
-# --dry-run não escreve nada · Sala de Controle (sem backup, sem agentes no installed.json) ·
+# --dry-run não escreve nada · Sala de Controle mora no CT (install recusa, pasta de Sala antiga e
+# skill de Sala num projeto só avisam — LEGACY_CONTROL_ROOM / LEGACY_SKILL) ·
 # backup .claude.bak-* só no *install, guarda 3, o resto na Lixeira · .gitignore preservado ·
 # scan/diff contam conflito à parte · squad de plataforma (instagram-*) derivada no propagate e
 # aviso do estúdio social sem plataforma · aviso de agente órfão (ORPHAN_AGENT) no propagate.
@@ -238,20 +239,38 @@ DA="$(bash "$SRC_SCRIPTS/diff-agents.sh" "$SRC2" "$P2" | grep '^TARGET=')"
 check "diff-agents: CONFLICT_LIST=dev-qa" sh -c "printf '%s' '$DA' | tr '\t' '\n' | grep -qx 'CONFLICT_LIST=dev-qa'"
 check "diff-agents: ux não aparece como desatualizado" sh -c "! printf '%s' '$DA' | tr '\t' '\n' | grep -q '^OUTDATED_LIST=.*dev-ux'"
 
-# ═══ 9. Sala de Controle ═════════════════════════════════════════════════════
-echo "── 9. Sala de Controle"
-S9="$T/1 | Sala de Controle"; mkdir -p "$S9/.claude"
-inst "$T/9a.out" --source "$CT" --target "$S9" --squads none --extra-skills sala-de-controle
-check "sala: rc=0" [ "$RC" = "0" ]
-check "sala: CONTROL_ROOM=1" grep -qx 'CONTROL_ROOM=1' "$T/9a.out"
-check "sala: sem backup .claude.bak-*" sh -c "! ls -d '$S9'/.claude.bak-* >/dev/null 2>&1"
-check "sala: sem agentes" [ ! -d "$S9/$A" ]
-check "sala: installed.json sem agentes nem hooks" python3 -c 'import json,sys; f=json.load(open(sys.argv[1]))["files"]; sys.exit(0 if f and all(k.startswith(".claude/skills/sala-de-controle/") for k in f) else 1)' "$S9/.team-os/installed.json"
-inst "$T/9b.out" --source "$CT" --target "$S9" --match-target-squads
-check "sala propagate: CONTROL_ROOM=1" grep -qx 'CONTROL_ROOM=1' "$T/9b.out"
-check "sala propagate: sem backup" sh -c "! ls -d '$S9'/.claude.bak-* >/dev/null 2>&1"
-check "sala propagate: 0 alterações" [ "$(kv CHANGED_FILES "$T/9b.out")" = "0" ]
-check "sala: .gitignore com .team-os/ e snapshot" sh -c "grep -qx '.team-os/' '$S9/.gitignore' && grep -q 'sala-de-controle/snapshot.json' '$S9/.gitignore'"
+# ═══ 9. Sala de Controle mora no CT (nunca é instalada em projeto) ══════════
+echo "── 9. Sala de Controle mora no CT"
+S9="$T/1 | Sala de Controle"; mkdir -p "$S9"
+inst "$T/9a.out" --source "$CT" --target "$S9" --extra-skills sala-de-controle --squads dev
+check "sala: --extra-skills sala-de-controle → rc≠0" [ "$RC" != "0" ]
+check "sala: ERROR=sala_mora_no_ct" grep -q '^ERROR=sala_mora_no_ct|' "$T/9a.out"
+check "sala: mensagem pt-BR aponta o CT e a migração" sh -c "grep -q 'mora no Centro de Treinamento' '$T/9a.out' && grep -q 'migrate-sala-to-ct.sh' '$T/9a.out'"
+check "sala: nada gravado na recusa" [ -z "$(ls -A "$S9")" ]
+inst "$T/9b.out" --source "$CT" --target "$S9" --squads none
+check "sala: --squads none → rc≠0" [ "$RC" != "0" ]
+check "sala: --squads none → ERROR=sala_mora_no_ct" grep -q '^ERROR=sala_mora_no_ct|' "$T/9b.out"
+# pasta de Sala antiga sintética: skill de Sala, nenhum agente
+mkdir -p "$S9/.claude/skills/sala-de-controle"
+printf -- '---\nname: sala-de-controle\n---\nversão antiga da Sala\n' > "$S9/.claude/skills/sala-de-controle/SKILL.md"
+B9="$(treehash "$S9")"
+inst "$T/9c.out" --source "$CT" --target "$S9" --match-target-squads
+check "sala antiga propagate: rc=0" [ "$RC" = "0" ]
+check "sala antiga propagate: LEGACY_CONTROL_ROOM=1" grep -q '^LEGACY_CONTROL_ROOM=1' "$T/9c.out"
+check "sala antiga propagate: NEXT= com migrate-sala-to-ct.sh" grep -q '^NEXT=bash .*migrate-sala-to-ct.sh' "$T/9c.out"
+check "sala antiga propagate: nada gravado" [ "$(treehash "$S9")" = "$B9" ]
+check "sala antiga propagate: sem installed.json" [ ! -e "$S9/.team-os" ]
+# projeto comum que ainda tem a skill sala-de-controle (versão antiga): não atualiza, avisa
+P9="$T/proj9 | comum"; mkdir -p "$P9/$A" "$P9/.claude/skills/sala-de-controle"
+cp "$CT/$A/dev-architect.md" "$P9/$A/"
+printf -- '---\nname: sala-de-controle\n---\nversão antiga da Sala\n' > "$P9/.claude/skills/sala-de-controle/SKILL.md"
+SK9="$(treehash "$P9/.claude/skills/sala-de-controle")"
+inst "$T/9d.out" --source "$CT" --target "$P9" --match-target-squads
+check "projeto com skill de Sala: rc=0" [ "$RC" = "0" ]
+check "projeto com skill de Sala: LEGACY_SKILL=sala-de-controle" grep -q '^LEGACY_SKILL=sala-de-controle|' "$T/9d.out"
+check "projeto com skill de Sala: skill não atualizada" [ "$(treehash "$P9/.claude/skills/sala-de-controle")" = "$SK9" ]
+check "projeto com skill de Sala: fora do installed.json" sh -c "! grep -q 'skills/sala-de-controle/' '$P9/.team-os/installed.json'"
+check "projeto com skill de Sala: team-os-creator não vai" [ ! -e "$P9/.claude/skills/team-os-creator" ]
 
 # ═══ 10. backup .claude.bak-* só no *install, guarda 3, resto na Lixeira ═════
 echo "── 10. backup do *install"

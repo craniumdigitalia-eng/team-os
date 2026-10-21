@@ -23,7 +23,17 @@ Evolução a partir da análise de ~50 repositórios (guia "15 skills essenciais
 - Skills: instagram-strategy, instagram-dm-flows, instagram-publishing (ex-social-meta-publishing), tiktok-publishing, youtube-scriptwriting/packaging/analytics/publishing, linkedin-strategy, linkedin-publishing, copy-humanize, ui-craft, doc-to-markdown, dev-debugging, core-web-vitals.
 - `migrate-social-split.sh` (dry-run padrão) + aviso de agente órfão no `*propagate`; `*feedback` + convenção `[skill-feedback]`; "Automações sugeridas" no Discovery; hook opcional `guard-env-files.sh` (`--with-env-guard`); `marketing-context.md`.
 - Pressure-tests: 3 cenários na squad security e 9 nas squads de plataforma, todos limpos.
-- Contagens: 111 agentes · 125 skills · 15 squads · 14 hooks.
+- Contagens: 111 agentes · 124 skills · 15 squads · 14 hooks.
+
+### Alterado — Sala de Controle no CT
+- A Sala de Controle mora no próprio CT (exclusiva do CT, como o `team-os-creator`): acabou a pasta separada `1 | Sala de Controle`. Raiz padrão = `0 | Centro de Treinamento` + uma pasta por negócio; memória em `docs/smart-memory/sala-de-controle/` do CT (fora do git).
+- `/sala-de-controle` sem argumento faz a rodada e abre o painel ao vivo (`127.0.0.1:8787`) no navegador do Claude; `*painel` reabre, `*painel stop` derruba.
+- Dois painéis com papéis claros e link cruzado: `/sala-de-controle *painel` = agentes em produção (8787, ao vivo); `/team-os-creator *painel` = mapa do pack (8788).
+- `*install` recusa `--extra-skills sala-de-controle` (`ERROR=sala_mora_no_ct`); `*propagate` numa pasta de Sala antiga não atualiza e avisa `LEGACY_CONTROL_ROOM`. O Command Center avisa a pasta antiga e sugere a migração.
+- Novo `migrate-sala-to-ct.sh` (+ `test-migrate-sala.sh` no CI): simula por padrão; com `--apply` copia registro, histórico e organização para o CT sem sobrescrever (colisão vira `-da-pasta-antiga`) e manda a pasta antiga para a Lixeira.
+
+### Removido — maestri-os
+- Skill `maestri-os` (Sala de Controle no modo Maestri) e todas as referências: a Sala única é a `sala-de-controle`, no CT. Pasta antiga com `maestri-os` entra na mesma migração (o histórico vai como arquivo). Contagem: 125 → 124 skills.
 
 ## [2.4.0] — 2026-10-14
 

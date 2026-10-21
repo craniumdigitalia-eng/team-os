@@ -156,6 +156,7 @@ if [ "$SKIP_TESTS" != "1" ]; then
   run_check "test-update.sh"               bash "$HERE/test-update.sh"
   run_check "test-propagate.sh"            bash "$HERE/test-propagate.sh"
   run_check "test-migrate-social.sh"       bash "$HERE/test-migrate-social.sh"
+  run_check "test-migrate-sala.sh"         bash "$HERE/test-migrate-sala.sh"
   # os testes não podem ter mexido nos arquivos do release
   bash "$HERE/pack-manifest.sh" --check >/dev/null || fail "o manifest ficou desatualizado depois dos testes"
 fi

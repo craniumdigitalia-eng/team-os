@@ -6,7 +6,7 @@
 #   <name>    → valida só .claude/agents/<name>.md (sem checks globais)
 #   --skills  → lint de TODAS as .claude/skills/*/SKILL.md (frontmatter, name = pasta,
 #               description de 1 linha ≤ 400 chars, version/updated com aspas).
-#               sala-de-controle e maestri-os: só WARN (nunca erro).
+#               sala-de-controle: só WARN (nunca erro).
 #               ERRO (em todas, inclusive as warn-only): qualquer arquivo da pasta da skill
 #               com $CLAUDE_PROJECT_DIR / ${CLAUDE_PROJECT_DIR} sem fallback `:-` — a variável
 #               só existe em hooks; no Bash do Claude Code use
@@ -97,7 +97,7 @@ BUILTIN_SLASH="help clear compact model config init review rename resume loop co
 # Palavras que aparecem como "/x" mas são caminho de sistema, não skill
 PATH_WORDS="tmp dev etc usr bin var opt private src app docs public lib home root proc sbin mnt"
 # Skills onde o lint de --skills só avisa (sem version/updated por design)
-SKILLS_WARN_ONLY="sala-de-controle maestri-os"
+SKILLS_WARN_ONLY="sala-de-controle"
 
 TMPDIR_V="$(mktemp -d "${TMPDIR:-/tmp}/validate-agent.XXXXXX")" || exit 1
 trap 'rm -rf "$TMPDIR_V"' EXIT

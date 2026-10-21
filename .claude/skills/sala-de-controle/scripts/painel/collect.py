@@ -297,7 +297,8 @@ def collect(root):
     for n in nodes:
         p = nfc(n["path"])
         ctx = context(n["path"]) if n.get("smart_memory") else {}
-        projects[p] = {"path": p, "name": nfc(n["name"]), "business": nfc(n.get("business") or ""),
+        nm = nfc(n["name"]) + (" (casa da Sala)" if n.get("kind") == "ct" else "")
+        projects[p] = {"path": p, "name": nm, "business": nfc(n.get("business") or ""),
                        "kind": n.get("kind"), "squads": n.get("squads", []), "agents_installed": n.get("agents", 0),
                        "smart_memory": bool(n.get("smart_memory")), "stage": stage_line(ctx),
                        "summary": clean(ctx.get("SUMMARY", ""), 200) if ctx else "",
@@ -337,7 +338,9 @@ def collect(root):
         members = (cfg or {}).get("members", [])
         agents = agents_of(sdir, members) if sdir else []
         main = read_transcript_state(tr, 5) if tr and os.path.isfile(tr) else {"turns": [], "last_tool": None, "last_epoch": 0}
-        is_sala = "sala de controle" in (s.get("NAME", "") + " " + cwd).lower()
+        # a Sala mora no CT: reconhece pelo nome da sessão ("Sala de Controle" ou
+        # "0 | Centro de Treinamento | Sala de Controle"); pastas de Sala antigas também contam
+        is_sala = s.get("IS_SELF") == "1" or "sala de controle" in (s.get("NAME", "") + " " + cwd).lower()
         status = s.get("STATUS") or s.get("STATE") or ""
         sess = {"id": sid, "short": s.get("SHORT_ID") or sid[:8], "name": nfc(s.get("NAME", "")), "cwd": cwd,
                 "folder": nfc(s.get("FOLDER", "")), "kind": s.get("KIND"), "status": status,
@@ -380,14 +383,15 @@ def collect(root):
               + sum(1 for s in out_sessions if s.get("state") == "blocked"),
               "tokens": sum((s.get("tokens") or {}).get("total", 0) for s in out_sessions),
               "tokens_rate": sum((s.get("tokens") or {}).get("rate", 0) for s in out_sessions)}
-    return {"root": nfc(root), "self": nfc(self_name), "generated": time.strftime("%Y-%m-%dT%H:%M:%S"),
+    home = "CT" if os.path.isdir(os.path.join(os.getcwd(), ".claude", "skills", "team-os-creator")) else ""
+    return {"root": nfc(root), "self": nfc(self_name), "home": home, "generated": time.strftime("%Y-%m-%dT%H:%M:%S"),
             "took_ms": int((time.time() - t0) * 1000), "projects": list(projects.values()),
             "sessions": out_sessions, "events": events[:60], "edges": edges, "counts": counts}
 
 
 def default_root():
     cwd = os.getcwd()
-    # a Sala mora em <raiz>/1 | Sala de Controle; o CT em <raiz>/0 | Centro de Treinamento
+    # a Sala mora no CT (<raiz>/0 | Centro de Treinamento): a raiz é a pasta-mãe do CT
     parent = os.path.dirname(cwd)
     return parent if os.path.isdir(parent) else cwd
 

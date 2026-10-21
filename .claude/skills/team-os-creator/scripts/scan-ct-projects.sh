@@ -112,7 +112,7 @@ echo "---"
 # Candidatos: as pastas irmãs do CT. Uma pasta SEM .claude/ e SEM .git próprios que CONTÉM
 # subpastas com .claude/ é um CONTÊINER (ex.: "<Negócio>" com "Comercial", "Site", "Marketing"…):
 # seus filhos diretos entram como projetos "Contêiner/Filho" — inclusive os vazios, para
-# aparecerem como "não instalado" no dashboard. Sala de Controle nunca é contêiner.
+# aparecerem como "não instalado" no dashboard. Pasta de Sala de Controle (antiga) nunca é contêiner.
 CANDIDATES="$(mktemp "${TMPDIR:-/tmp}/scan-ct.XXXXXX")" || exit 1
 for d in "$CT_ROOT"/*/; do
   [ -d "$d" ] || continue
@@ -169,15 +169,15 @@ while IFS=$'\t' read -r dir name; do
   # Smart-memory
   { [ -d "$dir/docs/smart-memory" ] || [ -f "$dir/docs/smart-memory/INDEX.md" ]; } && has_smart_memory=1
 
-  # Sala de Controle: pasta cujo nome diz "sala de controle"/"control room", ou que já tem
-  # uma skill opt-in de Sala — sala-de-controle (sessões do Claude) ou maestri-os (Maestri).
-  # Não é squad — o dashboard trata à parte.
-  has_maestri_os=0; has_sala=0; is_control_room=0
-  [ -d "$dir/.claude/skills/maestri-os" ] && has_maestri_os=1
-  [ -d "$dir/.claude/skills/sala-de-controle" ] && has_sala=1
-  lname=$(printf '%s' "$name" | tr '[:upper:]' '[:lower:]')
-  case "$lname" in *"sala de controle"*|*"sala-de-controle"*|*"control room"*|*"control-room"*) is_control_room=1 ;; esac
-  { [ $has_maestri_os -eq 1 ] || [ $has_sala -eq 1 ]; } && is_control_room=1
+  # Pasta de Sala de Controle ANTIGA: a Sala agora mora no CT. Fora do CT e sem agentes, com a
+  # skill sala-de-controle ou maestri-os (versões anteriores do pack), ou com nome de Sala
+  # ("sala de controle"/"control room"). O dashboard avisa e sugere migrate-sala-to-ct.sh.
+  is_legacy_cr=0
+  if [ "$is_current" -eq 0 ] && [ "$has_agents" -eq 0 ]; then
+    { [ -d "$dir/.claude/skills/sala-de-controle" ] || [ -d "$dir/.claude/skills/maestri-os" ]; } && is_legacy_cr=1
+    lname=$(printf '%s' "$name" | tr '[:upper:]' '[:lower:]')
+    case "$lname" in *"sala de controle"*|*"sala-de-controle"*|*"control room"*|*"control-room"*) is_legacy_cr=1 ;; esac
+  fi
 
   # Drift vs CT (só para projetos que não são o CT e têm agentes)
   if [ "$is_current" -eq 0 ] && [ "$has_agents" -eq 1 ] && [ -n "$SOURCE_AGENTS" ]; then
@@ -208,13 +208,13 @@ while IFS=$'\t' read -r dir name; do
   fi
 
   # Drift de SKILLS vs CT (mesma lógica: só compara skills que o destino já tem;
-  # team-os-creator nunca conta — é exclusiva do CT)
+  # team-os-creator e sala-de-controle nunca contam — são exclusivas do CT; maestri-os saiu do pack)
   skills_outdated=0
   if [ "$is_current" -eq 0 ] && [ "$has_skills" -eq 1 ] && [ -n "$SOURCE_SKILLS" ]; then
     for sp in "$dir/.claude/skills/"*/; do
       [ -d "$sp" ] || continue
       sn=$(basename "$sp")
-      [ "$sn" = "team-os-creator" ] && continue
+      case "$sn" in team-os-creator|sala-de-controle|maestri-os) continue ;; esac
       src="$SOURCE_SKILLS/$sn"
       [ -d "$src" ] || continue   # skill extra do destino — preservada, não é drift
       [ "$(hash_dir "$sp")" = "$(hash_dir "$src")" ] || skills_outdated=$((skills_outdated + 1))
@@ -237,11 +237,11 @@ while IFS=$'\t' read -r dir name; do
 
   # Formato TSV (TAB-delimitado): nomes reais de pasta contêm "|" (ex.: "João | Externo"),
   # então pipe como delimitador quebrava o parse do dashboard.
-  printf 'PROJECT=%s\tPATH=%s\tIS_CURRENT=%s\tHAS_AGENTS=%s\tAGENT_COUNT=%s\tAGENT_SQUADS=%s\tHAS_SKILLS=%s\tSKILL_COUNT=%s\tHAS_HOOKS=%s\tHAS_TEAM_OS=%s\tHAS_SMART_MEMORY=%s\tDRIFT_OK=%s\tDRIFT_OUTDATED=%s\tDRIFT_EXTRA=%s\tDRIFT_MISSING=%s\tSKILLS_OUTDATED=%s\tHAS_MAESTRI_OS=%s\tIS_CONTROL_ROOM=%s\tHAS_SALA_DE_CONTROLE=%s\tDRIFT_CONFLICT=%s\tSKILLS_CONFLICT=%s\n' \
+  printf 'PROJECT=%s\tPATH=%s\tIS_CURRENT=%s\tHAS_AGENTS=%s\tAGENT_COUNT=%s\tAGENT_SQUADS=%s\tHAS_SKILLS=%s\tSKILL_COUNT=%s\tHAS_HOOKS=%s\tHAS_TEAM_OS=%s\tHAS_SMART_MEMORY=%s\tDRIFT_OK=%s\tDRIFT_OUTDATED=%s\tDRIFT_EXTRA=%s\tDRIFT_MISSING=%s\tSKILLS_OUTDATED=%s\tIS_LEGACY_CONTROL_ROOM=%s\tDRIFT_CONFLICT=%s\tSKILLS_CONFLICT=%s\n' \
     "$name" "$dir" "$is_current" "$has_agents" "$agent_count" "$agent_squads" \
     "$has_skills" "$skill_count" "$([ -d "$dir/.claude/hooks" ] && echo 1 || echo 0)" \
     "$has_team_os" "$has_smart_memory" "$drift_ok" "$drift_outdated" "$drift_extra" \
-    "$drift_missing" "$skills_outdated" "$has_maestri_os" "$is_control_room" "$has_sala" \
+    "$drift_missing" "$skills_outdated" "$is_legacy_cr" \
     "$drift_conflict" "$skills_conflict"
 done < "$CANDIDATES"
 rm -f "$CANDIDATES"

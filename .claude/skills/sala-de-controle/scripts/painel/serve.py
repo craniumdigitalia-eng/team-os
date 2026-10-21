@@ -11,6 +11,10 @@ Rotas:
 Só lê. Nunca escreve em projeto nenhum. Só aceita caminhos de projetos conhecidos pelo org-map
 e só dentro de docs/smart-memory (sem `..`, sem symlink para fora).
 
+A Sala mora no CT: rode a partir da raiz do CT (raiz dos projetos = pasta-mãe do CT).
+Fora do CT o painel sobe mesmo assim, com WARN=sala_fora_do_ct.
+Link cruzado: o mapa do pack (/team-os-creator *painel) fica em http://127.0.0.1:8788.
+
 Usage: serve.py [--root <raiz>] [--port 8787] [--bg | --stop | --status]
   --bg    sobe em segundo plano (pid em ~/.claude/sala-de-controle-painel.pid) e imprime a URL
   --stop  derruba o servidor de segundo plano
@@ -234,6 +238,10 @@ class H(BaseHTTPRequestHandler):
         return self._send(404, {"error": "rota desconhecida"})
 
 
+def home_is_ct():
+    return os.path.isdir(os.path.join(os.getcwd(), ".claude", "skills", "team-os-creator"))
+
+
 def default_root():
     parent = os.path.dirname(os.getcwd())
     return parent if os.path.isdir(parent) else os.getcwd()
@@ -263,6 +271,8 @@ def main():
         print(f"RUNNING={1 if port_open(port) else 0} URL=http://127.0.0.1:{port}")
         return
     if "--bg" in a:
+        if not home_is_ct():
+            print("WARN=sala_fora_do_ct|a Sala de Controle mora no CT (0 | Centro de Treinamento) — abra a sessão da Sala no CT")
         if port_open(port):
             print(f"ALREADY=1 URL=http://127.0.0.1:{port}")
             return
