@@ -816,6 +816,41 @@ expect 2 $H "$(msg_payload "$(mk_lines 61 '[handoff] pronto')")" "fallback: [han
 expect 0 $H '{"tool_name":"SendMessage","tool_input":{"to":"dev","message":{"type":"shutdown_request"}}}' "fallback: JSON de protocolo → passa"
 TESTPATH="$PATH"
 
+# ── 10c. guard-env-files.sh (PreToolUse Edit|Write|MultiEdit — hook opcional) ──
+section "guard-env-files.sh"
+H=guard-env-files.sh
+edit_payload() {  # <tool_name> <file_path>
+  printf '{"session_id":"e1","hook_event_name":"PreToolUse","cwd":%s,"tool_name":%s,"tool_input":{"file_path":%s,"content":"X=1"}}' \
+    "$(jstr "$REPO")" "$(jstr "$1")" "$(jstr "$2")"
+}
+expect 2 $H "$(edit_payload Write "$REPO/.env")" "Write .env → bloqueia"
+expect 2 $H "$(edit_payload Edit "$REPO/.env.local")" "Edit .env.local → bloqueia"
+expect 2 $H "$(edit_payload MultiEdit "$REPO/apps/web/.env.production")" "MultiEdit .env.production em subpasta → bloqueia"
+expect 0 $H "$(edit_payload Write "$REPO/.env.example")" ".env.example → libera"
+expect 0 $H "$(edit_payload Edit "$REPO/.env.sample")" ".env.sample → libera"
+expect 0 $H "$(edit_payload Edit "$REPO/.env.template")" ".env.template → libera"
+expect 2 $H "$(edit_payload Edit "$REPO/package-lock.json")" "package-lock.json → bloqueia"
+expect 2 $H "$(edit_payload Write "$REPO/pnpm-lock.yaml")" "pnpm-lock.yaml → bloqueia"
+expect 2 $H "$(edit_payload Edit "$REPO/yarn.lock")" "yarn.lock → bloqueia"
+expect 2 $H "$(edit_payload Write "$REPO/bun.lockb")" "bun.lockb → bloqueia"
+expect 2 $H "$(edit_payload Edit "$REPO/poetry.lock")" "poetry.lock → bloqueia"
+expect 2 $H "$(edit_payload Edit "$REPO/crates/Cargo.lock")" "Cargo.lock → bloqueia"
+expect 0 $H "$(edit_payload Edit "$REPO/src/app.ts")" "arquivo comum → libera"
+expect 0 $H "$(edit_payload Write "$REPO/docs/env.md")" "env.md (não é .env) → libera"
+expect 0 $H "$(edit_payload Write "$REPO/package.json")" "package.json (não é lockfile) → libera"
+expect 2 $H "$(edit_payload Write "/Volumes/Meu Disco/Projeto X/.env")" ".env em caminho com espaço → bloqueia"
+expect 0 $H "$(edit_payload Edit "/Volumes/Meu Disco/Projeto X/src/a b.ts")" "arquivo comum em caminho com espaço → libera"
+expect 0 $H "$(bash_payload 'echo X=1 > .env')" "Bash não é afetado → passa"
+expect 0 $H "$(edit_payload Read "$REPO/.env")" "Read de .env não é afetado → passa"
+expect 0 $H 'isto nao e json' "JSON inválido → fail-open"
+TEAM_OS_ENV_GUARD=0 expect 0 $H "$(edit_payload Write "$REPO/.env")" "TEAM_OS_ENV_GUARD=0 → desligado"
+TESTPATH="$TMP/nopy:$PATH"
+expect 2 $H "$(edit_payload Write "$REPO/.env")" "fallback: Write .env → bloqueia"
+expect 0 $H "$(edit_payload Write "$REPO/.env.example")" "fallback: .env.example → libera"
+expect 2 $H "$(edit_payload Edit "/Volumes/Meu Disco/X/yarn.lock")" "fallback: lockfile em caminho com espaço → bloqueia"
+expect_stderr_warning $H "$(edit_payload Write "$REPO/.env")" "fallback: aviso ⚠️ em stderr"
+TESTPATH="$PATH"
+
 # ── 10d. context-watch.sh (UserPromptSubmit — aviso de contexto grande, nunca bloqueia) ──
 section "context-watch.sh"
 H=context-watch.sh

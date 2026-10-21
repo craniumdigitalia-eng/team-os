@@ -137,6 +137,7 @@ related: ["[[{contrato-slug}-v{N}-desvios]]", "[[../../project/legal-posture]]",
 - `/legal-contract-drafting` — anatomia, linguagem clara, matriz de desvios, revisão da contraparte, versionamento e changelog
 - `/legal-clause-library` — estrutura da cláusula, numeração `M{N}.{c}`, variantes com piso/teto, proibidas
 - `/legal-research` — para pedir e ler fonte de VERITAS com o vocabulário certo
+- `/doc-to-markdown` — converter a minuta da contraparte (DOCX/PDF) em `.md` local antes da revisão marcada; nada sai da máquina
 - `/verify-before-done` — matriz 100% preenchida e coerência conferida antes de submeter
 
 ## Notificar (peer-to-peer)

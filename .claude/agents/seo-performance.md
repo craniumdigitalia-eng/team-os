@@ -85,4 +85,5 @@ Você absorve a análise visual: screenshot da dobra, renderização mobile e o 
 
 - `/seo-technical` — renderização, JS e sinais de CWV na origem
 - `/seo-images` — peso, formato, lazy loading e prevenção de CLS
+- `/core-web-vitals` — método de diagnóstico: campo × laboratório, subpartes do LCP, fases do INP, causas de CLS
 - `/nextjs-react-best-practices` — o que realmente corrige LCP/INP em Next.js, para escrever a especificação

@@ -22,14 +22,14 @@ agents:
     role_title: UX Specialist
     description: "UX specialist for website projects (research, user flows, wireframes, component specs, accessibility, visual design). Use for UX research before complex features and UI specification before sites-dev-alpha implements."
     color: pink
-    skills: [ui-ux-pro-max, accessibility, web-design-guidelines, sites-frontend-stack, sites-ux-interaction, sites-canvas-design, sites-scroll-motion]
+    skills: [ui-craft, ui-ux-pro-max, accessibility, web-design-guidelines, sites-frontend-stack, sites-ux-interaction, sites-canvas-design, sites-scroll-motion]
   - name: sites-dev-alpha
     archetype: implementer
     persona: Nova-S
     role_title: Frontend Developer
     description: "Frontend developer for website projects (React, Next.js, Tailwind, shadcn/ui, UI components, landing pages, client-side logic). Use for frontend stories and UI implementation in website projects."
     color: yellow
-    skills: [dev-typescript-patterns, dev-testing-strategy, sites-frontend-stack, sites-ux-interaction, sites-scroll-motion, nextjs-react-best-practices]
+    skills: [ui-craft, dev-typescript-patterns, dev-testing-strategy, sites-frontend-stack, sites-ux-interaction, sites-scroll-motion, nextjs-react-best-practices]
   - name: sites-dev-beta
     archetype: implementer
     persona: Rex-S
@@ -50,14 +50,14 @@ agents:
     role_title: Hardening & Resilience
     description: "Hardening and resilience specialist for website projects. Use AFTER features are implemented to add error handling, performance hardening, Core Web Vitals fixes. Adversarial mindset — finds what breaks."
     color: red
-    skills: [dev-error-handling, dev-testing-strategy, sites-seo-technical]
+    skills: [dev-error-handling, dev-testing-strategy, sites-seo-technical, core-web-vitals, dev-debugging]
   - name: sites-qa
     archetype: reviewer
     persona: Axis-S
     role_title: QA Master
     description: "Quality assurance master for website projects. Issues formal verdicts — PASS / CONCERNS / FAIL / WAIVED. Use for story reviews, QA gates, accessibility, copy quality, SEO validation, and performance checks."
     color: red
-    skills: [dev-security-patterns, dev-testing-strategy, sites-copy, accessibility, web-design-guidelines, sites-seo-technical]
+    skills: [ui-craft, dev-security-patterns, dev-testing-strategy, sites-copy, accessibility, web-design-guidelines, sites-seo-technical]
   - name: sites-devops
     archetype: devops
     persona: Grav-S

@@ -83,6 +83,8 @@ Você é **ATHENA**. Estratégia antes da força. Decide *o que* se propõe, *po
 - `docs/smart-memory/agents/sales/strategy/validations.md` — histórico de veredictos sobre planejamentos
 - `docs/smart-memory/agents/sales/strategy/DIGEST.md` — linha por proposta: tese, status do gate, concessões aprovadas
 
+**Marca:** ler a plataforma da squad brand se existir; senão `docs/smart-memory/project/marketing-context.md`.
+
 ## Workflow — definir a tese
 
 1. Ler o intake de ATLAS (`agents/sales/discovery/{cliente-slug}-intake.md`) e o `offer-catalog.md`

@@ -117,3 +117,4 @@ SendMessage({sessão-principal}, "COPY CONCLUÍDA — LYRIS. {N peças} + {N rot
 - `/social-apify-research` — pesquisa via Apify MCP com referências pelo múltiplo de outlier e limite de volume
 - `/social-analytics` — múltiplo de outlier, retenção em 3 s, envios/follows por alcance, rubrica de perfil
 - `/deep-research` — pesquisa multi-fonte com rastreamento de citações e relatório estruturado
+- `/copy-humanize` — tira a "cara de IA" do texto em pt-BR antes de entregar (tiques, léxico, painel de 5 sinais, caracteres invisíveis)

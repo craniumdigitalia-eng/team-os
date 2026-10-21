@@ -36,8 +36,9 @@ O script arquiva automaticamente: `stories/done/*`, **toda nota com `status: res
 Durante as sessões, os agentes anotam barato em `docs/smart-memory/_inbox/` — a curadoria é adiada para cá. O archivist:
 
 1. Lê o `_inbox/` **inteiro de uma vez** (leitura em lote, não nota a nota ao longo da sessão).
-2. **Funde, deduplica e supersede** contra os DIGESTs das áreas: cada informação vira fato atômico datado no DIGEST certo (Core ou Contexto recente), substituindo fato antigo quando for o caso; o que merecer nota própria vira nota com frontmatter v3 (`kind`/`status`/`summary`, `expires` se tiver prazo).
-3. **Zera o inbox**: para cada nota consolidada,
+2. **Linhas `[skill-feedback]` primeiro:** toda linha que começa com `[skill-feedback]` é copiada **sem alteração** (marcador, texto e data) para o `DIGEST.md` da área a que se refere (o agente citado, ou o agente que usa a skill citada) — nunca fundida, resumida ou reescrita. O `/team-os-creator *feedback` do CT lê essas linhas no DIGEST; só depois de copiadas o arquivo do `_inbox/` pode ser limpo.
+3. **Funde, deduplica e supersede** contra os DIGESTs das áreas: cada informação vira fato atômico datado no DIGEST certo (Core ou Contexto recente), substituindo fato antigo quando for o caso; o que merecer nota própria vira nota com frontmatter v3 (`kind`/`status`/`summary`, `expires` se tiver prazo).
+4. **Zera o inbox**: para cada nota consolidada,
    ```bash
    bash "${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/team-os/scripts/compact-memory.sh" --clear-inbox <arquivo>
    ```
@@ -69,7 +70,10 @@ Missão do archivist (substitua `{DIGEST_OVER_LIST}` pelo valor de `WEIGH_DIGEST
 "Você é o archivist. Escopo EXCLUSIVO: docs/smart-memory/ (leitura) e
  docs/smart-memory/**/DIGEST.md + _inbox/ + _archive/ (escrita).
  Missão em UMA passada:
- 1. Consolide o _inbox/ (se houver): funda/deduplique/supersede contra os
+ 1. Consolide o _inbox/ (se houver). ANTES de limpar: copie cada linha que
+    começa com [skill-feedback] SEM ALTERAÇÃO (marcador, texto e data) para o
+    DIGEST.md da área a que ela se refere — nunca funda, resuma ou reescreva
+    essas linhas. Depois funda/deduplique/supersede o resto contra os
     DIGESTs e zere via --clear-inbox (passo 2 do compact-flow).
  2. Para cada área (agents/<squad>/<área>/, decisions/), cluster por tópico e detecte:
     cadeias supersedidas (sufixos -r2/-r3/-v2, investigation-round*, audit→fix

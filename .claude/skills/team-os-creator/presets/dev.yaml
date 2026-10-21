@@ -22,21 +22,21 @@ agents:
     role_title: UX Specialist
     description: "UX specialist (research, user flows, wireframes, component specs, accessibility). Use for UX research before complex features and UI specification before frontend dev implements."
     color: pink
-    skills: [ui-ux-pro-max, accessibility, web-design-guidelines, dev-defuddle]
+    skills: [ui-craft, ui-ux-pro-max, accessibility, web-design-guidelines, dev-defuddle]
   - name: dev-dev-alpha
     archetype: implementer
     persona: Nova
     role_title: Frontend Developer
     description: "Frontend developer (React, Next.js, Tailwind, UI components, client-side logic). Use for frontend stories and UI implementation in complex software projects."
     color: yellow
-    skills: [dev-typescript-patterns, dev-testing-strategy]
+    skills: [ui-craft, dev-typescript-patterns, dev-testing-strategy]
   - name: dev-dev-beta
     archetype: implementer
     persona: Rex
     role_title: Backend Developer
     description: "Backend developer (APIs, services, business logic, performance, server-side integrations). Use for backend stories in complex software projects."
     color: orange
-    skills: [dev-typescript-patterns, dev-api-design, dev-security-patterns]
+    skills: [dev-typescript-patterns, dev-api-design, dev-security-patterns, dev-debugging]
   - name: dev-dev-gamma
     archetype: implementer
     persona: Sera
@@ -50,14 +50,14 @@ agents:
     role_title: Hardening & Resilience
     description: "Hardening and resilience specialist. Use AFTER features are implemented to add error handling, retry logic, edge case coverage, and resilience patterns. Adversarial mindset — finds what breaks."
     color: red
-    skills: [dev-error-handling, dev-testing-strategy]
+    skills: [dev-error-handling, dev-testing-strategy, dev-debugging, core-web-vitals]
   - name: dev-qa
     archetype: reviewer
     persona: Axis
     role_title: QA Master
     description: "Quality assurance master. Issues formal verdicts — PASS / CONCERNS / FAIL / WAIVED. Use for story reviews, QA gates, security checks, and test design. Exclusive authority for quality gate decisions."
     color: red
-    skills: [dev-security-patterns, dev-testing-strategy]
+    skills: [ui-craft, dev-security-patterns, dev-testing-strategy, dev-debugging]
   - name: dev-devops
     archetype: devops
     persona: Grav

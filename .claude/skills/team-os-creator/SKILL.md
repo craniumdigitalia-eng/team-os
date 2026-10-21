@@ -2,8 +2,8 @@
 name: team-os-creator
 description: "Factory de agentes nativos do Claude Code para Agent Teams — exclusiva deste repositório fonte. Use para criar agentes ou squads (inclusive agentes próprios), atualizar o pack sem perder o que você criou (*update), propagar agentes e skills aos projetos, instalar squads em projeto novo, auditar compliance ou migrar o bloco NTP. Gera .claude/agents/*.md com Native Teams Protocol + smart-memory."
 user-invocable: true
-argument-hint: "[*analyze | *squad <preset> | *create <role> | *migrate | *bootstrap | *skills <agente> | *pressure-test <agente> | *audit | *update | *propagate | *migrate-social <pasta> | *install | *organize]"
-version: "3.3"
+argument-hint: "[*analyze | *squad <preset> | *create <role> | *migrate | *bootstrap | *skills <agente> | *pressure-test <agente> | *audit | *update | *propagate | *feedback | *migrate-social <pasta> | *install | *organize]"
+version: "3.4"
 updated: "2026-10-20"
 ---
 
@@ -55,6 +55,7 @@ Output: arquivos `.md` em `.claude/agents/` + skills + bootstrap de `docs/smart-
 | `/team-os-creator *audit` | Valida compliance de todos os agentes (`validate-agent.sh`) **e** das skills (`validate-agent.sh --skills`) |
 | `/team-os-creator *update` | **Atualiza o pack** nesta pasta para a versão mais nova **sem perder nada** do que o usuário criou ou editou (`scripts/update-pack.sh`): mostra o que muda, pede UMA confirmação, aplica com cópia de segurança e pergunta, um por um, o que fazer com os arquivos que o usuário mudou. Nunca faz commit/push. Ver "Fluxo `*update`" |
 | `/team-os-creator *propagate` | Propaga agentes atualizados para outros projetos |
+| `/team-os-creator *feedback` | Junta as correções `[skill-feedback]` anotadas nos projetos (`scripts/feedback-scan.sh`, só leitura), agrupa por skill/agente e propõe, alvo por alvo, a melhoria no CT — aplica só com OK. Ver "Fluxo `*feedback`" |
 | `/team-os-creator *migrate-social <pasta>` | Leva um projeto da squad `social` antiga (strategist/content/publisher) para o estúdio `social` + squad(s) de plataforma (`scripts/migrate-social-split.sh`; dry-run primeiro, `--apply --platforms <lista>` só com OK). Ver "Fluxo `*migrate-social`" |
 | `/team-os-creator *install` | Instala squads + skills (incluindo `team-os`) + `settings.json` em projeto destino. Pasta **Sala de Controle** → instala só a skill de Sala (`sala-de-controle` por padrão, ou `maestri-os` no modo Maestri) |
 | `/team-os-creator *organize` | Mapa da organização de pastas (negócio → projeto → squads → salas), pontos fora do padrão e proposta de melhoria. **Só propõe** — nada é movido, renomeado ou instalado sem OK explícito, ação por ação |
@@ -252,6 +253,7 @@ Script: `scripts/migrate-ntp.sh` — substitui, em cada `.claude/agents/*.md`, o
 4. Copia agents da(s) squad(s) escolhida(s) + skills — a lista é a **união** de: skills citadas no body dos agentes instalados (`/skill` ou skill `x`), `team-os` (obrigatória), `--extra-skills`, skills com prefixo da squad, e as já presentes no destino (mantidas atualizadas). Nunca `team-os-creator`, `sala-de-controle`, `maestri-os` (salvo `--extra-skills`). O `--dry-run` imprime a origem de cada skill (`SKILL_ORIGIN=<skill>|citada por X / prefixo / extra`) — use-o antes de instalar. Lixo (`.venv`, `ms-playwright`, `runtime-state.json`, `__pycache__`, `*.pyc`, `.DS_Store`, `Icon?`) nunca é copiado.
 4a. **Backup + settings:** no `*install`, se o destino já tinha `.claude/`, o script copia tudo para `.claude.bak-<timestamp>/` antes de escrever (só fora do dry-run; loga `BACKUP=`), guarda só as 3 mais recentes (`BACKUP_KEEP`) e manda as antigas para a Lixeira — macOS ou Linux, via `trash.sh`, nunca apaga (`BACKUP_TRASHED=`). O `*propagate` e a Sala de Controle **não fazem esse backup**: tudo que ele grava vem do CT (versionado) e o que o usuário editou no destino nunca é sobrescrito sem ele escolher (ver "Edições feitas no projeto" no `*propagate`).
 4b. **Instala a trava anti-worktree (sempre):** copia `block-worktree.sh` + `block-git-push.sh` + os hooks de quality gate para `.claude/hooks/` do destino. Worktrees são proibidos em todos os projetos: agentes trabalham direto na branch ativa (ownership disjunto resolve conflitos). A flag `--include-hooks` é praticamente **no-op** (o pacote padrão já cobre todos os hooks do CT; ela só copiaria hooks extras que não existem).
+4b.1. **Hook opcional `guard-env-files.sh` (só com OK do usuário):** bloqueia Edit/Write em `.env`/`.env.*` (libera `.env.example`/`.sample`/`.template`) e em lockfiles. **Não** entra por padrão. Com `--with-env-guard` o script copia o hook e o registra no `settings.json` (`ensure-settings.sh --with-env-guard`, matcher `Edit|Write|MultiEdit`; `ENV_GUARD_HOOK=installed`). Destino que já tem o hook continua recebendo a versão nova no `*propagate` (`ENV_GUARD_HOOK=kept`). A sugestão nasce do bloco "Automações sugeridas" que o Discovery da `/team-os` grava em `project/tech-stack.md`.
 4c. **Estado do destino:** todo `*install`/`*propagate` grava `.team-os/installed.json` no destino (versão do pack + uma impressão digital de cada arquivo gravado: agentes, arquivos das skills, hooks) e acrescenta `.team-os/` ao `.gitignore` dele. Na 1ª vez num destino antigo sai `BASELINE_CREATED=1` (essa vez sobrescreve o que difere, como sempre foi). Agentes próprios do CT (`origin: custom`) só entram com `--custom <nome|all>`; os que já estão no destino são atualizados pelo `*propagate`. O `settings.json` é garantido pelo `team-os/scripts/ensure-settings.sh` (merge idempotente: `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`, `bgIsolation: none`, `subagentPromptCacheTtl`, PreToolUse do `block-worktree.sh`, TaskCreated + os 5 TaskCompleted) — nunca sobrescreve valores existentes, avisa divergência.
 5. **Instala o session-title hook (core UX):** copia `team-os-session-title.sh` para `~/.claude/hooks/` e garante o registro do `SessionStart` em `~/.claude/settings.json` (nomeia toda sessão por `projeto · branch`). O script reporta `SESSION_TITLE_REGISTER_TODO=1` se faltar o registro — nesse caso, edite o settings global com JSON válido. Ver "Nomeação automática da sessão" na skill `team-os`.
 6. **NÃO copia `team-os-creator`** — única skill exclusiva do CT
@@ -388,6 +390,19 @@ Método completo em `reference/pressure-testing.md` (RED → GREEN → REFACTOR)
 
 ---
 
+## Fluxo `*feedback`
+
+As correções que o usuário faz nos projetos voltam para o CT. Nos destinos, o lead da `/team-os` anota cada correção como uma linha `[skill-feedback] <skill|agente>: <correção> (AAAA-MM-DD)` no `_inbox/` (convenção em `team-os/reference/estrutura-smart-memory.md`); o `*compact` leva a linha para o `DIGEST.md` da área.
+
+1. **Varredura (só leitura):** `bash .claude/skills/team-os-creator/scripts/feedback-scan.sh` — mesma raiz do `scan-ct-projects.sh` (`--root <pasta>` ou `--project <pasta>` para um só). Lê só `_inbox/*.md` e `DIGEST.md` de cada `docs/smart-memory/`, nunca `_archive/`. Saída: `FEEDBACK=<projeto>|<alvo>|<texto>`, `TARGET=<alvo>|<skill|agente|desconhecido>|<ocorrências>|<projetos>`, `REPEAT=<alvo>|<projetos>` e os totais. `FEEDBACK_TOTAL=0` → diga isso em uma linha e encerre.
+2. **Mostrar agrupado** — uma tabela por alvo (mais projetos primeiro): alvo, tipo, quantas vezes, em quais projetos, as correções em 1 linha cada. Alvo `desconhecido` (nome que não existe no CT) → pergunte a qual skill/agente se refere.
+3. **Propor, alvo por alvo** — leia o arquivo do alvo no CT e proponha a menor mudança que evita a repetição: (a) ajuste no método da skill ou no body do agente (regra, passo, critério), ou (b) linha nova na tabela `| Desculpa | Realidade |` do agente quando a correção desmonta uma racionalização. Mostre o diff proposto. **Nunca** mexa no bloco `## Native Teams Protocol` (é canônico; só `*migrate`).
+4. **Regra da repetição:** a mesma falha corrigida **2 vezes em projetos diferentes** (`REPEAT=`) é sinal de que texto não basta → além da edição, **considere uma barreira estrutural**: hook novo ou ampliado em `.claude/hooks/` (com casos no `test-hooks.sh`), gate de task ou checagem no `*audit`. Proponha; não crie sem OK.
+5. **Aplicar só com OK** — um alvo por vez; o usuário pode aceitar, ajustar ou pular cada um. Nada é alterado nos projetos destino (as linhas `[skill-feedback]` ficam lá; quem limpa é o `*compact` daquele projeto).
+6. **Ciclo Definition of Done** para cada alvo alterado (suba `version`/`updated` da skill; regra de garantia alterada → `*pressure-test`) → `*audit` → `generate-agents-page.py` → `*propagate --match-target-squads`.
+
+---
+
 ## Definition of Done (RULE #12) — ciclo obrigatório de toda alteração
 
 Qualquer criação/atualização de agente ou skill **só está pronta** quando TODO o ciclo abaixo foi executado, de uma vez, sem precisar ser lembrado:
@@ -426,6 +441,7 @@ Qualquer criação/atualização de agente ou skill **só está pronta** quando 
 │   ├── scan-ct-projects.sh         ← status + drift por hash (agentes E skills; TSV); raiz = arg, env CT_ROOT, .team-os-root (gitignored) ou pai do git root
 │   ├── dashboard.sh                ← Command Center (render do painel)
 │   ├── diff-agents.sh              ← respeita poda por squad (TSV)
+│   ├── feedback-scan.sh            ← *feedback: junta as linhas [skill-feedback] dos projetos (só leitura; nunca _archive/)
 │   ├── generate-agent.sh           ← materializa template + valida com *audit ao final (sem .team-os-maintainer: origin: custom + presets/custom/)
 │   ├── search-skills.sh · install-suggested-skills.sh  ← opcionais: "sugerir skills" no *create/*skills, só com OK do usuário (CLI skills@ com versão fixa)
 │   ├── install-to-project.sh       ← --squads <lista|none> · --extra-skills · --match-target-squads (avisa ORPHAN_AGENT) · --custom · --on-conflict keep|new · --only · --dry-run (origem de cada skill) · backup .claude.bak-* · ensure-settings

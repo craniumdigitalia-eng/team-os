@@ -15,7 +15,7 @@ agents:
     role_title: Conteúdo do LinkedIn
     description: "QUILL, Content writer for the LinkedIn squad. Writes posts, PDF document/carousel scripts, articles, newsletters, polls and strategic comments from STRATA's brief. Never approves or publishes."
     color: yellow
-    skills: [social-copywriting, linkedin-strategy, social-carousel-design, social-format-specs]
+    skills: [social-copywriting, linkedin-strategy, social-carousel-design, social-format-specs, copy-humanize]
   - name: linkedin-publisher
     archetype: implementer
     persona: RELAY

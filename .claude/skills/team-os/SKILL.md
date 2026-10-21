@@ -3,7 +3,7 @@ name: team-os
 description: "Bootstrap e orquestração de sessão para Claude Code Agent Teams. Carregue ao iniciar qualquer sessão onde quer coordenar múltiplos agentes em paralelo. Verifica e configura o ambiente (AGENT_TEAMS, teammateMode), lê ou cria a smart-memory, pergunta o objetivo, analisa o paralelismo real e propõe um time dimensionado para máxima velocidade. Trigger: /team-os"
 user-invocable: true
 argument-hint: "[*env | *memory | *compact [--auto] | *tasks | *spawn <objetivo> | *grill [objetivo] | *status]"
-version: "3.1.1"
+version: "3.2.1"
 updated: "2026-10-20"
 ---
 
@@ -326,6 +326,7 @@ Quando `docs/smart-memory/` não existe, o team-os **não cria scaffolding vazio
 3. **Acelerar com paralelismo** — em codebase grande, delegue o enriquecimento a teammates em paralelo (um por área/módulo), cada um gravando sua seção.
 4. **Injetar o protocolo no `CLAUDE.md`** — Fase 2-E: se falta a seção `## Smart-Memory Protocol`, injetar `reference/claude-md-block.md` verbatim.
 5. **Validar com o usuário** — apresentar o resumo do que foi inferido e pedir correção do que estiver impreciso antes de seguir.
+6. **Automações sugeridas** — se `project/tech-stack.md` trouxer o bloco `## Automações sugeridas (não aplicadas)` (formatar/lintar ao editar, bloquear `.env`, não editar lockfile, MCP de documentação), mostre a lista ao usuário e aplique **cada item só com o OK dele**; nada é ativado por padrão. O bloqueio de `.env`/lockfile é o hook opcional `guard-env-files.sh`, instalado a partir do CT com `install-to-project.sh --with-env-guard`.
 
 Use `team-os/reference/obsidian-patterns.md` para o padrão de frontmatter/wikilinks/tags. Só depois da smart-memory populada → Fase 4 (Team Design).
 
@@ -365,6 +366,10 @@ Qualquer limiar **HEAVY** cruzado (linhas, done, bootstrap > budget **ou** DIGES
 ### Estrutura criada
 
 `discovery.sh` cria `INDEX.md` · `_inbox/` · `project/{overview,tech-stack,conventions,architecture,modules}.md` · `decisions/` · `stories/BACKLOG.md` + `stories/{backlog,active,in-review,done}/` (story = `<id>-<slug>.md`, `<id>` livre por squad) · `agents/<squad>/<área>/DIGEST.md` (uma área por agente instalado; nota de squad inteira pode ficar em `agents/<squad>/`) · `_archive/` (fora do working set — o `weigh-memory.sh` o exclui e os agentes não o leem). Árvore completa e template do `INDEX.md` → ler `reference/estrutura-smart-memory.md` quando precisar.
+
+**Contexto de marketing:** projeto com squad de canal (instagram, tiktok, youtube, linkedin, traffic ou sales) e **sem** squad brand → criar `docs/smart-memory/project/marketing-context.md` a partir de `reference/marketing-context.md`, preenchido com o usuário (nunca inventado). Com a squad brand instalada, o arquivo só aponta para a plataforma de marca.
+
+**Correção do usuário vira `[skill-feedback]`:** quando o usuário corrigir o trabalho de um agente ou o método de uma skill (regra quebrada, passo esquecido, critério errado), o lead grava **uma linha** em `docs/smart-memory/_inbox/` — `[skill-feedback] <skill|agente>: <correção, em 1 frase> (AAAA-MM-DD)` — além de corrigir o trabalho. Uma linha por correção, sem dado de cliente nem segredo. No `*compact`, essas linhas não se fundem com outros fatos: o archivist as copia como estão (com o marcador) para o `DIGEST.md` da área antes de limpar o `_inbox/`; no CT, `/team-os-creator *feedback` as junta de todos os projetos e propõe a melhoria na skill ou no agente. Formato e exemplos → `reference/estrutura-smart-memory.md`.
 
 **Injetar no `CLAUDE.md` do projeto** (Fase 2-E — passo obrigatório): se falta a seção `## Smart-Memory Protocol`, injetar o conteúdo de **`reference/claude-md-block.md` verbatim** (criar o `CLAUDE.md` se não existir; **nunca duplicar** se a seção já existe). O bloco canônico vive só nesse arquivo — não copie versões divergentes daqui. Ele cobre: fonte de verdade em `docs/smart-memory/`, leitura L0/L1/L2 com `sm-find.sh` (summary-first, máx 3 notas por tarefa), nunca ler pastas inteiras nem `_archive/`, escrita de sessão via `_inbox/`, fatos atômicos datados com `supersedes`, TTL via `expires:` e proibição de worktrees/branches novas.
 

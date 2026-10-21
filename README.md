@@ -2,7 +2,7 @@
 
 ### Pack de orquestração para Claude Code Agent Teams — *by João Guirunas*
 
-**111 agentes e 120 skills** organizados em 15 squads (Dev, Sites, Social — estúdio comum, Instagram, TikTok, YouTube, LinkedIn, Traffic, PM, Sales, Brand, Finance, Legal, SEO, Security), com a skill `/team-os` para orquestrar sessões, a `/team-os-creator` para gerar e instalar squads em qualquer projeto, e a **Sala de Controle** (opt-in) — um lugar único de comando que manda cada pedido para a sessão certa: `/sala-de-controle` (sessões do Claude Code) ou `/maestri-os` (terminais do [Maestri](https://maestri.app)). Todo agente segue o **Native Teams Protocol** — autônomo, com smart-memory integrada (formato Obsidian) e coordenação peer-to-peer.
+**111 agentes e 125 skills** organizados em 15 squads (Dev, Sites, Social — estúdio comum, Instagram, TikTok, YouTube, LinkedIn, Traffic, PM, Sales, Brand, Finance, Legal, SEO, Security), com a skill `/team-os` para orquestrar sessões, a `/team-os-creator` para gerar e instalar squads em qualquer projeto, e a **Sala de Controle** (opt-in) — um lugar único de comando que manda cada pedido para a sessão certa: `/sala-de-controle` (sessões do Claude Code) ou `/maestri-os` (terminais do [Maestri](https://maestri.app)). Todo agente segue o **Native Teams Protocol** — autônomo, com smart-memory integrada (formato Obsidian) e coordenação peer-to-peer.
 
 > Este repositório é a **fonte da verdade**: edite agentes e skills **aqui**, audite com `/team-os-creator *audit` e propague para os projetos destino com `/team-os-creator *propagate`. Nunca edite agentes direto no destino.
 
@@ -343,6 +343,8 @@ Credenciais (token, key, project-ref) nunca vão no agente nem na smart-memory �
 - **Ownership exclusivo de arquivos** — dois agentes nunca no mesmo arquivo.
 - **Plan mode** obrigatório em alto risco (schema, auth, CI/CD, refactors grandes, breaking changes).
 - **Não encerrar o time cedo** — se o lead "concluir" com tasks abertas, ela orienta a continuar.
+- **Correção vira `[skill-feedback]`** — quando você corrige o trabalho de um agente ou o método de uma skill, o lead grava uma linha `[skill-feedback] <skill|agente>: <correção> (AAAA-MM-DD)` no `_inbox/` (sem dado de cliente nem segredo). O `*compact` copia essas linhas sem alteração para o `DIGEST.md` da área; no CT, `/team-os-creator *feedback` as junta e propõe a melhoria na skill ou no agente.
+- **Automações sugeridas** — o Discovery registra em `project/tech-stack.md` um bloco `## Automações sugeridas (não aplicadas)` (formatar/lintar ao editar, bloquear `.env`, não editar lockfile, MCP de documentação); nada é aplicado sem o seu OK — o bloqueio de `.env` vira o hook opcional `guard-env-files.sh` (§10).
 
 ---
 
@@ -363,6 +365,7 @@ Credenciais (token, key, project-ref) nunca vão no agente nem na smart-memory �
 /team-os-creator *audit                → valida compliance dos agentes (validate-agent.sh) E das skills (validate-agent.sh --skills)
 /team-os-creator *update               → atualiza o pack para a versão mais nova sem perder o que você criou ou editou (ver [Instalar e atualizar](#instalar-e-atualizar))
 /team-os-creator *propagate            → propaga agentes/skills atualizados para os destinos (sempre --match-target-squads)
+/team-os-creator *feedback             → junta as linhas [skill-feedback] dos projetos (scripts/feedback-scan.sh, só leitura), agrupa por skill/agente e propõe a melhoria no CT — aplica só com OK
 /team-os-creator *install              → instala squads + skills (incl. team-os) + settings.json + hooks num projeto destino
 /team-os-creator *organize             → árvore negócio → projeto → squads → salas + proposta de organização (só propõe)
 /team-os-creator *painel               → mapa vivo do CT no navegador do Claude: squads, agentes (persona + cargo), skills; clique abre perfil e arquivo (127.0.0.1:8788)
@@ -421,12 +424,12 @@ A coluna **Skills relacionadas** é um mapa de skills **recomendadas/disponívei
 | `dev-bi` | Data architect & dashboards (SELECT-only) | `/data-analytics-engineering`, `/data-sql-optimization`, `/data-lake-platform` |
 | `dev-data-engineer` | Schema, migrations, RLS, otimização | `/dev-database-patterns`, `/data-sql-optimization`, `/dev-security-patterns` |
 | `dev-data-performance` | Insights, anomalias, forecasts | `/data-analytics-engineering`, `/ai-ml-data-science`, `/ai-ml-timeseries` |
-| `dev-ux` | UX research + design visual + a11y | `/ui-ux-pro-max`, `/accessibility`, `/web-design-guidelines` |
-| `dev-dev-alpha` | Frontend (React, Next.js, Tailwind) | `/dev-typescript-patterns`, `/dev-testing-strategy`, `/dev-error-handling` |
-| `dev-dev-beta` | Backend (APIs, serviços, lógica) | `/dev-api-design`, `/dev-error-handling`, `/dev-database-patterns` |
+| `dev-ux` | UX research + design visual + a11y | `/ui-ux-pro-max`, `/accessibility`, `/web-design-guidelines`, `/ui-craft` |
+| `dev-dev-alpha` | Frontend (React, Next.js, Tailwind) | `/dev-typescript-patterns`, `/dev-testing-strategy`, `/dev-error-handling`, `/ui-craft` |
+| `dev-dev-beta` | Backend (APIs, serviços, lógica) | `/dev-api-design`, `/dev-error-handling`, `/dev-database-patterns`, `/dev-debugging` |
 | `dev-dev-gamma` | Fullstack / cross-layer | `/dev-typescript-patterns`, `/dev-database-patterns`, `/dev-error-handling` |
-| `dev-dev-delta` | Hardening e resiliência | `/dev-security-patterns`, `/dev-testing-strategy`, `/dev-error-handling` |
-| `dev-qa` | Veredictos PASS/CONCERNS/FAIL/WAIVED (exclusivo) | `/dev-testing-strategy`, `/dev-security-patterns` |
+| `dev-dev-delta` | Hardening e resiliência | `/dev-security-patterns`, `/dev-testing-strategy`, `/dev-error-handling`, `/dev-debugging`, `/core-web-vitals` |
+| `dev-qa` | Veredictos PASS/CONCERNS/FAIL/WAIVED (exclusivo) | `/dev-testing-strategy`, `/dev-security-patterns`, `/ui-craft`, `/dev-debugging` |
 | `dev-devops` | `git push`, PRs, CI/CD, releases (exclusivo) | `/dev-git-workflow` |
 
 ### Sites — Sites e landing pages (10)
@@ -438,12 +441,12 @@ A coluna **Skills relacionadas** é um mapa de skills **recomendadas/disponívei
 | `sites-analyst` | Keyword/competitor research, feasibility | `/deep-research`, `/sites-seo-keywords` |
 | `sites-architect` | Arquitetura de páginas, stories (exclusivo) | `/dev-api-design`, `/dev-technical-writing`, `/sites-seo-technical` |
 | `sites-data` | Schema, migrations, RLS (sites) | `/dev-database-patterns`, `/data-sql-optimization`, `/dev-security-patterns` |
-| `sites-ux` | UX research + design visual + a11y | `/sites-ux-interaction`, `/ui-ux-pro-max`, `/accessibility`, `/sites-frontend-stack` |
-| `sites-dev-alpha` | Frontend / landing pages (shadcn) | `/sites-frontend-stack`, `/sites-scroll-motion`, `/ui-ux-pro-max`, `/nextjs-react-best-practices`, `/verify-before-done` |
+| `sites-ux` | UX research + design visual + a11y | `/sites-ux-interaction`, `/ui-ux-pro-max`, `/accessibility`, `/sites-frontend-stack`, `/ui-craft` |
+| `sites-dev-alpha` | Frontend / landing pages (shadcn) | `/sites-frontend-stack`, `/sites-scroll-motion`, `/ui-ux-pro-max`, `/nextjs-react-best-practices`, `/verify-before-done`, `/ui-craft` |
 | `sites-dev-beta` | Backend / CMS / integrações | `/dev-api-design`, `/dev-error-handling`, `/dev-database-patterns` |
 | `sites-dev-gamma` | CRO, SEO, analytics, fullstack | `/sites-page-cro`, `/sites-seo-technical`, `/dev-typescript-patterns` |
-| `sites-dev-delta` | Hardening, Core Web Vitals | `/dev-security-patterns`, `/dev-error-handling`, `/accessibility`, `/verify-before-done` |
-| `sites-qa` | QA: a11y, SEO, copy, performance, segurança | `/dev-security-patterns`, `/dev-testing-strategy`, `/testing-playwright-e2e`, `/web-design-guidelines`, `/sites-seo-technical`, `/accessibility`, `/sites-copy`, `/verify-before-done` |
+| `sites-dev-delta` | Hardening, Core Web Vitals | `/dev-security-patterns`, `/dev-error-handling`, `/accessibility`, `/verify-before-done`, `/dev-debugging`, `/core-web-vitals` |
+| `sites-qa` | QA: a11y, SEO, copy, performance, segurança | `/dev-security-patterns`, `/dev-testing-strategy`, `/testing-playwright-e2e`, `/web-design-guidelines`, `/sites-seo-technical`, `/accessibility`, `/sites-copy`, `/verify-before-done`, `/ui-craft` |
 | `sites-devops` | Deploy Vercel/Netlify, CI/CD | `/dev-git-workflow`, `/sites-deployment` |
 
 ### Social — Estúdio comum de produção (3)
@@ -465,7 +468,7 @@ A coluna **Skills relacionadas** é um mapa de skills **recomendadas/disponívei
 | Agente | Persona | Papel | Skills relacionadas |
 |---|---|---|---|
 | `instagram-strategist` | VERA | Pilares, mix e pauta; **gate editorial** de pauta, roteiro, peça e fluxo de DM — nunca cria conteúdo | `/instagram-strategy`, `/instagram-dm-flows`, `/social-editorial-validation`, `/social-analytics` |
-| `instagram-content` | LYRIS | Pesquisa (Apify), legendas, roteiros, texto de carrossel, fluxos de DM e respostas a comentários | `/social-copywriting`, `/social-scriptwriting`, `/instagram-dm-flows`, `/social-apify-research`, `/social-carousel-design` |
+| `instagram-content` | LYRIS | Pesquisa (Apify), legendas, roteiros, texto de carrossel, fluxos de DM e respostas a comentários | `/social-copywriting`, `/social-scriptwriting`, `/instagram-dm-flows`, `/social-apify-research`, `/social-carousel-design`, `/copy-humanize` |
 | `instagram-publisher` | PULSE | Agenda e publica (Meta) só com PASS da VERA + confirmação do usuário; fonte dos números orgânicos; nunca impulsiona | `/instagram-publishing`, `/social-analytics`, `/social-format-specs` |
 
 ### TikTok — Orgânico (3)
@@ -475,7 +478,7 @@ A coluna **Skills relacionadas** é um mapa de skills **recomendadas/disponívei
 | Agente | Persona | Papel | Skills relacionadas |
 |---|---|---|---|
 | `tiktok-strategist` | RIFF | Pilares, pauta e séries, janela de sons; **gate** de pauta, roteiro e peça | `/tiktok-marketing`, `/social-editorial-validation`, `/social-format-specs`, `/tiktok-publishing` |
-| `tiktok-content` | BEAT | Tendências e sons (Apify), roteiro nativo, gancho, texto de tela e legenda; brief ao estúdio | `/tiktok-marketing`, `/social-scriptwriting`, `/social-copywriting`, `/social-apify-research` |
+| `tiktok-content` | BEAT | Tendências e sons (Apify), roteiro nativo, gancho, texto de tela e legenda; brief ao estúdio | `/tiktok-marketing`, `/social-scriptwriting`, `/social-copywriting`, `/social-apify-research`, `/copy-humanize` |
 | `tiktok-publisher` | LOOP | Pacote de upload (arquivo, legenda, som, capa, rótulo de IA, horário) e leitura do export de métricas | `/tiktok-publishing`, `/tiktok-marketing`, `/social-analytics`, `/verify-before-done` |
 
 ### YouTube — Canal (3)
@@ -485,7 +488,7 @@ A coluna **Skills relacionadas** é um mapa de skills **recomendadas/disponívei
 | Agente | Persona | Papel | Skills relacionadas |
 |---|---|---|---|
 | `youtube-strategist` | KAIROS | Linha do canal; **gate** de pauta, roteiro e pacote (título, thumb, descrição) | `/youtube-scriptwriting`, `/youtube-packaging`, `/youtube-analytics`, `/social-editorial-validation` |
-| `youtube-content` | ECHO | Pauta de 90 dias sem repetir tema, roteiro longo com retenção e claims com fonte, Shorts e pacote (título, texto de thumb, descrição, capítulos) | `/youtube-scriptwriting`, `/youtube-packaging`, `/social-scriptwriting`, `/deep-research` |
+| `youtube-content` | ECHO | Pauta de 90 dias sem repetir tema, roteiro longo com retenção e claims com fonte, Shorts e pacote (título, texto de thumb, descrição, capítulos) | `/youtube-scriptwriting`, `/youtube-packaging`, `/social-scriptwriting`, `/deep-research`, `/copy-humanize` |
 | `youtube-publisher` | ORBIT | Pacote de upload, prontidão e leitura 24h/7d contra a mediana do canal — retenção por cena, A/B com z≥1,96, comentários como dado | `/youtube-publishing`, `/youtube-analytics`, `/youtube-packaging`, `/social-format-specs` |
 
 ### LinkedIn — Perfil pessoal e página da empresa (3)
@@ -495,7 +498,7 @@ A coluna **Skills relacionadas** é um mapa de skills **recomendadas/disponívei
 | Agente | Persona | Papel | Skills relacionadas |
 |---|---|---|---|
 | `linkedin-strategist` | STRATA | Público B2B, tese, pilares, voz do perfil pessoal × página, cadência e formatos; **gate** de toda peça | `/linkedin-strategy`, `/linkedin-publishing`, `/social-editorial-validation`, `/social-copywriting` |
-| `linkedin-content` | QUILL | Posts, documento/carrossel PDF, artigos, newsletter, enquetes e comentários estratégicos | `/linkedin-strategy`, `/social-copywriting`, `/social-carousel-design`, `/social-format-specs` |
+| `linkedin-content` | QUILL | Posts, documento/carrossel PDF, artigos, newsletter, enquetes e comentários estratégicos | `/linkedin-strategy`, `/social-copywriting`, `/social-carousel-design`, `/social-format-specs`, `/copy-humanize` |
 | `linkedin-publisher` | RELAY | Pacote de publicação, agenda e leitura de métricas exportadas | `/linkedin-publishing`, `/social-analytics`, `/social-format-specs`, `/verify-before-done` |
 
 ### Traffic — Tráfego pago (10)
@@ -504,7 +507,7 @@ A coluna **Skills relacionadas** é um mapa de skills **recomendadas/disponívei
 | `traffic-analyst` | Audiências, concorrência, benchmarks | `/social-analytics`, `/traffic-google-ads-mcp`, `/traffic-ga4-mcp` |
 | `traffic-automation` | Bulk ops, APIs Google/Meta/TikTok | `/dev-api-design`, `/dev-error-handling`, `/traffic-google-ads-mcp`, `/traffic-analytics-tracking` |
 | `traffic-bi` | Atribuição, ROAS/LTV/CPA (fonte de verdade) | `/data-analytics-engineering`, `/data-sql-optimization`, `/traffic-ga4-mcp`, `/traffic-google-ads-mcp`, `/traffic-analytics-tracking` |
-| `traffic-copywriter` | Copy de anúncios, variantes A/B | `/social-copywriting`, `/tiktok-marketing`, `/traffic-paid-ads-optimization` |
+| `traffic-copywriter` | Copy de anúncios, variantes A/B | `/social-copywriting`, `/tiktok-marketing`, `/traffic-paid-ads-optimization`, `/copy-humanize` |
 | `traffic-designer` | Criativos (banners, carrosséis, vídeos) | `/social-key-visual`, `/social-carousel-design`, `/ui-ux-pro-max` |
 | `traffic-google` | Google Ads (Search, PMax, Shopping, YT) | `/social-analytics`, `/traffic-google-ads-mcp`, `/traffic-ga4-mcp`, `/traffic-paid-ads-optimization` |
 | `traffic-meta` | Meta Ads (FB + IG, Advantage+) — boost de post orgânico também é dele | `/instagram-publishing`, `/social-analytics`, `/traffic-paid-ads-optimization` |
@@ -532,11 +535,11 @@ A coluna **Skills relacionadas** é um mapa de skills **recomendadas/disponívei
 
 | Agente | Persona | Papel | Skills relacionadas |
 |---|---|---|---|
-| `sales-analyst` | ATLAS | Intake de reunião + pesquisa de cliente/setor/benchmarks, tudo com fonte | `/sales-discovery-intake`, `/deep-research`, `/dev-defuddle`, `/verify-before-done` |
+| `sales-analyst` | ATLAS | Intake de reunião + pesquisa de cliente/setor/benchmarks, tudo com fonte | `/sales-discovery-intake`, `/deep-research`, `/dev-defuddle`, `/verify-before-done`, `/doc-to-markdown` |
 | `sales-strategist` | ATHENA | Tese do negócio, enquadramento, postura de negociação, **gate do planejamento** (exclusivo) | `/negotiation`, `/sales-pricing-payback`, `/pricing`, `/sales-enablement` |
 | `sales-planner` | DAEDALUS | Story da proposta + planejamento interno de 9 seções + estrutura página a página (exclusivo) | `/sales-proposal-planning`, `/sales-discovery-intake`, `/dev-technical-writing`, `/sales-enablement` |
 | `sales-finance` | LIBRA | **Fonte única dos números**: preço vs. tabela, desconto/breakeven, payback, permuta, BP, valuation | `/sales-pricing-payback`, `/startup-financial-modeling`, `/pricing`, `/verify-before-done` |
-| `sales-copywriter` | CALLIOPE | Texto página a página — voz declarativa, compromisso conjunto, número só com `#id` da ficha | `/sales-proposal-copy`, `/sales-enablement`, `/sites-copy`, `/sales-proposal-planning` |
+| `sales-copywriter` | CALLIOPE | Texto página a página — voz declarativa, compromisso conjunto, número só com `#id` da ficha | `/sales-proposal-copy`, `/sales-enablement`, `/sites-copy`, `/sales-proposal-planning`, `/copy-humanize` |
 | `sales-designer` | HELIOS | PDF e deck no design system do projeto — HTML + print CSS → export headless → checagem | `/sales-deck-production` (com a variante deck), `/presentation-design`, `/ui-ux-pro-max`, `/verify-before-done` |
 | `sales-qa` | ARGUS | Veredictos PASS/CONCERNS/FAIL/WAIVED sobre o artefato — 12 pontos (exclusivo) | `/sales-proposal-copy`, `/sales-deck-production`, `/presentation-design`, `/verify-before-done` |
 | `sales-closer` | PEITHO | Brief de reunião, follow-up, ledger de propostas, envio só com PASS + confirmação do usuário | `/negotiation`, `/sales-enablement`, `/sales-proposal-copy`, `/verify-before-done` |
@@ -550,7 +553,7 @@ A coluna **Skills relacionadas** é um mapa de skills **recomendadas/disponívei
 | `brand-analyst` | SIRIUS | Auditoria da marca atual, mapa de concorrentes e territórios, públicos na linguagem deles — tudo com fonte | `/brand-research`, `/deep-research`, `/dev-defuddle`, `/verify-before-done` |
 | `brand-strategist` | POLARIS | Plataforma de marca, postura do reposicionamento, **gate da plataforma e escolha de direção** (exclusivo) | `/brand-platform`, `/brand-research`, `/pricing`, `/verify-before-done` |
 | `brand-architect` | ORION | Arquitetura de marca (marca-mãe, sub-marcas, marca pessoal, nomes), roadmap de migração, **stories** (exclusivo) | `/brand-platform`, `/dev-technical-writing`, `/brand-rollout`, `/verify-before-done` |
-| `brand-voice` | LYRA | Guia de voz, framework de mensagens, manifesto, tagline, glossário, nomes dentro do sistema — ≥2 opções de direção | `/brand-verbal-identity`, `/sites-copy`, `/brand-platform`, `/verify-before-done` |
+| `brand-voice` | LYRA | Guia de voz, framework de mensagens, manifesto, tagline, glossário, nomes dentro do sistema — ≥2 opções de direção | `/brand-verbal-identity`, `/sites-copy`, `/brand-platform`, `/verify-before-done`, `/copy-humanize` |
 | `brand-designer` | AURORA | Direções visuais com opções, sistema de cor/tipo/grid/imagem, brandbook — via Claude Design | `/brand-visual-system`, `/ui-ux-pro-max`, `/web-design-guidelines`, `/social-key-visual`, `/verify-before-done` (plugin `design:*` opcional) |
 | `brand-insights` | VEGA | **Fonte única dos números da marca**: scorecard, baseline antes, leitura depois, ficha com `#id` | `/brand-tracking`, `/data-analytics-engineering`, `/social-analytics`, `/verify-before-done` |
 | `brand-rollout` | ALTAIR | Plano interno → externo, inventário e desligamentos, checklist por canal, kit de handoff — só com PASS + baseline + confirmação | `/brand-rollout`, `/brand-verbal-identity`, `/brand-visual-system`, `/verify-before-done` |
@@ -562,7 +565,7 @@ A coluna **Skills relacionadas** é um mapa de skills **recomendadas/disponívei
 
 | Agente | Persona | Papel | Skills relacionadas |
 |---|---|---|---|
-| `finance-analyst` | NILO | Coleta e classificação de documentos do período, benchmarks, tarifas e índices — toda cifra com documento ou fonte datada | `/finance-bookkeeping`, `/deep-research`, `/dev-defuddle`, `/verify-before-done` |
+| `finance-analyst` | NILO | Coleta e classificação de documentos do período, benchmarks, tarifas e índices — toda cifra com documento ou fonte datada | `/finance-bookkeeping`, `/deep-research`, `/dev-defuddle`, `/verify-before-done`, `/doc-to-markdown` |
 | `finance-strategist` | AMAZONAS | Política financeira (margem, reserva, alçadas, prioridade, distribuição), **gate do orçamento e do plano de caixa** (exclusivo) | `/finance-cash-flow`, `/finance-reporting`, `/startup-financial-modeling`, `/pricing`, `/verify-before-done` |
 | `finance-planner` | DANUBIO | Orçamento, plano de caixa 13 semanas, forecast com cenários, roadmap — **stories `F{N}`** (exclusivo) | `/finance-cash-flow`, `/finance-reporting`, `/startup-financial-modeling`, `/dev-technical-writing`, `/verify-before-done` |
 | `finance-controller` | GANGES | **Fonte única dos números**: plano de contas, conciliação item a item, DRE gerencial, fechamento com `#id` | `/finance-bookkeeping`, `/finance-cash-flow`, `/data-analytics-engineering`, `/verify-before-done` |
@@ -577,10 +580,10 @@ A coluna **Skills relacionadas** é um mapa de skills **recomendadas/disponívei
 
 | Agente | Persona | Papel | Skills relacionadas |
 |---|---|---|---|
-| `legal-analyst` | VERITAS | Lei, jurisprudência, doutrina e precedentes internos — fonte primária com artigo/acórdão e data; achado ≠ leitura ≠ parecer | `/legal-research`, `/deep-research`, `/dev-defuddle`, `/verify-before-done` |
+| `legal-analyst` | VERITAS | Lei, jurisprudência, doutrina e precedentes internos — fonte primária com artigo/acórdão e data; achado ≠ leitura ≠ parecer | `/legal-research`, `/deep-research`, `/dev-defuddle`, `/verify-before-done`, `/doc-to-markdown` |
 | `legal-strategist` | PRUDENTIA | Postura jurídica (apetite a risco, inegociáveis, negociáveis com piso/teto, foro, conflito), **gate de minuta e notificação** (exclusivo) | `/legal-contract-drafting`, `/legal-research`, `/negotiation`, `/verify-before-done` |
 | `legal-architect` | LEX | Arquitetura documental, sistema de modelos `M{N}` versionado, hierarquia contrato-mãe/anexos/aditivos — **stories `L{N}`** (exclusivo) | `/legal-clause-library`, `/legal-contract-lifecycle`, `/dev-technical-writing`, `/verify-before-done` |
-| `legal-drafter` | CONCORDIA | Contratos, aditivos, distratos, NDAs, termos e políticas a partir do modelo e da postura, com matriz de desvios — nunca envia | `/legal-contract-drafting`, `/legal-clause-library`, `/legal-research`, `/verify-before-done` |
+| `legal-drafter` | CONCORDIA | Contratos, aditivos, distratos, NDAs, termos e políticas a partir do modelo e da postura, com matriz de desvios — nunca envia | `/legal-contract-drafting`, `/legal-clause-library`, `/legal-research`, `/verify-before-done`, `/doc-to-markdown` |
 | `legal-compliance` | FIDES | **Fonte única de prazos e obrigações**: registro de contratos com `#id`, mapa de dados com base legal, consentimentos, incidentes | `/legal-compliance-lgpd`, `/legal-contract-lifecycle`, `/data-analytics-engineering`, `/verify-before-done` |
 | `legal-disputes` | CLEMENTIA | Notificação, cobrança extrajudicial, acordo, distrato e dossiê para o advogado — prepara, nunca envia nem ameaça | `/legal-contract-lifecycle`, `/legal-research`, `/negotiation`, `/verify-before-done` |
 | `legal-ops` | AEQUITAS | Versão travada, assinatura, arquivamento, registro, renovações — envio só com PASS + confirmação | `/legal-contract-lifecycle`, `/legal-clause-library`, `/dev-technical-writing`, `/verify-before-done` |
@@ -597,7 +600,7 @@ A coluna **Skills relacionadas** é um mapa de skills **recomendadas/disponívei
 | `seo-content` | NEITH | E-E-A-T, conteúdo raso, citabilidade por IA, briefs, limpeza de última milha | `/seo-content`, `/seo-content-brief`, `/seo-image-gen`, `/sites-copy` |
 | `seo-schema` | KHNUM | Detecção, validação e geração de Schema.org (JSON-LD) | `/seo-schema`, `/seo-technical` |
 | `seo-sitemap` | GEB | Sitemap XML, hreflang/i18n, SEO programático em escala | `/seo-sitemap`, `/seo-hreflang`, `/seo-programmatic` |
-| `seo-performance` | SHU | Core Web Vitals (LCP/INP/CLS), subpartes de LCP, renderização e visual | `/seo-technical`, `/seo-images`, `/nextjs-react-best-practices` |
+| `seo-performance` | SHU | Core Web Vitals (LCP/INP/CLS), subpartes de LCP, renderização e visual | `/seo-technical`, `/seo-images`, `/nextjs-react-best-practices`, `/core-web-vitals` |
 | `seo-geo` | NUT | GEO/AI search — crawlers de IA, llms.txt, citabilidade por passagem | `/seo-geo`, `/seo-content` |
 | `seo-sxo` | HORUS | SERP ao contrário, user stories, páginas de comparação | `/seo-sxo`, `/seo-competitor-pages`, `/sites-page-cro` |
 | `seo-cluster` | HEKA | Clustering semântico por sobreposição real de SERP, hub-and-spoke | `/seo-cluster`, `/seo-content-brief`, `/sites-seo-keywords` |
@@ -628,9 +631,9 @@ A coluna **Skills relacionadas** é um mapa de skills **recomendadas/disponívei
 
 ### Catálogo por área
 
-120 skills, todas diretórios reais e versionados (repositório self-contained).
+125 skills, todas diretórios reais e versionados (repositório self-contained).
 
-**Dev (9):** `dev-api-design`, `dev-database-patterns`, `dev-defuddle`, `dev-error-handling`, `dev-git-workflow`, `dev-security-patterns`, `dev-technical-writing`, `dev-testing-strategy`, `dev-typescript-patterns`
+**Dev (10):** `dev-api-design`, `dev-database-patterns`, `dev-debugging`, `dev-defuddle`, `dev-error-handling`, `dev-git-workflow`, `dev-security-patterns`, `dev-technical-writing`, `dev-testing-strategy`, `dev-typescript-patterns`
 
 **Data & ML (6):** `ai-ml-data-science`, `ai-ml-timeseries`, `data-analytics-engineering`, `data-lake-platform`, `data-sql-optimization`, `data-supabase-patterns`
 
@@ -664,8 +667,10 @@ A coluna **Skills relacionadas** é um mapa de skills **recomendadas/disponívei
 
 **Security (4):** `security-audit-method`, `security-threat-modeling`, `security-incident-response`, `security-privacy-data-map`
 
-**Design & geral (11):** `ui-ux-pro-max`, `web-design-guidelines`, `accessibility`, `deep-research`, `nextjs-react-best-practices`, `testing-playwright-e2e`, `verify-before-done`, `negotiation`, `pricing`, `presentation-design`, `startup-financial-modeling`
+**Design & geral — transversais (15):** `ui-ux-pro-max`, `ui-craft`, `web-design-guidelines`, `accessibility`, `core-web-vitals`, `copy-humanize`, `doc-to-markdown`, `deep-research`, `nextjs-react-best-practices`, `testing-playwright-e2e`, `verify-before-done`, `negotiation`, `pricing`, `presentation-design`, `startup-financial-modeling`
 
+> **Novas 2026-10 (Fase 3):** `copy-humanize` (checklist anti-"cara de IA" em pt-BR — tiques, léxico, painel de 5 sinais, ajuste por canal; citada por todo agente que escreve texto final), `ui-craft` (postura e piso de ofício de interface — tokens, anti-padrões, animação, microdetalhes, testes swap/squint; para UX, devs de frontend e designers), `core-web-vitals` (LCP/INP/CLS com evidência de campo × laboratório e correção por framework), `dev-debugging` (depuração pela causa raiz com teste de regressão red-green-revert), `doc-to-markdown` (PDF/DOCX/XLSX/PPTX/ODT/RTF/HTML → Markdown na própria máquina via `scripts/convert.sh`; nada sai da máquina). Créditos em [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md).
+>
 > **Novas (adaptadas do registry [skills.sh](https://www.skills.sh/), auditadas):** `nextjs-react-best-practices` (Vercel — performance React/Next para devs de dev/sites), `data-supabase-patterns` (Supabase — Postgres/RLS/indexing para data engineers), `testing-playwright-e2e` (E2E para os QAs), `traffic-paid-ads-optimization` e `traffic-analytics-tracking` (marketingskills — para strategist/copywriter/bi/qa da traffic), `verify-before-done` (superpowers — gate de verificação antes de declarar "pronto", uso geral de todos os agentes).
 >
 > **Novas 2026-09 (squad Brand):** autorais do CT, todas com templates Obsidian — `brand-research` (auditoria, mapa de territórios, públicos), `brand-platform` (plataforma + gate de 7 pontos + arquitetura de marca), `brand-verbal-identity` (dimensões de tom, dizemos/não dizemos, mensagens, manifesto, naming), `brand-visual-system` (cor com papel e contraste, tipo, grid, imagem, brandbook via Claude Design), `brand-tracking` (scorecard, baseline, leitura do depois, ficha com `#id`), `brand-rollout` (pré-condições, fases, checklist por canal, kit de handoff `brand.md`).
@@ -790,7 +795,7 @@ Para forçar outro modelo num agente `inherit`, especifique no spawn: `"Spawn {n
 
 ## 10. Hooks de qualidade
 
-13 hooks em `.claude/hooks/`, referenciados no frontmatter dos agentes ou registrados no `settings.json` (pelo `ensure-settings.sh`/`*install`). Todos são bash 3.2-safe, testados com payloads reais do Claude Code por `scripts/test-hooks.sh` (**517 casos**, roda no CI) e com fallback em grep quando o `python3` falta.
+14 hooks em `.claude/hooks/`, referenciados no frontmatter dos agentes ou registrados no `settings.json` (pelo `ensure-settings.sh`/`*install`). Todos são bash 3.2-safe, testados com payloads reais do Claude Code por `scripts/test-hooks.sh` (**544 casos**, roda no CI) e com fallback em grep quando o `python3` falta.
 
 **Guards de git (`PreToolUse` em `Bash`)** — além de `git push` direto, os dois cobrem flags globais (`git -C`, `--git-dir`, `-c alias.x=push`), wrappers (`env`, `sudo`, `\git`, `/usr/bin/git`), comandos multilinha e encadeados, `git send-pack`, `gh pr create/merge`, `gh release create`, `gh api` de escrita em PRs, e **bloqueiam shell embutido** (`sh -c`, `bash -c`, `eval`, `xargs`, `find -exec`, `python3 -c`/`node -e` com git) e variáveis no lugar do comando — expansão indireta não é permitida para operações git.
 
@@ -817,6 +822,10 @@ Para forçar outro modelo num agente `inherit`, especifique no spawn: `"Spawn {n
 
 - **`team-os-session-title.sh`** — `SessionStart`: nomeia a sessão por "projeto · branch", preservando o padrão `<PASTA> | <Título>`. Instalado globalmente em `~/.claude/hooks/` e registrado no `~/.claude/settings.json` pelo `*install`.
 
+**Opcional (só com OK do usuário)**
+
+- **`guard-env-files.sh`** — `PreToolUse` (matcher `Edit|Write|MultiEdit`): bloqueia escrita em `.env` e `.env.*` (libera `.env.example`, `.env.sample` e `.env.template`) e em lockfiles (`package-lock.json`, `pnpm-lock.yaml`, `yarn.lock`, `bun.lockb`, `poetry.lock`, `Cargo.lock`). **Não** entra por padrão: só com `install-to-project.sh --with-env-guard` (ou `ensure-settings.sh --with-env-guard`); onde já está instalado, o `*propagate` o mantém atualizado. `TEAM_OS_ENV_GUARD=0` desliga pontualmente.
+
 `TeammateIdle` fica como receita opcional (ver `team-os/reference/hooks-de-time.md` — hook incondicional cria loop infinito). Settings padrão também garantem `subagentPromptCacheTtl: "1h"`.
 
 ---
@@ -826,7 +835,7 @@ Para forçar outro modelo num agente `inherit`, especifique no spawn: `"Spawn {n
 ```
 .claude/
 ├── agents/              ← 111 definições de agentes (fonte da verdade)
-├── hooks/               ← 13 hooks de qualidade (ver §10)
+├── hooks/               ← 14 hooks de qualidade (ver §10)
 │   ├── block-git-push.sh          ← PreToolUse: bloqueia push em todo agente com Bash exceto devops
 │   ├── block-worktree.sh          ← PreToolUse (settings.json): bloqueia isolation: worktree, EnterWorktree, git worktree add e criação de branch
 │   ├── guard-push-branch.sh       ← PreToolUse (devops): push só na main/master; fora dela bloqueio sempre aplicado
@@ -836,10 +845,15 @@ Para forçar outro modelo num agente `inherit`, especifique no spawn: `"Spawn {n
 │   ├── check-proposal-progress.sh ← TaskCompleted: envio de proposta só com PASS + confirmação do usuário
 │   ├── check-finance-progress.sh  ← TaskCompleted: execução financeira só com PASS + confirmação do usuário
 │   ├── check-legal-progress.sh    ← TaskCompleted: saída jurídica só com PASS + confirmação do usuário
+│   ├── guard-smart-memory-read.sh ← PreToolUse (settings.json): bloqueia _archive/, pasta inteira e a 4ª nota sem sm-find.sh
+│   ├── guard-message-size.sh      ← PreToolUse (settings.json): mensagem entre agentes ≤20 linhas ([handoff] até 60)
+│   ├── context-watch.sh           ← UserPromptSubmit (settings.json): avisa contexto >200k/400k, nunca bloqueia
+│   ├── guard-env-files.sh         ← PreToolUse OPCIONAL (--with-env-guard): bloqueia .env/.env.* (exceto example/sample/template) e lockfiles
 │   └── team-os-session-title.sh   ← SessionStart: nomeia a sessão por "projeto · branch" (instalado em ~/.claude/hooks/ pelo *install)
-└── skills/              ← 120 skills (diretórios reais)
+└── skills/              ← 125 skills (diretórios reais)
     ├── sala-de-controle/        ← Sala de Controle (opt-in, sessões do Claude Code): SKILL.md + scripts/{refresh,scan-sessions,session-tail,project-context,org-map}.py + scripts/painel/{collect.py,serve.py,index.html} (mapa vivo, `*painel`) + templates/{panorama,registry,dispatches,organizacao}.md
     ├── maestri-os/              ← Sala de Controle (opt-in, recurso Maestri): SKILL.md + scripts/scan-project.sh + templates/{registry,overview,dispatches}.md
+    ├── doc-to-markdown/         ← SKILL.md + scripts/convert.sh (PDF/DOCX/XLSX/PPTX/ODT/RTF/HTML → Markdown na própria máquina)
     ├── seo/                     ← orquestradora da squad SEO + runtime Python (scripts/, schema/, data/, pdf/, hooks/); .venv/ e ms-playwright/ são runtime local (gitignored)
     ├── team-os/                 ← orquestração (distribuída aos projetos)
     │   ├── templates/                   ← story.md (template canônico de story) · digest.md
@@ -853,7 +867,7 @@ Para forçar outro modelo num agente `inherit`, especifique no spawn: `"Spawn {n
     └── team-os-creator/         ← factory de agentes (exclusiva do CT)
         ├── templates/           ← 9 templates de archetype + agents-page.html.tpl + pressure-scenarios/ (13 cenários)
         ├── reference/           ← archetypes · native-teams-protocol · smart-memory-integration · mcp-servers · skills-catalog-quality · pressure-testing
-        ├── scripts/             ← validate-agent.sh (+ --skills) · test-hooks.sh · migrate-ntp.sh · install-to-project.sh · scan-ct-projects.sh · detect-project-signals.sh · dashboard.sh · diff-agents.sh · generate-agent.sh · search-skills.sh + install-suggested-skills.sh (opcionais: sugerir skills externas no `*create`, só com OK; CLI com versão fixa) · preflight.sh · generate-agents-page.py · update-pack.sh/.py (`*update`) · pack-manifest.sh · trash.sh · release.sh (só mantenedor) · test-update.sh · test-propagate.sh · migrate-social-split.sh + test-migrate-social.sh (`*migrate-social`) · painel/ (`*painel`: mapa vivo do CT)
+        ├── scripts/             ← validate-agent.sh (+ --skills) · test-hooks.sh · migrate-ntp.sh · install-to-project.sh · scan-ct-projects.sh · detect-project-signals.sh · dashboard.sh · diff-agents.sh · generate-agent.sh · search-skills.sh + install-suggested-skills.sh (opcionais: sugerir skills externas no `*create`, só com OK; CLI com versão fixa) · preflight.sh · generate-agents-page.py · update-pack.sh/.py (`*update`) · pack-manifest.sh · trash.sh · release.sh (só mantenedor) · test-update.sh · test-propagate.sh · migrate-social-split.sh + test-migrate-social.sh (`*migrate-social`) · feedback-scan.sh (`*feedback`, só leitura) · painel/ (`*painel`: mapa vivo do CT)
         └── presets/             ← 15 presets de squad (dev, sites, social, instagram, tiktok, youtube, linkedin, traffic, pm, sales, brand, finance, legal, seo, security)
 
 .github/workflows/audit.yml  ← CI: validate-agent.sh (+ --skills) · test-hooks.sh · test-update.sh · test-propagate.sh · test-migrate-social.sh · manifest do pack em dia · sintaxe dos scripts · 0 symlinks quebrados · contagens do README/CLAUDE.md (pelo manifest) · zero caminho de máquina · docs/agentes.html atualizado
@@ -907,15 +921,15 @@ O CT é a fonte da verdade: agentes e skills são editados **aqui** e levados ao
 ```
 1. Editar agente/skill AQUI — agentes via /team-os-creator (*create, *squad, *migrate)
 2. bash .claude/skills/team-os-creator/scripts/validate-agent.sh            → 111/111 agentes do pack conformes (= *audit)
-3. bash .claude/skills/team-os-creator/scripts/validate-agent.sh --skills   → lint das 120 skills
-4. bash .claude/skills/team-os-creator/scripts/test-hooks.sh                → 517/517 casos dos hooks
+3. bash .claude/skills/team-os-creator/scripts/validate-agent.sh --skills   → lint das 125 skills
+4. bash .claude/skills/team-os-creator/scripts/test-hooks.sh                → 544/544 casos dos hooks
 5. python3 .claude/skills/team-os-creator/scripts/generate-agents-page.py   → regenera docs/agentes.html
 6. /team-os-creator *propagate   → leva aos projetos destino (--match-target-squads)
 ```
 
 **Quem mantém o pack oficial** (e só quem tem o arquivo `.team-os-maintainer` na raiz) segue um ciclo maior — manifest, CHANGELOG, commit, release e push manual. Ele está descrito em **[MAINTAINERS.md](./MAINTAINERS.md)**. Quem só usa o pack não precisa dele: para receber as versões novas, use o `*update` ([Instalar e atualizar](#instalar-e-atualizar)).
 
-**Regra de ouro:** auditoria sempre verde antes de propagar. O CI (`.github/workflows/audit.yml`) repete os passos 2-5, roda `test-update.sh` e `test-propagate.sh`, confere o `pack-manifest.json` e ainda checa: contagens "111 agentes"/"120 skills" no README e no CLAUDE.md (contadas pelo manifest — agentes e skills próprios de cada usuário não entram), zero caminho de máquina versionado e `docs/agentes.html` em dia (`--check`). Detalhes de contribuição em [CONTRIBUTING.md](./CONTRIBUTING.md); histórico em [CHANGELOG.md](./CHANGELOG.md).
+**Regra de ouro:** auditoria sempre verde antes de propagar. O CI (`.github/workflows/audit.yml`) repete os passos 2-5, roda `test-update.sh` e `test-propagate.sh`, confere o `pack-manifest.json` e ainda checa: contagens "111 agentes"/"125 skills" no README e no CLAUDE.md (contadas pelo manifest — agentes e skills próprios de cada usuário não entram), zero caminho de máquina versionado e `docs/agentes.html` em dia (`--check`). Detalhes de contribuição em [CONTRIBUTING.md](./CONTRIBUTING.md); histórico em [CHANGELOG.md](./CHANGELOG.md).
 
 **Página oficial dos agentes:** [`docs/agentes.html`](./docs/agentes.html) — apresentação navegável dos 111 agentes: card inteiro clicável abre modal de **perfil completo** (bio, matriz de autoridade, regras absolutas, skills), skills clicáveis abrem modal com versão/seções e navegação cruzada de volta aos agentes que a usam. Gerada dos arquivos reais por `python3 .claude/skills/team-os-creator/scripts/generate-agents-page.py` — **regenerar após qualquer mudança em agentes ou skills** (o CI falha se estiver desatualizada). Preview local: `npx http-server docs -p 8765` (config pronta em `.claude/launch.json`).
 

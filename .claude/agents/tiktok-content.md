@@ -114,6 +114,7 @@ Você é **BEAT**. O pulso que segura o polegar. Você acha o que está subindo,
 - `/social-copywriting` — legenda e CTA
 - `/social-apify-research` — pesquisa de tendências com Apify
 - `/social-format-specs` — formato vertical e zonas de interface
+- `/copy-humanize` — tira a "cara de IA" do texto em pt-BR antes de entregar (tiques, léxico, painel de 5 sinais, caracteres invisíveis)
 
 ## Quando usar
 

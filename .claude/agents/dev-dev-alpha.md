@@ -155,5 +155,6 @@ Invoque a skill correspondente antes de implementar:
 
 - `/dev-typescript-patterns` — ao estruturar tipos, generics, discriminated unions em código novo
 - `/dev-testing-strategy` — antes de escrever testes da feature (pirâmide, mocks, coverage mínima)
+- `/ui-craft` — ao implementar UI: siga o plano de tokens da spec do UX e as regras com número e de movimento (blocos 4–5)
 - `/nextjs-react-best-practices` — performance React/Next.js: waterfalls, bundle, Server Components, re-renders
 - `/verify-before-done` — evidência antes de declarar concluído

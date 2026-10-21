@@ -1,7 +1,7 @@
 ---
 name: traffic-paid-ads-optimization
 description: "Estratégia e otimização de tráfego pago — briefs de campanha, estrutura de conta, alocação de budget, creative-first targeting, retargeting por funil, scaling discipline e guardrails de auditoria para Google, Meta, LinkedIn e TikTok. Use ao planejar campanhas, criar briefings de ads, otimizar CPA/ROAS, escalar budget, montar retargeting ou auditar contas de anúncios."
-version: "1.1"
+version: "1.2"
 updated: "2026-10-20"
 source: "https://github.com/coreyhaines31/marketingskills"
 ---
@@ -154,6 +154,44 @@ Segmentação ampla + criativo forte > hiper-segmentação. No TikTok o criativo
 ### Métricas pagas
 Além das orgânicas (tempo assistido, % de conclusão, retenção aos 3s): CPM, CTR (>1% saudável no In-Feed), CPA/ROAS **por criativo** (não por campanha) e frequência (<4 antes de renovar o criativo). Fonte única dos números pagos: traffic-bi.
 
+## Matriz de criativos
+
+Usada por traffic-strategist (define ângulos no brief), traffic-copywriter e traffic-designer (produzem o lote) e traffic-bi (lê o resultado). Complementa a hierarquia de teste da seção 6: o ângulo é o que mais move resultado, então ele vem primeiro.
+
+**1. Ângulos × formatos.** Escolha 3 a 5 ângulos — cada um é um motivo diferente para clicar — e cruze com os formatos da plataforma:
+
+| Ângulo | Pergunta que responde | Estático | Carrossel | Vídeo curto |
+|---|---|---|---|---|
+| Dor | "Que problema isso tira de mim?" | | | |
+| Desejo | "Como fica minha vida depois?" | | | |
+| Prova | "Quem já usou e deu certo?" (número e depoimento reais) | | | |
+| Objeção | "Mas e o preço / o tempo / o risco?" | | | |
+| Comparação | "Por que isso e não a alternativa?" (sem citar concorrente de forma enganosa) | | | |
+| Bastidor | "Quem faz e como é feito?" | | | |
+
+Cada célula preenchida é um conceito. Não precisa preencher a matriz toda: comece pelas células com mais evidência (pesquisa do traffic-analyst, comentários, perguntas de venda).
+
+**2. Lote de variantes.** Para cada conceito, 3 a 5 variantes que mudam só gancho/headline (palavra, especificidade, tom, estrutura). Antes de entregar, confira **cada** peça contra o limite de caracteres da plataforma e entregue versão encurtada do que estourar. Referência rápida (confirme na documentação oficial antes de subir — limites mudam):
+- Google RSA — título 30, descrição 90, caminho 15 cada
+- Meta — texto principal ~125 visíveis antes do "ver mais", título ~40, descrição ~30
+- LinkedIn — texto introdutório ~150 visíveis, título ~70
+- TikTok — texto do anúncio até 100 (ver seção TikTok Ads)
+
+**3. Iteração por melhores e piores.** Com dado suficiente (traffic-bi; mesma métrica de decisão do brief — CTR, CPA ou ROAS):
+- Nos **melhores**: que ângulo, estrutura (pergunta, afirmação, número) e tamanho se repetem? Dobre a aposta com redação nova.
+- Nos **piores**: que padrão se repete (genérico, longo, tom errado)? Evite no próximo lote.
+- Cada rodada: variantes dos vencedores + 1 ou 2 ângulos ainda não testados. Aposente o que perdeu.
+
+**4. Log de iterações** (em `docs/smart-memory/`, área do traffic-strategist):
+```
+Rodada N — AAAA-MM-DD — campanha/conjunto
+O que mudou:   [ângulos/variantes novas, o que foi aposentado]
+Resultado:     [métrica de decisão por criativo, gasto e período — fonte traffic-bi]
+Decisão:       [escalar / manter / pausar / novo teste] + motivo
+Próximo teste: [hipótese]
+```
+Sem log, a equipe retesta o que já perdeu.
+
 ## Checklist pré-launch universal
 
 - [ ] Conversion tracking testado com conversão real
@@ -168,3 +206,4 @@ Além das orgânicas (tempo assistido, % de conclusão, retenção aos 3s): CPM,
 ---
 
 Adaptado de coreyhaines31/marketingskills → skill "ads" (ex-"paid-ads" na v1.x) (skills.sh) — 2026-08-26.
+Seção "Matriz de criativos" adaptada de coreyhaines31/marketingskills → skill `ad-creative` (MIT) — 2026-10-20.

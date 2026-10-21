@@ -1,7 +1,7 @@
 ---
 name: seo-content
 description: "Qualidade de conteúdo e E-E-A-T com avaliação de prontidão para citação por IA, mais limpeza final de rascunho (frases típicas de IA e caracteres Unicode invisíveis). Use ao pedir 'content quality', 'E-E-A-T', 'readability', 'thin content', 'content audit', 'humanize', 'AI phrasing' ou 'remove watermarks'."
-version: "2.3.2"
+version: "2.3.3"
 updated: "2026-10-20"
 user-invocable: true
 argument-hint: "[url]"
@@ -136,6 +136,8 @@ Google's raters assess low-quality, scaled, copied, or AI-generated main content
 > **Honest scoping (Google docs, 2026-06-05):** per "Using third-party SEO tools, services, and advice," no tool guarantees rankings and third-party tools have no access to Google's internal ranking data. claude-seo's scores are **heuristics**, not Google-internal signals, so say so in reports, and validate GEO/AEO findings against Google's official guidance (Search Console is the first-party source).
 
 ## Draft Cleanup: AI Phrasing & Invisible Watermarks
+
+> **Texto em pt-BR:** o checklist de "cara de IA" (tiques estruturais, léxico pt-BR, tipografia, painel de 5 sinais e ajuste por canal) vive em `/copy-humanize`. Esta seção continua dona do script abaixo (invisíveis + tabela de frases em inglês) e da regra de escopo; para rascunho em português, rode o script para os invisíveis e aplique `/copy-humanize` no texto.
 
 For "humanize this", "remove watermarks", or "clean up this draft", run the
 bundled cleanup script on the user's own content:

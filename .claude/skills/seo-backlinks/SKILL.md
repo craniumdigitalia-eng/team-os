@@ -1,7 +1,7 @@
 ---
 name: seo-backlinks
 description: "Análise do perfil de backlinks — referring domains, distribuição de âncoras, links tóxicos e gap contra concorrentes, com APIs gratuitas (Moz, Bing Webmaster, Common Crawl) e DataForSEO. Use ao pedir backlinks, link profile, referring domains, anchor text, toxic links, link building, disavow ou backlink audit."
-version: "2.3.2"
+version: "2.4.0"
 updated: "2026-10-20"
 user-invocable: true
 argument-hint: "<url>"
@@ -242,6 +242,41 @@ it passes.
 ### Medium Priority (ongoing improvement)
 ### Link Building Opportunities (top 10)
 
+## Conquistar links e menções
+
+Esta seção é sobre **ganhar** links, não só medi-los. Divisão de papéis: o ANUBIS (seo-backlinks) audita, monta a lista-alvo e recomenda; **quem faz contato é o usuário ou a squad brand** — nenhum agente envia e-mail, mensagem ou pitch em nome da empresa. Rascunhos de abordagem podem ser entregues para o usuário aprovar e enviar.
+
+**Antes: link é mesmo o gargalo?** Compare os domínios de referência da *página-alvo* (não do domínio inteiro) com as 3 a 5 páginas que ficam acima dela. Se elas têm números parecidos e ainda vencem, o problema é conteúdo, intenção ou frescor — mande para seo-content/seo-sxo, não para link building. Aponte links internos das páginas mais fortes para a página-alvo antes de buscar links de fora.
+
+**1. Ativos linkáveis (ter algo que mereça link)**
+- **Dados próprios** — pesquisa, levantamento, benchmark do setor com metodologia aberta.
+- **Ferramentas** — calculadora, simulador, gerador, checklist interativo.
+- **Guias de referência** — glossário do setor, guia completo, modelos e templates que outros citam.
+Coloque o ativo perto da página-alvo e ligue um ao outro com link interno; link para um estudo não ajuda a página de preço se a autoridade não for repassada.
+
+**2. Táticas, da mais barata para a mais cara**
+| Tática | Esforço | Observação |
+|---|---|---|
+| Menção sem link → pedir o link | baixo | sites que já citam a marca; maior taxa de sucesso |
+| Links quebrados e URLs antigas | baixo | links apontando para 404 ou endereço antigo — redirecionar e pedir atualização |
+| Parcerias (parceiros, integrações, fornecedores, clientes) | baixo | páginas de parceiro, cases, "feito com" |
+| Páginas de recursos | médio | listas curadas de ferramentas/guias do nicho onde o ativo cabe |
+| Listas "melhores X" do setor | médio | pedir avaliação honesta, sem pagamento por link |
+| Digital PR | alto | dado próprio + pauta para jornalista; teto mais alto |
+| Diretórios de qualidade | baixo | só os do setor ou regionais com curadoria e tráfego real — nunca fazenda de diretórios; local → seo-local |
+
+Qualifique cada alvo antes de recomendar: **relevante** (o público dele precisaria do produto?), **real** (tráfego orgânico não em queda, padrão editorial, links de saída não dominados por âncoras comerciais), **alcançável** (pessoa dona da página) e **útil** (o link iria para uma página que precisa dele).
+
+**3. Ponte com seo-geo (menção vale mesmo sem link).** As páginas de terceiros que as IAs citam nas respostas da categoria — listas "melhores X", comparativos, avaliações, fóruns — entram no **topo** da lista-alvo, mesmo que não deem link seguido. Peça ao NUT (seo-geo) o levantamento de fontes citadas no painel de prompts e cruze com o perfil de links.
+
+**4. Proibido**
+- Comprar link que passa autoridade, PBN (rede privada de blogs), inserção paga em artigo antigo, ferramenta de link automático.
+- Troca de links em massa ou página de parceiro criada só para cruzar links.
+- Âncora exata planejada em guest post, release ou advertorial.
+Placement pago é aceitável **só** com `rel="sponsored"` ou `rel="nofollow"` e divulgação — vale por tráfego e citação por IA, não por ranking. Âncora: deixe o outro site escolher (marca, URL, genérica).
+
+**5. Entrega e medição.** O relatório lista, por página-alvo: diagnóstico (link é o gargalo?), ativos existentes e a construir, 3 a 4 táticas com o porquê, lista-alvo qualificada (página, contato, ângulo, se é citada por IA) e riscos do perfil atual. Meça mensalmente novos domínios de referência **por página-alvo**, posição nas consultas-alvo (efeito leva semanas a meses) e menções em páginas citadas por IA; números de busca vêm da SESHAT (seo-google).
+
 ## Error Handling
 
 | Error | Cause | Resolution |
@@ -303,3 +338,7 @@ After completing any backlink analysis command, always offer:
 Load on demand (do NOT load at startup):
 - `skills/seo/references/backlink-quality.md` -- Detailed toxic link patterns and scoring methodology (shared reference, load when analyzing toxic links or spam scores)
 - `skills/seo/references/free-backlink-sources.md` -- Source comparison, confidence weighting, setup guides (shared reference, load when configuring free backlink APIs)
+
+---
+
+Seção "Conquistar links e menções" adaptada de coreyhaines31/marketingskills → skill `link-building` (MIT) — 2026-10-20.

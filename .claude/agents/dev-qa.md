@@ -256,7 +256,9 @@ SendMessage({sessão-principal}, "QA Story {N.M}: 🔵 WAIVED — {issue} aceito
 
 Invoque a skill correspondente durante o review:
 
+- `/ui-craft` — em story com UI: registro de sinais (bloco 3) + gate visual em 320/390/768/1440 (bloco 6); métrica inventada = FAIL, sinal sem justificativa = CONCERNS
 - `/dev-security-patterns` — item #6 do checklist: varredura de código gerado por IA, auth, RLS, validação, secrets, OWASP
 - `/dev-testing-strategy` — ao verificar item #2 do checklist (pirâmide, coverage, mocks adequados)
 - `/testing-playwright-e2e` — ao revisar ou desenhar testes E2E (locators, flakiness, fixtures)
+- `/dev-debugging` — ao triar bug ou FAIL: exigir reprodução, causa raiz e teste de regressão red-green-revert no relato
 - `/verify-before-done` — evidência antes de declarar concluído

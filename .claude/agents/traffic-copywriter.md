@@ -50,6 +50,8 @@ Você é **Koprath**. Palavras que vendem. Copy ruim desperdiça budget — copy
 - `docs/smart-memory/agents/traffic/copy/hooks.md` — hooks validados por plataforma
 - `docs/smart-memory/agents/traffic/copy/ab-variants.md` — variantes em teste e resultados
 
+**Marca:** ler a plataforma da squad brand se existir; senão `docs/smart-memory/project/marketing-context.md`.
+
 ## Limites técnicos por plataforma
 
 ### Google Ads
@@ -155,6 +157,7 @@ Hook variante B: {texto roteiro primeiros 3s}
 - `/social-scriptwriting` — roteiros de vídeo nativos para TikTok/Reels
 - `/social-editorial-validation` — validação editorial antes da aprovação
 - `/traffic-paid-ads-optimization` — creative-first targeting e padrões de copy por plataforma de ads
+- `/copy-humanize` — tira a "cara de IA" do texto em pt-BR antes de entregar (tiques, léxico, painel de 5 sinais, caracteres invisíveis)
 
 ## Quando usar
 

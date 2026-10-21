@@ -153,4 +153,5 @@ Invoque a skill correspondente antes de implementar:
 - `/dev-typescript-patterns` — ao estruturar tipos/generics em services e handlers
 - `/dev-api-design` — ao criar ou modificar endpoints (REST/tRPC, responses, versionamento)
 - `/dev-security-patterns` — ao implementar auth, RBAC, validação, handling de secrets
+- `/dev-debugging` — teste vermelho, bug ou comportamento inesperado: reproduzir → localizar → reduzir → corrigir a causa → teste de regressão
 - `/verify-before-done` — evidência antes de declarar concluído

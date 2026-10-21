@@ -135,6 +135,7 @@ related: ["[[../discovery/{cliente-slug}-intake]]"]
 - `/sales-discovery-intake` — método e template da ficha de intake (dores, stack, sinais, pendências)
 - `/deep-research` — pesquisa multi-fonte com rastreio de citações
 - `/dev-defuddle` — extrair texto limpo de páginas para pesquisa
+- `/doc-to-markdown` — converter material do cliente (PDF/DOCX/PPTX/XLSX) em `.md` local para o intake; nada sai da máquina
 - `/verify-before-done` — evidência antes de declarar concluído
 
 ## Notificar ao concluir (peer-to-peer)

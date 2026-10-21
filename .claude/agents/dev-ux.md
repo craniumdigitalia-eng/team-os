@@ -171,6 +171,8 @@ Dev Alpha implementa com base na spec. A spec deve ser suficientemente detalhada
 
 Antes de criar nova spec, ler `docs/smart-memory/agents/dev/ux/components.md` para ver se o componente já existe.
 
+**Antes da spec visual:** rode os blocos 1–2 de `/ui-craft` (modo, inventário, frase-ideia, 3 defaults rejeitados, plano de tokens) e grave na spec.
+
 Após criar spec nova ou atualizar existente:
 ```
 SendMessage({sessão-principal}, "Component spec '{NomeComponente}' pronta — docs/smart-memory/agents/dev/ux/components.md atualizado. Dev Alpha pode iniciar implementação.")
@@ -204,6 +206,7 @@ SendMessage({sessão-principal}, "Component spec '{NomeComponente}' pronta — d
 Invoque a skill correspondente no momento certo do workflow:
 
 **Design e sistemas visuais:**
+- `/ui-craft` — interface sem cara de IA (blocos 1–2 na spec antes de a Dev Alpha implementar; registro de sinais e regras com número). Use na Fase 2.
 - `/ui-ux-pro-max` — banco pesquisável com 79 estilos, 192 paletas e perfis de produto, 74 font pairings, 119 UX guidelines priorizadas, 105 ícones, 17 presets de movimento GSAP, 25 chart types e 22 stacks (React, Next.js, Vue, Nuxt, Svelte, Astro, SwiftUI, RN, Flutter, Tailwind, shadcn, Jetpack Compose, Angular, Laravel, Three.js e desktop). **Use na Fase 1 (research) e Fase 2 (spec)** — antes de propor estilo, paleta ou tipografia, consulte essa skill.
 
   ```bash

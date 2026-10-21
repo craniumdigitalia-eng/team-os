@@ -15,7 +15,7 @@ agents:
     role_title: Conteúdo TikTok
     description: "BEAT, criador de conteúdo da squad TikTok. Pesquisa tendências e sons, propõe a pauta, escreve roteiro nativo, texto de tela e legenda e manda o brief ao estúdio social depois do PASS."
     color: yellow
-    skills: [tiktok-marketing, social-scriptwriting, social-copywriting, social-apify-research]
+    skills: [tiktok-marketing, social-scriptwriting, social-copywriting, social-apify-research, copy-humanize]
   - name: tiktok-publisher
     archetype: implementer
     persona: LOOP

@@ -4,6 +4,27 @@ Todas as mudanças relevantes deste repositório. Formato baseado em [Keep a Cha
 
 ## [Não lançado]
 
+Evolução a partir da análise de ~50 repositórios (guia "15 skills essenciais" + 11 Reels). Método trazido para dentro das nossas skills, em pt-BR; créditos em `THIRD_PARTY_NOTICES.md` ("Métodos adaptados (2026-10)").
+
+### Corrigido
+- Scripts de skills não achavam a pasta do projeto fora de hooks: `$CLAUDE_PROJECT_DIR` ganhou fallback para a raiz do git em 33 skills e 17 agentes; o `*audit` barra uso sem fallback.
+- `pricing` 2.1.4: Van Westendorp com curvas corretas e sem a promessa "25–50% sem impacto".
+- Créditos de licença: verify-before-done, pricing, sales-enablement, traffic-*, accessibility, slides, web-design-guidelines e negotiation.
+- Presets citavam 8 skills inexistentes; o `*audit` passa a conferir.
+- Skills de site deixaram de ensinar "cara de IA" (Inter fixo, transition-all, card que sobe com sombra, mesh gradient roxo); `prefers-reduced-motion` obrigatório.
+- `seo-audit` delegava a um agente inexistente; social-* e agentes VERA/LYRIS/PULSE saíram do pt-PT.
+
+### Alterado
+- verify-before-done 1.1, team-os (`*grill`, texto enxuto), deep-research 3.0.1-ct, negotiation 1.6 pt-BR com regras do pack, security com filtro do candidato / três estados / refutação cruzada, SEO (rankings-push, top 3, painel de visibilidade em IA), ui-ux-pro-max 2.15, web-design-guidelines com cache fixado, accessibility 2.0 enxuta, social-video-editing 2.0, social-* (ganchos com nota, carrossel 4:5, outlier pela mediana, hashtags 3–5), GSAP na sites-scroll-motion.
+- `slides` consolidada em `sales-deck-production`.
+- **Social dividida por plataforma:** `social` vira estúdio comum (AEON, IRIS, FLUX) + squads `instagram` (VERA/LYRIS/PULSE, inclui Facebook e Threads), `tiktok` (RIFF/BEAT/LOOP), `youtube` (KAIROS/ECHO/ORBIT) e `linkedin` (STRATA/QUILL/RELAY). Aprovação não se transfere entre plataformas; impulsionar é sempre da squad traffic. Squads derivadas dos presets (15).
+
+### Adicionado
+- Skills: instagram-strategy, instagram-dm-flows, instagram-publishing (ex-social-meta-publishing), tiktok-publishing, youtube-scriptwriting/packaging/analytics/publishing, linkedin-strategy, linkedin-publishing, copy-humanize, ui-craft, doc-to-markdown, dev-debugging, core-web-vitals.
+- `migrate-social-split.sh` (dry-run padrão) + aviso de agente órfão no `*propagate`; `*feedback` + convenção `[skill-feedback]`; "Automações sugeridas" no Discovery; hook opcional `guard-env-files.sh` (`--with-env-guard`); `marketing-context.md`.
+- Pressure-tests: 3 cenários na squad security e 9 nas squads de plataforma, todos limpos.
+- Contagens: 111 agentes · 125 skills · 15 squads · 14 hooks.
+
 ## [2.4.0] — 2026-10-14
 
 ### Adicionado

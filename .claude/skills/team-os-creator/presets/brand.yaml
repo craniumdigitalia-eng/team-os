@@ -29,7 +29,7 @@ agents:
     role_title: Verbal Identity
     description: "LYRA, identidade verbal da squad Brand. A partir da plataforma aprovada escreve o guia de voz (dimensões de tom, dizemos/não dizemos), o framework de mensagens por público, manifesto, tagline, glossário e nomes. Nunca inventa posicionamento nem promessa que não esteja na plataforma."
     color: yellow
-    skills: [brand-verbal-identity, sites-copy, brand-platform]
+    skills: [brand-verbal-identity, sites-copy, brand-platform, copy-humanize]
   - name: brand-designer
     archetype: ux
     persona: AURORA

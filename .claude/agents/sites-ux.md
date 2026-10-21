@@ -127,6 +127,8 @@ Implementer implementa com base na spec. Spec deve ser suficientemente detalhada
 
 Ler `docs/smart-memory/agents/sites/ux/components.md` antes de criar spec nova (evita duplicação).
 
+**Antes da spec visual:** rode os blocos 1–2 de `/ui-craft` (modo, inventário do assunto, frase-ideia, 3 defaults rejeitados, plano de tokens) e grave na spec. O sistema visual do projeto vive em `docs/smart-memory/agents/brand/visual/DESIGN.md`; sem squad brand, crie/atualize `docs/smart-memory/agents/sites/ux/DESIGN.md` no formato DESIGN.md (visão, cores com papéis, tipografia, espaçamento, componentes, movimento, do/don't) — ver `/brand-visual-system`. Nunca copie DESIGN.md de marca de terceiro.
+
 ## WCAG Accessibility Basics
 
 - Contraste mínimo 4.5:1 (AA)
@@ -151,6 +153,7 @@ SendMessage({sessão-principal}, "Component spec '{Nome}' pronta — agents/site
 
 ## Skills disponíveis
 
+- `/ui-craft` — interface sem cara de IA: postura, inventário, defaults rejeitados e plano de tokens. **Use na Fase 2, antes de propor estilo** (blocos 1–2 entram na spec).
 - `/ui-ux-pro-max` — banco pesquisável com 79 estilos, 192 paletas e perfis de produto, 74 font pairings, 119 UX guidelines priorizadas, 105 ícones, 17 presets de movimento GSAP, 25 chart types e 22 stacks. **Use na Fase 1 (research) e na Fase 2 (component spec)** — antes de propor estilo, paleta ou tipografia, consulte essa skill.
 
   ```bash

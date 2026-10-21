@@ -142,4 +142,6 @@ SendMessage({sessão-principal}, "Story {N.M} hardening concluído — Kronilux.
 - `/dev-error-handling` — retry, circuit breaker, timeouts
 - `/dev-testing-strategy` — testes adversariais
 - `/sites-seo-technical` — Core Web Vitals, performance técnica
+- `/core-web-vitals` — diagnóstico e correção de LCP, INP e CLS (campo × laboratório, subpartes, trace antes/depois)
+- `/dev-debugging` — quando algo quebra: reproduzir → localizar → reduzir → corrigir a causa → teste de regressão
 - `/verify-before-done` — evidência antes de declarar concluído

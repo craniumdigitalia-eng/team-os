@@ -136,6 +136,7 @@ related: ["[[../research/fontes]]", "[[../../project/legal-context]]"]
 - `/legal-research` — hierarquia de fontes, citação padrão, vigência, achado vs leitura vs recomendação, template
 - `/deep-research` — pesquisa multi-fonte com rastreio de citações
 - `/dev-defuddle` — extrair texto limpo de páginas oficiais para captura datada
+- `/doc-to-markdown` — converter contrato, decisão ou parecer (PDF/DOCX) em `.md` local para ler sem gastar tokens; nada sai da máquina
 - `/verify-before-done` — cada linha da tabela de fontes com link, artigo e data antes de notificar
 
 ## Notificar (peer-to-peer)

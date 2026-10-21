@@ -30,6 +30,10 @@
 #                                       guard-smart-memory-read.sh, guard-message-size.sh e
 #                                       context-watch.sh são
 #                                       SEMPRE instalados)
+#   --with-env-guard                    hook OPCIONAL guard-env-files.sh (bloqueia escrita em .env e
+#                                       lockfile): copia e registra no settings.json (ensure-settings.sh
+#                                       --with-env-guard). Só com OK do usuário. Destino que já tem o
+#                                       hook continua recebendo a versão nova no propagate.
 #   --dry-run                           simula sem copiar nada
 #   (com --match-target-squads)         agente do destino que saiu do pack (registrado ou no histórico
 #                                       do CT, sem `origin: custom`) sai como ORPHAN_AGENT=<nome>|… —
@@ -58,6 +62,7 @@ SOURCE=""
 TARGET=""
 SQUADS="all"
 INCLUDE_HOOKS=0
+WITH_ENV_GUARD=0  # --with-env-guard: hook opcional guard-env-files.sh (copia + registra)
 DRY_RUN=0
 MATCH_TARGET=0   # --match-target-squads: deriva squads do que JÁ existe no destino (modo propagate)
 EXTRA_SKILLS=""  # --extra-skills: opt-in fora do filtro por squad (ex.: sala-de-controle, maestri-os)
@@ -112,11 +117,12 @@ while [[ $# -gt 0 ]]; do
                     ON_CONFLICT="$2"; ON_CONFLICT_SET=1; shift 2 ;;
     --match-target-squads) MATCH_TARGET=1; shift ;;
     --include-hooks)  INCLUDE_HOOKS=1;  shift ;;
+    --with-env-guard) WITH_ENV_GUARD=1; shift ;;
     --dry-run)      DRY_RUN=1;     shift ;;
     --include-skills) shift ;;  # ignorado — skills são sempre incluídas
     *)
       echo "ERROR=unknown_flag|FLAG=$1" >&2
-      echo "Usage: install-to-project.sh --source <path> --target <path> [--squads <lista> | --match-target-squads] [--custom <nomes|all>] [--on-conflict keep|new] [--only <nomes>] [--include-hooks] [--dry-run]" >&2
+      echo "Usage: install-to-project.sh --source <path> --target <path> [--squads <lista> | --match-target-squads] [--custom <nomes|all>] [--on-conflict keep|new] [--only <nomes>] [--include-hooks] [--with-env-guard] [--dry-run]" >&2
       exit 2 ;;
   esac
 done
@@ -512,12 +518,21 @@ if [ $CONTROL_ROOM -eq 0 ]; then
   [ -n "$quality_hooks_installed" ] && echo "QUALITY_HOOKS=${quality_hooks_installed# }"
   [ -n "$quality_hooks_missing" ] && echo "QUALITY_HOOKS_MISSING=${quality_hooks_missing# }"
 
+  # --with-env-guard: hook opcional (OK do usuário). Já presente no destino → mantém atualizado.
+  ENV_GUARD="guard-env-files.sh"
+  if [ -f "$SOURCE/.claude/hooks/$ENV_GUARD" ] && { [ $WITH_ENV_GUARD -eq 1 ] || [ -f "$TARGET/.claude/hooks/$ENV_GUARD" ]; }; then
+    plan_add hook "$ENV_GUARD" "$SOURCE/.claude/hooks/$ENV_GUARD"
+    [ $WITH_ENV_GUARD -eq 1 ] && echo "ENV_GUARD_HOOK=installed" || echo "ENV_GUARD_HOOK=kept"
+  elif [ $WITH_ENV_GUARD -eq 1 ]; then
+    echo "ENV_GUARD_HOOK_MISSING=$ENV_GUARD não encontrado na fonte"
+  fi
+
   # --include-hooks: só hooks extras (fora do pacote padrão)
   if [ $INCLUDE_HOOKS -eq 1 ] && [ -d "$SOURCE/.claude/hooks" ]; then
     for hook_file in "$SOURCE/.claude/hooks/"*.sh; do
       [ -f "$hook_file" ] || continue
       hook_name=$(basename "$hook_file")
-      case " $STD_HOOKS " in *" $hook_name "*) continue ;; esac
+      case " $STD_HOOKS $ENV_GUARD " in *" $hook_name "*) continue ;; esac
       plan_add hook "$hook_name" "$hook_file"
       hooks_extra=$((hooks_extra + 1))
     done
@@ -600,16 +615,18 @@ ensure_gitignore
 # Cria o arquivo se não existe e SÓ ADICIONA o que falta num existente (nunca
 # sobrescreve valor, valida o JSON final). No dry-run mostra o merge sem gravar.
 ENSURE_SETTINGS="$SOURCE/.claude/skills/team-os/scripts/ensure-settings.sh"
+ES_EXTRA=""
+[ $WITH_ENV_GUARD -eq 1 ] && ES_EXTRA="--with-env-guard"
 TARGET_SETTINGS="$TARGET/.claude/settings.json"
 if [ -f "$ENSURE_SETTINGS" ]; then
   [ -f "$TARGET_SETTINGS" ] && settings_existed=1 || settings_existed=0
   if [ $DRY_RUN -eq 1 ]; then
     # Só as linhas de mudança/aviso (o merge completo é ruído no dry-run)
-    es_out="$(bash "$ENSURE_SETTINGS" --project-dir "$TARGET" --dry-run 2>&1 | grep -E '^(\[dry-run\]|✓|⚠|  [+~])' || true)"
+    es_out="$(bash "$ENSURE_SETTINGS" --project-dir "$TARGET" --dry-run $ES_EXTRA 2>&1 | grep -E '^(\[dry-run\]|✓|⚠|  [+~])' || true)"
     [ -n "$es_out" ] && printf '%s\n' "$es_out" | sed 's/^/ENSURE_SETTINGS: /'
     echo "SETTINGS_ENSURED=dry-run"
   else
-    if es_out="$(bash "$ENSURE_SETTINGS" --project-dir "$TARGET" 2>&1)"; then
+    if es_out="$(bash "$ENSURE_SETTINGS" --project-dir "$TARGET" $ES_EXTRA 2>&1)"; then
       printf '%s\n' "$es_out" | grep -E '^(✓|⚠|  [+~]|mudanças)' | sed 's/^/ENSURE_SETTINGS: /'
       if [ $settings_existed -eq 0 ]; then echo "SETTINGS_CREATED=1"; else echo "SETTINGS_ENSURED=1"; fi
     else

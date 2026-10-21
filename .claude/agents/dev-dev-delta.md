@@ -155,4 +155,6 @@ Invoque a skill correspondente antes de implementar:
 
 - `/dev-error-handling` — padrões de retry, circuit breaker, timeout, error boundaries, logging estruturado
 - `/dev-testing-strategy` — para escrever testes adversariais (edge cases, fault injection)
+- `/dev-debugging` — quando algo quebra: reproduzir → localizar → reduzir → corrigir a causa → teste de regressão
+- `/core-web-vitals` — quando a feature tem front: LCP, INP e CLS com trace antes/depois
 - `/verify-before-done` — evidência antes de declarar concluído

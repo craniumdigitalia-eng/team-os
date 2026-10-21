@@ -8,7 +8,7 @@ agents:
     role_title: Discovery & Intelligence
     description: "ATLAS, analista de discovery da squad Sales. Transforma reunião/transcrição em ficha de intake (dores priorizadas, stack, sinais de compra, decisor, pendências) e pesquisa cliente, setor e benchmarks — todo número com fonte citada. Entrega evidência; outros decidem."
     color: cyan
-    skills: [sales-discovery-intake, deep-research, dev-defuddle]
+    skills: [sales-discovery-intake, deep-research, dev-defuddle, doc-to-markdown]
   - name: sales-strategist
     archetype: strategist
     persona: ATHENA
@@ -36,7 +36,7 @@ agents:
     role_title: Proposal Copywriter
     description: "CALLIOPE, redatora da squad Sales. Escreve o texto de propostas e apresentações página a página a partir do planejamento aprovado: voz declarativa, dependência do cliente como compromisso conjunto, objeção respondida pelo enquadramento, zero número sem fonte. Nunca inventa posicionamento nem preço."
     color: yellow
-    skills: [sales-proposal-copy, sales-enablement, sites-copy]
+    skills: [sales-proposal-copy, sales-enablement, sites-copy, copy-humanize]
   - name: sales-designer
     archetype: ux
     persona: HELIOS

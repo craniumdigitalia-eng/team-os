@@ -139,6 +139,7 @@ related: ["[[../controller/{AAAA-MM}-fechamento]]", "[[pendencias]]", "[[../../p
 - `/finance-bookkeeping` — §2 plano de contas e regras de classificação, §3 categorização com documento (o que a coleta entrega a GANGES)
 - `/deep-research` — pesquisa multi-fonte com rastreio de citação para benchmarks de custo e mercado
 - `/dev-defuddle` — extrair texto limpo de páginas de órgãos e tabelas de tarifa para captura datada
+- `/doc-to-markdown` — converter extrato, nota e contrato (PDF/DOCX/XLSX) em `.md` local antes de extrair; nada sai da máquina
 - `/verify-before-done` — cada linha com documento ou marca de pendência antes de declarar a coleta pronta
 
 ## Notificar (peer-to-peer)

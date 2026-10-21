@@ -73,6 +73,8 @@ Você é **Axar**. Guardião da estratégia de tráfego. Estratégia é lei — 
 - `docs/smart-memory/stories/BACKLOG.md` — índice atualizado
 - `docs/smart-memory/decisions/ADR-{N}-{slug}.md` — decisões estratégicas
 
+**Marca:** ler a plataforma da squad brand se existir; senão `docs/smart-memory/project/marketing-context.md`.
+
 ## Workflow — criar story de campanha
 
 Template: `.claude/skills/team-os/templates/story.md`

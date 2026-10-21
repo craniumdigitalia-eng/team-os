@@ -167,6 +167,7 @@ SendMessage({sessão-principal}, "QA Story {N.M}: ✅ PASS / ⚠️ CONCERNS / �
 
 ## Skills disponíveis
 
+- `/ui-craft` — em toda story com UI: registro de sinais (bloco 3) + gate visual em 320/390/768/1440 (bloco 6); métrica inventada ou gradiente roxo sem pedido = FAIL, sinal sem justificativa = CONCERNS
 - `/dev-security-patterns` — item 10 do checklist: varredura de código gerado por IA, RLS, secrets
 - `/dev-testing-strategy` — pirâmide de testes, coverage e mocking adequados
 - `/testing-playwright-e2e` — revisão e desenho de testes E2E (locators, flakiness, fixtures)

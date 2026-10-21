@@ -267,6 +267,39 @@ hasf pnpm-lock.yaml && PKG_MGR="pnpm"
 MONOREPO="não"
 { hasf turbo.json || hasf pnpm-workspace.yaml || { hasf package.json && grep -q '"workspaces"' "$TARGET/package.json"; }; } && MONOREPO="sim"
 
+# ── Automações sugeridas (só SUGESTÃO em project/tech-stack.md — nada é aplicado) ──
+# Cada item diz como ativar; o lead só aplica com OK explícito do usuário.
+FMT_TOOLS=""
+{ hasf .prettierrc || hasf .prettierrc.json || hasf .prettierrc.js || hasf .prettierrc.cjs || hasf .prettierrc.mjs \
+  || hasf .prettierrc.yaml || hasf .prettierrc.yml || hasf prettier.config.js || hasf prettier.config.cjs \
+  || hasf prettier.config.mjs || pkg_has '"prettier"'; } && FMT_TOOLS="${FMT_TOOLS}${FMT_TOOLS:+, }Prettier"
+{ hasf .eslintrc || hasf .eslintrc.js || hasf .eslintrc.cjs || hasf .eslintrc.json || hasf .eslintrc.yml \
+  || hasf eslint.config.js || hasf eslint.config.mjs || hasf eslint.config.cjs || hasf eslint.config.ts \
+  || pkg_has '"eslint"'; } && FMT_TOOLS="${FMT_TOOLS}${FMT_TOOLS:+, }ESLint"
+{ hasf biome.json || hasf biome.jsonc || pkg_has '"@biomejs/biome"'; } && FMT_TOOLS="${FMT_TOOLS}${FMT_TOOLS:+, }Biome"
+ENV_FILES=$(find "$TARGET" -maxdepth 3 \( -name node_modules -o -name .git -o -name .venv -o -name vendor \) -prune \
+  -o -type f \( -name '.env' -o -name '.env.*' \) -print 2>/dev/null | sed "s|^$TARGET/||" | sort | head -5 | tr '\n' ' ' | sed 's/ *$//')
+LOCKFILES=""
+for lf in package-lock.json pnpm-lock.yaml yarn.lock bun.lockb poetry.lock Cargo.lock; do
+  hasf "$lf" && LOCKFILES="${LOCKFILES}${LOCKFILES:+, }$lf"
+done
+AUTOMATIONS=""
+add_auto() { AUTOMATIONS="${AUTOMATIONS}- $1
+"; }
+[ -n "$FMT_TOOLS" ] && add_auto "**Formatar/lintar ao editar** (detectado: $FMT_TOOLS): hook \`PostToolUse\` (matcher \`Edit|Write|MultiEdit\`) que roda o formatador/linter no arquivo editado. Como ativar: o lead propõe o comando exato do projeto e registra em \`.claude/settings.json\` só com o seu OK."
+[ -n "$ENV_FILES" ] && add_auto "**Bloquear edição de .env** (encontrado: $ENV_FILES): hook opcional \`guard-env-files.sh\` (\`.env.example\`/\`.sample\`/\`.template\` continuam editáveis). Como ativar: a partir do CT, \`install-to-project.sh --with-env-guard\` — só com o seu OK."
+[ -n "$LOCKFILES" ] && add_auto "**Não editar lockfile à mão** ($LOCKFILES): lockfile muda só pelo gerenciador de pacotes. O mesmo \`guard-env-files.sh\` bloqueia a edição manual. Como ativar: \`install-to-project.sh --with-env-guard\` — só com o seu OK."
+[ -n "$FRAMEWORKS" ] && add_auto "**MCP de documentação** (framework: $FRAMEWORKS): considerar o MCP context7 para consultar a doc atual do framework em vez de depender de memória. Como ativar: \`claude mcp add\` pelo usuário — só com o seu OK (servidor externo)."
+if [ -n "$AUTOMATIONS" ]; then
+  AUTOMATIONS_MD="## Automações sugeridas (não aplicadas)
+
+> Só sugestões, detectadas dos arquivos do projeto. **Nada aqui foi ativado.** O lead mostra a lista e aplica cada item só com o OK do usuário.
+
+$AUTOMATIONS"
+else
+  AUTOMATIONS_MD=""
+fi
+
 # ── Mapa de módulos ──────────────────────────────────────────────────────────
 MODULE_DIRS=""
 for base in src app lib packages apps server api components services modules; do
@@ -509,6 +542,8 @@ tags: [project, tech-stack]
 | Monorepo | $MONOREPO |
 
 > Detectado automaticamente dos manifestos do projeto. Confirme/complete o que faltar.
+
+$AUTOMATIONS_MD
 EOF
 fi
 

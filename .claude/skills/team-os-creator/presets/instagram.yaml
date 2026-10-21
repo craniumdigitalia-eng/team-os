@@ -15,7 +15,7 @@ agents:
     role_title: Conteúdo Instagram
     description: "LYRIS, criadora de conteúdo da squad Instagram. Pesquisa via Apify MCP e escreve legendas, roteiros, texto de carrossel, fluxos de DM/ManyChat e respostas a comentários — sempre sobre pauta aprovada pela VERA — e manda o brief ao estúdio social. Nunca publica nem envia DM."
     color: yellow
-    skills: [social-copywriting, social-scriptwriting, instagram-dm-flows, social-apify-research]
+    skills: [social-copywriting, social-scriptwriting, instagram-dm-flows, social-apify-research, copy-humanize]
   - name: instagram-publisher
     archetype: implementer
     persona: PULSE

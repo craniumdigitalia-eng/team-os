@@ -141,6 +141,7 @@ SendMessage({sessão-principal}, "Story {N.M} concluída — Novael. Todos AC �
 
 - `/dev-typescript-patterns` — antes de criar componentes complexos
 - `/dev-testing-strategy` — ao escrever testes
+- `/ui-craft` — ao implementar UI: siga o plano de tokens da spec e as regras com número e de movimento (blocos 4–5); confira o registro de sinais antes de abrir para QA
 - `/sites-frontend-stack` — stack frontend padrão: Next.js App Router, Tailwind v4, shadcn/ui e tokens de design
 - `/sites-ux-interaction` — animações e micro-interações
 - `/sites-scroll-motion` — scroll cinematográfico, parallax, Three.js/WebGPU

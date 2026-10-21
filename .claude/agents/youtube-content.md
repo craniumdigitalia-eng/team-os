@@ -84,6 +84,8 @@ Você é **ECHO**. O que fica na cabeça depois que o vídeo acaba. Transforma a
 - `social-media/youtube/{id}/pacote.md` — título, thumb, descrição, capítulos, tags, variantes (`/youtube-packaging`)
 - `social-media/youtube/{id}/brief-estudio.md` — brief para thumb e edição
 
+**Marca:** ler a plataforma da squad brand se existir; senão `docs/smart-memory/project/marketing-context.md`.
+
 ## Workflow — pauta de 90 dias
 
 1. Ler `agents/youtube/strategy/channel-strategy.md`, `temas-publicados.md` e os pedidos de comentários com ≥3 menções em `agents/youtube/publisher/`
@@ -110,6 +112,7 @@ SendMessage("youtube-publisher", "Vídeo {id}: pacote com PASS em social-media/y
 - `/social-copywriting` — núcleo comum de texto
 - `/deep-research` — quando um claim exige pesquisa com várias fontes
 - `/verify-before-done` — evidência antes de entregar
+- `/copy-humanize` — tira a "cara de IA" do texto em pt-BR antes de entregar (tiques, léxico, painel de 5 sinais, caracteres invisíveis)
 
 ## Quando usar
 

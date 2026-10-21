@@ -99,6 +99,24 @@ Conceitos e métodos reescritos em pt-BR no padrão do pack (texto próprio, sem
 | `instagram-dm-flows` (opt-in de WhatsApp e templates) | [coreyhaines31/marketingskills](https://github.com/coreyhaines31/marketingskills) — referência de WhatsApp da skill `sms` | MIT — `Copyright (c) 2025 Corey Haines` | conceitos adaptados |
 | `youtube-scriptwriting`, `youtube-packaging`, `youtube-analytics`, `youtube-publishing` | [darkzOGx/youtube-automation-agent](https://github.com/darkzOGx/youtube-automation-agent) | MIT — `Copyright (c) 2025 YouTube Automation Agent Contributors` | commit 24f9cb5 — método, sem código |
 | `sites-scroll-motion` §5A (GSAP + ScrollTrigger) | [greensock/gsap-skills](https://github.com/greensock/gsap-skills) | MIT — `Copyright (c) 2026 GreenSock` | padrões useGSAP/context/matchMedia |
+| `sites-page-cro` (Teste A/B de página) | [coreyhaines31/marketingskills](https://github.com/coreyhaines31/marketingskills) — `ab-testing` | MIT — `Copyright (c) 2025 Corey Haines` | commit e85f3cb |
+| `seo-backlinks` (Conquistar links e menções) | coreyhaines31/marketingskills — `link-building` | MIT — `Copyright (c) 2025 Corey Haines` | commit e85f3cb |
+| `traffic-paid-ads-optimization` (Matriz de criativos) | coreyhaines31/marketingskills — `ad-creative` | MIT — `Copyright (c) 2025 Corey Haines` | commit e85f3cb |
+| `ui-craft` (postura, plano de tokens) | [anthropics/skills](https://github.com/anthropics/skills) — `frontend-design` | Apache-2.0 — © Anthropic, PBC | commit dbd4588f9e10 — **modificado** (traduzido, resumido, reorganizado) |
+| `ui-craft` (craft floor, modos de superfície) | [pbakaus/impeccable](https://github.com/pbakaus/impeccable) | Apache-2.0 — © Paul Bakaus | commit dad8dbb3aac2 — **modificado**; NOTICE do upstream só se aplica a ios.md/android.md (não usados) |
+| `ui-craft` (registro de sinais, regras com número) | [Leonxlnx/taste-skill](https://github.com/Leonxlnx/taste-skill) | MIT — © 2026 Leonxlnx | commit 6010f91a9935 |
+| `ui-craft` (anti-padrões) | [Nutlope/hallmark](https://github.com/Nutlope/hallmark) | MIT — © 2026 Hallmark contributors | commit 13ac0ec7e148 |
+| `ui-craft` (quadro de animação) | [emilkowalski/skills](https://github.com/emilkowalski/skills) | MIT — © 2026 Emil Kowalski | commit 2d228630ba14 |
+| `ui-craft` (microdetalhes) | [jakubkrehel/make-interfaces-feel-better](https://github.com/jakubkrehel/make-interfaces-feel-better) | MIT — © 2026 Jakub Krehel | commit 35545ea1512a |
+| `ui-craft` (defaults rejeitados, testes swap/squint) | [Dammyjay93/interface-design](https://github.com/Dammyjay93/interface-design) | MIT — © 2026 Damola Akinleye | commit 2f9be3206855 |
+| `ui-craft` (baseline da stack); `brand-visual-system` §14 (formato DESIGN.md) | [ibelick/ui-skills](https://github.com/ibelick/ui-skills) | MIT — © 2026 Julien Thibeaut | commit 55363c305097 |
+| `dev-debugging`; `dev-error-handling` (Observabilidade) | [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) — `debugging-and-error-recovery`, `observability-and-instrumentation` | MIT — `Copyright (c) 2026 Addy Osmani` | commit aeac41d |
+| `core-web-vitals` (+ `references/{LCP,INP,CLS}.md`) | [addyosmani/web-quality-skills](https://github.com/addyosmani/web-quality-skills) — `core-web-vitals` | MIT — `Copyright (c) 2026 Addy Osmani` | commit afa8da9 — adaptada e reorganizada em pt-BR |
+| `copy-humanize` (checklist, painel de 5 sinais) | [Jakeschincariol/instagram-agent-skill](https://github.com/Jakeschincariol/instagram-agent-skill) — `ig-human` | MIT — `Copyright (c) 2026 Jake Schincariol` | conceito; texto e léxico pt-BR autorais |
+| `copy-humanize` (sinais de texto gerado) | [Leonxlnx/taste-skill](https://github.com/Leonxlnx/taste-skill) — `references/copy.md` | MIT — © 2026 Leonxlnx | conceito |
+| `doc-to-markdown` (uso opcional do CLI) | [firecrawl/anydoc](https://github.com/firecrawl/anydoc) | MIT — Sideguide Technologies Inc. (Firecrawl) | commit 3b6d4cd — só ideia e uso opcional com versão fixa 0.2.4; nenhum código copiado; OCR hospedado proibido |
+| `team-os` — Discovery "Automações sugeridas"; hook opcional `guard-env-files.sh` | [anthropics/claude-plugins-official](https://github.com/anthropics/claude-plugins-official) — `claude-code-setup` | Apache-2.0 — © Anthropic, PBC | só ideia; nenhum texto copiado |
+| convenção `[skill-feedback]`; `team-os-creator *feedback` | [rebelytics/one-skill-to-rule-them-all](https://github.com/rebelytics/one-skill-to-rule-them-all) | CC-BY-4.0 | só ideia; nenhum texto copiado |
 
 ## Conteúdo adaptado de agency-agents
 

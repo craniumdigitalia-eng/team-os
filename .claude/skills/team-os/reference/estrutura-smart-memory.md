@@ -46,6 +46,27 @@ docs/smart-memory/
 
 > `_archive/` fica fora do working set: o `weigh-memory.sh` o exclui da contagem de peso e os agentes não o leem (convenção reforçada no Smart-Memory Protocol). Ver "Smart-Memory Compaction".
 
+## `_inbox/` — linha `[skill-feedback]`
+
+Quando o usuário corrige o trabalho de um agente ou o método de uma skill, o lead grava **uma linha** num arquivo do `_inbox/` (ex.: `_inbox/lead-2026-10-20.md`), além de corrigir o trabalho:
+
+```
+[skill-feedback] <skill|agente>: <correção, em 1 frase> (AAAA-MM-DD)
+```
+
+Exemplos:
+
+```
+[skill-feedback] sales-proposal-copy: número entrou na proposta sem id da ficha da LIBRA (2026-10-20)
+[skill-feedback] dev-qa: deu PASS sem rodar o teste E2E que a story pedia (2026-10-21)
+```
+
+Regras:
+- `<skill|agente>` é o **nome exato** da pasta da skill ou do arquivo do agente (sem `.md`) — é a chave que agrupa o feedback.
+- Uma linha por correção, em pt-BR, sem dado de cliente, nome de pessoa ou segredo (a linha sai do projeto e vai para o CT).
+- No `*compact`, a linha não se funde com outros fatos: vai como está, com o marcador, para o `DIGEST.md` da área do agente (ou da área que usa a skill).
+- No CT, `/team-os-creator *feedback` (`feedback-scan.sh`) lê essas linhas de todos os projetos — só `_inbox/` e `DIGEST.md`, nunca `_archive/` — e propõe a melhoria na skill ou no agente.
+
 ## `INDEX.md` template
 
 ```markdown

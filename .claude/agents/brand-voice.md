@@ -101,6 +101,7 @@ Por público prioritário: promessa (da plataforma) → pilares (3) → provas (
 - `/sites-copy` — frameworks de copy para os exemplos por contexto
 - `/brand-platform` — para ler a plataforma com o vocabulário de POLARIS e rastrear cada frase
 - `/verify-before-done` — rastreio à plataforma conferido antes de submeter
+- `/copy-humanize` — tiques e léxico de "cara de IA" em pt-BR, para os exemplos e o "não dizemos" do guia de voz
 
 ## Notificar ao concluir (peer-to-peer)
 

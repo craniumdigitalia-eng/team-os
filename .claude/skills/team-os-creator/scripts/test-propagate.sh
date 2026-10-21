@@ -318,6 +318,22 @@ inst "$T/13c.out" --source "$SRC2" --target "$P13" --squads social --dry-run
 check "órfão: *install (sem --match-target-squads) não avisa" sh -c "! grep -q '^ORPHAN_AGENT=' '$T/13c.out'"
 mv "$T/social-photo.fora-do-ct.md" "$SRC2/$A/social-photo.md"
 
+# ═══ 14. hook opcional guard-env-files.sh (--with-env-guard) ═════════════════
+echo "── 14. hook opcional guard-env-files.sh"
+P14="$T/proj14 | env"; mkdir -p "$P14"
+inst "$T/14a.out" --source "$SRC2" --target "$P14" --squads dev
+check "env-guard: install sem a flag rc=0" [ "$RC" = "0" ]
+check "env-guard: sem a flag o hook não é copiado" [ ! -e "$P14/.claude/hooks/guard-env-files.sh" ]
+check "env-guard: sem a flag não é registrado" sh -c "! grep -q guard-env-files '$P14/.claude/settings.json'"
+inst "$T/14b.out" --source "$SRC2" --target "$P14" --match-target-squads --with-env-guard
+check "env-guard: com a flag rc=0" [ "$RC" = "0" ]
+check "env-guard: ENV_GUARD_HOOK=installed" [ "$(kv ENV_GUARD_HOOK "$T/14b.out")" = "installed" ]
+check "env-guard: hook copiado e executável" [ -x "$P14/.claude/hooks/guard-env-files.sh" ]
+check "env-guard: registrado em Edit|Write|MultiEdit" python3 -c 'import json,sys; s=json.load(open(sys.argv[1])); sys.exit(0 if any(e.get("matcher")=="Edit|Write|MultiEdit" and "guard-env-files.sh" in str(e) for e in s["hooks"]["PreToolUse"]) else 1)' "$P14/.claude/settings.json"
+inst "$T/14c.out" --source "$SRC2" --target "$P14" --match-target-squads
+check "env-guard: propagate sem a flag mantém o hook (ENV_GUARD_HOOK=kept)" [ "$(kv ENV_GUARD_HOOK "$T/14c.out")" = "kept" ]
+check "env-guard: propagate sem a flag não remove o registro" grep -q guard-env-files "$P14/.claude/settings.json"
+
 # ═══ 11. nada fora da pasta temporária ═══════════════════════════════════════
 check "Lixeira usada é a do HOME falso/da pasta do teste" sh -c "case '$TRASH' in '$T'/*) exit 0;; esac; exit 1"
 check "CT real sem .team-os/ criado pelo teste em .claude" [ ! -e "$CT/.claude/agents/acme-writer.md" ]

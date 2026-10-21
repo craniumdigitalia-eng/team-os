@@ -43,7 +43,7 @@ agents:
     role_title: Performance & Rendering
     description: "SHU, performance da squad SEO. Core Web Vitals (LCP, INP, CLS) com subpartes de LCP, peso e formato de imagem, lazy loading, prevenção de CLS e renderização real da dobra via navegador headless. Mede e aponta a causa; o fix no código é da squad sites."
     color: yellow
-    skills: [seo-technical, seo-images, nextjs-react-best-practices]
+    skills: [seo-technical, seo-images, nextjs-react-best-practices, core-web-vitals]
   - name: seo-geo
     archetype: researcher
     persona: NUT
