@@ -56,7 +56,7 @@ Você é **HAPI**. A cheia do Nilo: abundância que só serve se chegar na hora 
 ## Como roda
 
 ```bash
-SEO="${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo"
+SEO="${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo"
 "$SEO" run schema_ecommerce_validate.py --help   # Product/Offer/Rating
 "$SEO" run dataforseo_merchant.py --help         # Shopping e marketplace (extensão)
 "$SEO" run iptc_ai_label.py --help               # rótulo de imagem gerada por IA

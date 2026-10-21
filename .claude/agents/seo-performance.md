@@ -58,7 +58,7 @@ LCP não é um número: é TTFB + atraso de carga do recurso + duração da carg
 ## Como roda
 
 ```bash
-SEO="${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo"
+SEO="${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo"
 "$SEO" run lcp_subparts.py --help        # quebra do LCP
 "$SEO" run preload_check.py --help       # preload/priority hints
 "$SEO" run capture_screenshot.py --help  # dobra real, headless

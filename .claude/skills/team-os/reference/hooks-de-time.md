@@ -109,7 +109,7 @@ Versão **condicional segura** ("mantém trabalhando" sem loop): `exit 2` **apen
 # Só devolve exit 2 (bloqueia o idle, com mensagem) se houver task pendente na fila.
 # Como contar tasks pendentes depende do seu projeto (não há CLI oficial para a
 # task list do Agent Teams). Exemplo: um arquivo de fila mantido pelo lead.
-PENDING=$(grep -c '^- \[ \]' "$CLAUDE_PROJECT_DIR/docs/smart-memory/_session/queue.md" 2>/dev/null || echo 0)
+PENDING=$(grep -c '^- \[ \]' "${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/docs/smart-memory/_session/queue.md" 2>/dev/null || echo 0)
 if [ "${PENDING:-0}" -gt 0 ]; then
   echo "Há $PENDING task(s) pendente(s) na fila — faça self-claim da próxima compatível." >&2
   exit 2   # condicional: SÓ quando há trabalho real esperando

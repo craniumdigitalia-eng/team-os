@@ -1,8 +1,8 @@
 ---
 name: seo-cluster
 description: "Clustering semântico de tópicos baseado em SERP — agrupa keywords pela sobreposição real de resultados do Google (não por texto), desenha clusters hub-and-spoke com matriz de links internos e gera visualizações. Use ao pedir 'topic cluster', 'content cluster', 'pillar page', 'hub and spoke', 'arquitetura de conteúdo' ou 'keyword grouping'."
-version: "2.3.1"
-updated: "2026-09-25"
+version: "2.3.2"
+updated: "2026-10-20"
 user-invocable: true
 argument-hint: "<seed-keyword or url>"
 license: MIT
@@ -77,7 +77,7 @@ the full algorithm.
 - Skip pairs where both are long-tail variants of the same head term (assume same cluster)
 
 **DataForSEO integration:** If DataForSEO MCP is available, use `serp_organic_live_advanced`
-instead of WebSearch for SERP data. Run `"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run dataforseo_costs.py check serp_organic_live_advanced --count N`
+instead of WebSearch for SERP data. Run `"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run dataforseo_costs.py check serp_organic_live_advanced --count N`
 before each batch. If `"status": "needs_approval"`, show cost estimate and ask user.
 If `"status": "blocked"`, fall back to WebSearch.
 
@@ -309,7 +309,7 @@ After cluster planning or execution completes, offer:
 
 ## Security
 
-- All URLs fetched via `"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run render_page.py <url> --mode auto` (SPA-aware SSRF protection via `url_safety`)
+- All URLs fetched via `"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run render_page.py <url> --mode auto` (SPA-aware SSRF protection via `url_safety`)
 - No credentials stored or transmitted
 - Output files contain no PII or API keys
 - DataForSEO cost checks run before every API call

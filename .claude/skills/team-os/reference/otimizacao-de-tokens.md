@@ -42,7 +42,7 @@ Desde a v3 as regras desta alavanca são **mecanismo**, não só pedido:
 Mede se a sessão deixou a memória mais leve ou mais pesada — sem estimativa, contando linhas e tokens do L0.
 
 ```bash
-W="$CLAUDE_PROJECT_DIR/.claude/skills/team-os/scripts/weigh-memory.sh"
+W="${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/team-os/scripts/weigh-memory.sh"
 bash "$W" --quiet --save-start   # Fase 0: grava a baseline (${TMPDIR:-/tmp}/team-os-weigh-<cksum do path>.start)
 bash "$W" --report               # fim da rodada / *status / fim do *compact
 ```

@@ -7,6 +7,13 @@
 #   --skills  → lint de TODAS as .claude/skills/*/SKILL.md (frontmatter, name = pasta,
 #               description de 1 linha ≤ 400 chars, version/updated com aspas).
 #               sala-de-controle e maestri-os: só WARN (nunca erro).
+#               ERRO (em todas, inclusive as warn-only): qualquer arquivo da pasta da skill
+#               com $CLAUDE_PROJECT_DIR / ${CLAUDE_PROJECT_DIR} sem fallback `:-` — a variável
+#               só existe em hooks; no Bash do Claude Code use
+#               "${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}".
+#               Exceções: caminho de hook ($CLAUDE_PROJECT_DIR/.claude/hooks/...), linha com o
+#               marcador `hook-example`, test-hooks.sh e este script; pastas .venv/node_modules/
+#               ms-playwright ficam fora da varredura.
 #
 # Fontes da verdade:
 #   - presets/*.yaml ............ archetype + squad + persona de cada agente DO PACK
@@ -45,6 +52,10 @@
 #            {backlog,active,in-review,done,BACKLOG.md}
 #   skills : todo /token citado no body (com ou sem hífen) e todo skill `x` precisam
 #            existir em .claude/skills/ — exceto slash commands built-in do Claude Code
+#   cpd    : ERRO se o body (fora do frontmatter) usa $CLAUDE_PROJECT_DIR sem fallback `:-`
+#            (o `command:` de hook no frontmatter fica como está — lá o harness define a variável)
+#   global : ERRO se `skills: [...]` de um agente em presets/*.yaml (ou custom/) cita skill
+#            sem pasta em .claude/skills/<nome>/ (project_archetypes e descrições são ignorados)
 #
 # Extração de PERSONA (padrão documentado): a persona de um agente é o texto do
 # primeiro H1 antes de " — " (em dash), ex.: "# Nova — Frontend Developer" → "Nova".
@@ -111,6 +122,14 @@ in_list() {  # in_list "item" "a b c"
   return 1
 }
 
+# Linhas (de stdin, já no formato "N:texto" ou "arq:N:texto") com $CLAUDE_PROJECT_DIR ou
+# ${CLAUDE_PROJECT_DIR} SEM fallback `:-`. Ignora caminho de hook e o marcador `hook-example`.
+cpd_no_fallback() {
+  grep -v 'hook-example' \
+    | sed -E 's#\$\{?CLAUDE_PROJECT_DIR\}?/\.claude/hooks/#<hook>/#g' \
+    | grep -E '\$(\{CLAUDE_PROJECT_DIR\}|CLAUDE_PROJECT_DIR([^A-Za-z0-9_]|$))'
+}
+
 # ═════════════════════════════════════════════════════════════════════════════
 # Modo --skills: lint de .claude/skills/*/SKILL.md
 # ═════════════════════════════════════════════════════════════════════════════
@@ -157,6 +176,15 @@ lint_skills() {
 
     if [ $warn_only -eq 1 ] && [ ${#errs[@]} -gt 0 ]; then
       warns=("${warns[@]+"${warns[@]}"}" "${errs[@]}"); errs=()
+    fi
+
+    # $CLAUDE_PROJECT_DIR sem fallback em qualquer arquivo da skill (ERRO mesmo nas warn-only)
+    local cpd_hits cpd_n
+    cpd_hits="$(grep -rnI --exclude-dir=.venv --exclude-dir=venv --exclude-dir=node_modules --exclude-dir=ms-playwright --exclude-dir=__pycache__ 'CLAUDE_PROJECT_DIR' "$d" 2>/dev/null \
+      | grep -vE '/team-os-creator/scripts/(test-hooks|validate-agent)\.sh:' | cpd_no_fallback)"
+    if [ -n "$cpd_hits" ]; then
+      cpd_n="$(printf '%s\n' "$cpd_hits" | wc -l | tr -d ' ')"
+      errs+=("$cpd_n linha(s) com \$CLAUDE_PROJECT_DIR sem fallback (só existe em hooks) — use \"\${CLAUDE_PROJECT_DIR:-\$(git rev-parse --show-toplevel 2>/dev/null || pwd)}\": $(printf '%s\n' "$cpd_hits" | head -3 | cut -d: -f1,2 | sed "s#^$d##" | tr '\n' ' ')")
     fi
     if [ ${#errs[@]} -eq 0 ] && [ ${#warns[@]} -eq 0 ]; then
       echo "✅ $sname"; n_ok=$((n_ok + 1))
@@ -441,6 +469,11 @@ validate() {
     [ "$agent_ntp_hash" != "$NTP_HASH" ] && errors+=("bloco NTP divergente do canônico (reference/native-teams-protocol.md) — rode *migrate")
   fi
 
+  # ── $CLAUDE_PROJECT_DIR sem fallback no body (o command: de hook no frontmatter é isento) ──
+  local cpd_lines
+  cpd_lines="$(awk '/^---$/{c++; next} c>=2{print NR ":" $0}' "$file" | cpd_no_fallback | cut -d: -f1 | tr '\n' ' ')"
+  [ -n "$cpd_lines" ] && errors+=("\$CLAUDE_PROJECT_DIR sem fallback no body (linhas: ${cpd_lines% }) — fora de hooks a variável não existe; use \"\${CLAUDE_PROJECT_DIR:-\$(git rev-parse --show-toplevel 2>/dev/null || pwd)}\"")
+
   # ── Área na smart-memory: linha obrigatória, squad = prefixo, logo após o H1 ──
   local AREA_LINE AREA_PATH AREA_SQUAD
   AREA_LINE="$(printf '%s\n' "$BODY" | grep -m1 '^\*\*Área na smart-memory:\*\*')"
@@ -575,6 +608,27 @@ else
       GLOBAL_ERRORS=$((GLOBAL_ERRORS + 1))
     fi
   done < "$MAP_FILE"
+
+  # skills: [...] de cada agente nos presets precisa existir como .claude/skills/<nome>/ = ERRO
+  # (só a chave `skills:` dentro de um agente — project_archetypes e descrições ficam de fora)
+  for preset in "$PRESETS_DIR"/*.yaml "$PRESETS_DIR"/custom/*.yaml; do
+    [ -f "$preset" ] || continue
+    while IFS='|' read -r ps_agent ps_skill; do
+      [ -n "$ps_skill" ] || continue
+      if [ ! -d "$SKILLS_DIR/$ps_skill" ]; then
+        echo "❌ preset ${preset#$PRESETS_DIR/}: agente '$ps_agent' cita skill '$ps_skill' em skills: mas $SKILLS_DIR/$ps_skill/ não existe"
+        GLOBAL_ERRORS=$((GLOBAL_ERRORS + 1))
+      fi
+    done <<EOF_PSKILLS
+$(awk '
+  /^  - name:/ { a=$3; gsub(/["\047]/, "", a); next }
+  /^[^ ]/      { a="" }
+  a != "" && /^    skills:[[:space:]]*\[/ {
+    l=$0; sub(/^[^\[]*\[/, "", l); sub(/\].*$/, "", l)
+    n=split(l, arr, ","); for (i=1; i<=n; i++) { x=arr[i]; gsub(/[[:space:]"\047]/, "", x); if (x != "") print a "|" x }
+  }' "$preset")
+EOF_PSKILLS
+  done
 
   # repetição de cor na mesma squad = WARNING — só quando a squad tem ≤ 8 agentes
   # (8 cores disponíveis; acima disso a repetição é inevitável)

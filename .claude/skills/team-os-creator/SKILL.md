@@ -3,8 +3,8 @@ name: team-os-creator
 description: "Factory de agentes nativos do Claude Code para Agent Teams — exclusiva deste repositório fonte. Use para criar agentes ou squads (inclusive agentes próprios), atualizar o pack sem perder o que você criou (*update), propagar agentes e skills aos projetos, instalar squads em projeto novo, auditar compliance ou migrar o bloco NTP. Gera .claude/agents/*.md com Native Teams Protocol + smart-memory."
 user-invocable: true
 argument-hint: "[*analyze | *squad <preset> | *create <role> | *migrate | *bootstrap | *skills <agente> | *pressure-test <agente> | *audit | *update | *propagate | *install | *organize]"
-version: "3.1"
-updated: "2026-10-03"
+version: "3.2"
+updated: "2026-10-20"
 ---
 
 # team-os-creator — Agent Factory
@@ -307,6 +307,17 @@ Desfazer: `update-pack.sh --undo` volta o último `--apply` (ou `--resolve …=n
 
 Quem não é o mantenedor cria agentes **próprios** com o `*create` normal (RULE #15): o `generate-agent.sh` acrescenta `origin: custom` ao frontmatter e registra o agente em `presets/custom/custom.yaml` (nome livre; squad = prefixo do nome). O resto é igual: archetype, template, Native Teams Protocol, `*audit`, `*pressure-test`. O `*update` nunca toca nesses arquivos — só reinjeta neles o bloco NTP canônico da versão nova. Com `.team-os-maintainer` (mantenedor), o agente nasce do pack e entra no preset da squad, como sempre. `TEAM_OS_AGENT_ORIGIN=pack|custom` força um dos dois.
 
+### Passo opcional do `*create` / `*skills` — sugerir skills externas
+
+Só quando o usuário pedir ou aceitar ("quer que eu procure skills prontas para este papel?"). Antes, confira as skills do próprio pack (`.claude/skills/`) — elas vêm primeiro.
+
+1. `bash scripts/search-skills.sh <keyword> [min_installs]` — busca no catálogo skills.sh (precisa de rede) com os filtros de `reference/skills-catalog-quality.md`; devolve até 10 candidatas (`owner/repo@skill`, installs, autor confiável).
+2. Mostre as candidatas ao usuário com o que cada uma faz e a licença; descarte as fracas pelos sinais do `skills-catalog-quality.md`.
+3. **Só com confirmação explícita do usuário, skill por skill:** `bash scripts/install-suggested-skills.sh <owner/repo>@<skill>` (instala em `.claude/skills/` com `-a claude-code`; o lixo que o CLI criar vai para a Lixeira).
+4. Skill instalada é material de terceiro: leia inteira antes de usar, padronize frontmatter (pt-BR, `version`/`updated`, `source:`), registre autor e licença em `THIRD_PARTY_NOTICES.md` e rode `*audit` (`validate-agent.sh --skills`).
+
+Os dois scripts chamam o CLI com versão fixa (`skills@1.7.1`, variável `SKILLS_CLI_VERSION`); trocar de versão é decisão consciente, só para uma versão publicada há pelo menos 2 semanas. Nenhum fluxo automático os chama.
+
 ---
 
 ## Fluxo `*painel`
@@ -395,7 +406,7 @@ Qualquer criação/atualização de agente ou skill **só está pronta** quando 
 │   ├── dashboard.sh                ← Command Center (render do painel)
 │   ├── diff-agents.sh              ← respeita poda por squad (TSV)
 │   ├── generate-agent.sh           ← materializa template + valida com *audit ao final (sem .team-os-maintainer: origin: custom + presets/custom/)
-│   ├── search-skills.sh · install-suggested-skills.sh
+│   ├── search-skills.sh · install-suggested-skills.sh  ← opcionais: "sugerir skills" no *create/*skills, só com OK do usuário (CLI skills@ com versão fixa)
 │   ├── install-to-project.sh       ← --squads <lista|none> · --extra-skills · --match-target-squads · --custom · --on-conflict keep|new · --only · --dry-run (origem de cada skill) · backup .claude.bak-* · ensure-settings
 │   ├── propagate-sync.py           ← grava arquivo por arquivo com .team-os/installed.json no destino (conflito → <arquivo>.new) · modo drift p/ scan/diff
 │   ├── test-propagate.sh           ← teste hermético do *install/*propagate (HOME/TMPDIR falsos)

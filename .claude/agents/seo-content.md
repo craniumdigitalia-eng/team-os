@@ -58,7 +58,7 @@ Quando o pedido é brief e não auditoria: contagem por seção, pontuação dos
 ## Como roda
 
 ```bash
-SEO="${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo"
+SEO="${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo"
 "$SEO" run content_quality.py --help   # E-E-A-T, profundidade, legibilidade
 "$SEO" run content_verify.py --help    # verificação de afirmações
 "$SEO" run content_humanize.py --help  # fraseado automático e Unicode invisível

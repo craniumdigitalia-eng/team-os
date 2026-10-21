@@ -1,8 +1,8 @@
 ---
 name: seo-ecommerce
 description: "SEO de e-commerce — visibilidade no Google Shopping, inteligência de marketplace (Amazon), validação de schema de produto, preços de concorrentes e gaps de keywords de marketplace via DataForSEO Merchant API. Use ao pedir 'ecommerce SEO', 'product SEO', 'Google Shopping', 'product schema', 'Amazon SEO' ou 'shopping ads'."
-version: "2.3.1"
-updated: "2026-09-25"
+version: "2.3.2"
+updated: "2026-10-20"
 user-invocable: true
 argument-hint: "<url or keyword>"
 license: MIT
@@ -38,8 +38,8 @@ Fetch and parse any product page for on-page SEO quality.
 ### Workflow
 
 ```
-1. "${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run render_page.py <url> --mode auto → raw/rendered HTML
-2. "${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run parse_html.py --url <url>   → SEO elements
+1. "${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run render_page.py <url> --mode auto → raw/rendered HTML
+2. "${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run parse_html.py --url <url>   → SEO elements
 3. Analyze product-specific signals (below)
 ```
 
@@ -103,7 +103,7 @@ Live competitive analysis from Google Shopping results.
 
 Before EVERY Merchant API call:
 ```bash
-"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run dataforseo_costs.py check merchant_google_products_search
+"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run dataforseo_costs.py check merchant_google_products_search
 ```
 
 - `"status": "approved"` -- proceed
@@ -112,20 +112,20 @@ Before EVERY Merchant API call:
 
 After each call:
 ```bash
-"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run dataforseo_costs.py log merchant_google_products_search <cost>
+"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run dataforseo_costs.py log merchant_google_products_search <cost>
 ```
 
 ### Workflow
 
 ```bash
 # Product search: who sells what at what price
-"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run dataforseo_merchant.py search "<keyword>" --marketplace google
+"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run dataforseo_merchant.py search "<keyword>" --marketplace google
 
 # Seller analysis: merchant ratings and dominance
-"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run dataforseo_merchant.py sellers "<keyword>"
+"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run dataforseo_merchant.py sellers "<keyword>"
 
 # Normalize results for analysis
-"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run dataforseo_normalize.py results.json --module merchant
+"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run dataforseo_normalize.py results.json --module merchant
 ```
 
 ### Analysis Outputs
@@ -159,7 +159,7 @@ Cross-marketplace intelligence comparing Google Shopping and Amazon.
 ### Cost Guardrail (MANDATORY)
 
 ```bash
-"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run dataforseo_costs.py check merchant_amazon_products_search
+"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run dataforseo_costs.py check merchant_amazon_products_search
 ```
 
 Amazon endpoints are in the `warn_endpoints` set -- always requires user approval.
@@ -168,10 +168,10 @@ Amazon endpoints are in the `warn_endpoints` set -- always requires user approva
 
 ```bash
 # Amazon product search
-"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run dataforseo_merchant.py search "<keyword>" --marketplace amazon
+"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run dataforseo_merchant.py search "<keyword>" --marketplace amazon
 
 # Cross-marketplace comparison
-"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run dataforseo_merchant.py compare "<keyword>"
+"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run dataforseo_merchant.py compare "<keyword>"
 ```
 
 ### Cross-Marketplace Report
@@ -324,10 +324,10 @@ capability examples, and the relationship to AP2 (Agent Payments Protocol).
 
 ```bash
 # Discover and validate the UCP profile
-"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run ucp_check.py https://store.example.com --json
+"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run ucp_check.py https://store.example.com --json
 
 # With endpoint reachability probes (HEAD each declared capability)
-"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run ucp_check.py https://store.example.com --probe-endpoints --json
+"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run ucp_check.py https://store.example.com --probe-endpoints --json
 ```
 
 The script returns: profile presence, version, declared capabilities,

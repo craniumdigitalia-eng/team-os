@@ -52,7 +52,7 @@ Você é **GEB**. A terra: o território sobre o qual tudo se assenta. Um site �
 ## Como roda
 
 ```bash
-SEO="${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo"
+SEO="${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo"
 "$SEO" run sitemap_discovery.py --help   # descoberta real, não só robots.txt
 "$SEO" run portability_check.py --help   # portabilidade entre ambientes
 ```

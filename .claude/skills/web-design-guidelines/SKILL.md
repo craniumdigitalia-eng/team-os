@@ -3,6 +3,7 @@ name: web-design-guidelines
 description: "Review de código UI contra as Vercel Web Interface Guidelines — carrega as guidelines (remoto ou cache local) e reporta violações em formato file:line. Use ao \"revisar minha UI\", \"audit design\", \"review UX\" ou checar o site contra as guidelines da Vercel. Para acessibilidade/WCAG, use a skill accessibility."
 version: "1.0"
 updated: "2026-09-25"
+source: "https://github.com/vercel-labs/web-interface-guidelines"
 user-invocable: true
 argument-hint: "<file-or-pattern>"
 ---

@@ -7,8 +7,8 @@
 Todo `/team-os` pesa a memória na Fase 0. Se `WEIGH_STATUS=HEAVY` **ou** `WEIGH_ARCHIVABLE>0`, a Fase 2-F roda a fase **mecânica** sozinha, sem perguntar:
 
 ```bash
-bash "$CLAUDE_PROJECT_DIR/.claude/skills/team-os/scripts/compact-memory.sh" --mechanical-only   # só mv
-bash "$CLAUDE_PROJECT_DIR/.claude/skills/team-os/scripts/weigh-memory.sh" --quiet             # re-pesa
+bash "${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/team-os/scripts/compact-memory.sh" --mechanical-only   # só mv
+bash "${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/team-os/scripts/weigh-memory.sh" --quiet             # re-pesa
 ```
 
 - Move só o que já está decidido como frio: `stories/done/*`, notas `status: resolved|superseded` e `expires:` vencido. Nada é reescrito nem apagado (mesmas guardas do `*compact`).
@@ -28,7 +28,7 @@ O fluxo tem uma fase mecânica (script), uma de **consolidação** (archivist + 
 
 **Passo 1 — Mecânico (script, sempre primeiro):**
 ```bash
-bash "$CLAUDE_PROJECT_DIR/.claude/skills/team-os/scripts/compact-memory.sh" --dry-run   # colhe o plano mecânico
+bash "${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/team-os/scripts/compact-memory.sh" --dry-run   # colhe o plano mecânico
 ```
 O script arquiva automaticamente: `stories/done/*`, **toda nota com `status: resolved` ou `superseded`** e — novo no v3 — **toda nota com `expires: YYYY-MM-DD` vencido (TTL)** → `_archive/<Q>/expired/`, registrada no LEDGER como "(expired)". Nunca toca em `project/`, `decisions/`, stories ativas, `_inbox/`, DIGESTs e INDEXes. O dry-run também reporta o inbox pendente (`COMPACT_INBOX_PENDING=<n>` + lista `INBOX:`). Gordos de `WEIGH_FAT_LIST` entram no plano como candidatos via `--archive-file`. `WEIGH_DIGEST_OVER_LIST` (`path:linhas;…`, todo `DIGEST.md` acima de `DIGEST_MAX_LINES`, default 60) vai **inteiro** para o prompt do archivist (passo 3).
 
@@ -39,7 +39,7 @@ Durante as sessões, os agentes anotam barato em `docs/smart-memory/_inbox/` —
 2. **Funde, deduplica e supersede** contra os DIGESTs das áreas: cada informação vira fato atômico datado no DIGEST certo (Core ou Contexto recente), substituindo fato antigo quando for o caso; o que merecer nota própria vira nota com frontmatter v3 (`kind`/`status`/`summary`, `expires` se tiver prazo).
 3. **Zera o inbox**: para cada nota consolidada,
    ```bash
-   bash "$CLAUDE_PROJECT_DIR/.claude/skills/team-os/scripts/compact-memory.sh" --clear-inbox <arquivo>
+   bash "${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/team-os/scripts/compact-memory.sh" --clear-inbox <arquivo>
    ```
    (move para `_archive/<Q>/inbox/` + linha no LEDGER — nada é deletado).
 
@@ -97,9 +97,9 @@ Missão do archivist (substitua `{DIGEST_OVER_LIST}` pelo valor de `WEIGH_DIGEST
 
 **Passo 5 — Execução integral, sem mais perguntas:**
 ```bash
-bash "$CLAUDE_PROJECT_DIR/.claude/skills/team-os/scripts/compact-memory.sh"                     # done + resolved/superseded + TTL vencido
-bash "$CLAUDE_PROJECT_DIR/.claude/skills/team-os/scripts/compact-memory.sh" --archive-file <p>  # cada frio do plano semântico
-bash "$CLAUDE_PROJECT_DIR/.claude/skills/team-os/scripts/compact-memory.sh" --clear-inbox <f>   # cada inbox consolidado (se restou)
+bash "${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/team-os/scripts/compact-memory.sh"                     # done + resolved/superseded + TTL vencido
+bash "${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/team-os/scripts/compact-memory.sh" --archive-file <p>  # cada frio do plano semântico
+bash "${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/team-os/scripts/compact-memory.sh" --clear-inbox <f>   # cada inbox consolidado (se restou)
 ```
 
 **Passo 6 — Relatório de órfãos + re-pesagem:** todo modo do `compact-memory.sh` que move arquivo varre o working set por wikilinks `[[...]]` que apontavam para o que saiu e reporta `COMPACT_ORPHAN_LINKS=<n>` com a lista (`ORPHAN_LINK: [[nota]] ainda referenciado em: ...`). O lead (ou o archivist) corrige cada órfão — aponta para o LEDGER ou remove a referência. Ao final: re-pesar (`weigh-memory.sh`) e mostrar o **placar** — `weigh-memory.sh --report` imprime `WEIGH_REPORT=Memória: A → B linhas (±n) · bootstrap pior área X → Y tokens · N notas arquivadas` contra a baseline gravada na Fase 0 (`--save-start`). `WEIGH_DIGEST_OVER` tem que voltar a 0.

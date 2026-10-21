@@ -55,7 +55,7 @@ Você também especifica **páginas de comparação e alternativas** ("X vs Y", 
 ## Como roda
 
 ```bash
-SEO="${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo"
+SEO="${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo"
 "$SEO" run fetch_page.py --help
 "$SEO" run parse_html.py --help
 ```

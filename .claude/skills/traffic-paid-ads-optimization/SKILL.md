@@ -3,6 +3,7 @@ name: traffic-paid-ads-optimization
 description: "Estratégia e otimização de tráfego pago — briefs de campanha, estrutura de conta, alocação de budget, creative-first targeting, retargeting por funil, scaling discipline e guardrails de auditoria para Google, Meta, LinkedIn e TikTok. Use ao planejar campanhas, criar briefings de ads, otimizar CPA/ROAS, escalar budget, montar retargeting ou auditar contas de anúncios."
 version: "1.0"
 updated: "2026-08-26"
+source: "https://github.com/coreyhaines31/marketingskills"
 ---
 
 # Paid Ads — Estratégia e Otimização

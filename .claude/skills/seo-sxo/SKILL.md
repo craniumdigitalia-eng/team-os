@@ -1,8 +1,8 @@
 ---
 name: seo-sxo
 description: "Search Experience Optimization — lê a SERP do Google ao contrário para detectar descasamento de tipo de página, deriva user stories da intenção de busca e pontua páginas por persona; explica por que páginas bem otimizadas não ranqueiam. Use ao pedir 'SXO', 'page type mismatch', 'SERP analysis', 'persona scoring', 'intent mismatch' ou 'por que minha página não ranqueia'."
-version: "2.3.1"
-updated: "2026-09-25"
+version: "2.3.2"
+updated: "2026-10-20"
 user-invocable: true
 argument-hint: "<url> [keyword]"
 license: MIT
@@ -39,8 +39,8 @@ well-optimized it is.
 
 ### Step 1: Target Acquisition
 
-1. Fetch the target URL via `"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run render_page.py <URL> --mode auto` (SPA-aware and SSRF-safe)
-2. Parse with `"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run parse_html.py <URL>` to extract: title, H1, meta description,
+1. Fetch the target URL via `"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run render_page.py <URL> --mode auto` (SPA-aware and SSRF-safe)
+2. Parse with `"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run parse_html.py <URL>` to extract: title, H1, meta description,
    headings hierarchy, word count, schema markup, CTAs, media elements
 3. If no keyword provided, extract primary keyword from title tag + H1 overlap
 4. Validate keyword is non-empty before proceeding
@@ -240,7 +240,7 @@ The SXO score is **separate** from the main SEO Health Score.
 ## Quality Checklist
 
 Before delivering results, verify:
-- [ ] Target URL was fetched via `"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run render_page.py <URL> --mode auto` (not raw curl/fetch)
+- [ ] Target URL was fetched via `"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run render_page.py <URL> --mode auto` (not raw curl/fetch)
 - [ ] Page type classification uses taxonomy from references
 - [ ] At least 5 SERP results were analyzed
 - [ ] User stories cite specific SERP signals as evidence

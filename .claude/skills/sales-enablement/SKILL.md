@@ -3,6 +3,7 @@ name: sales-enablement
 description: "Materiais para o time de vendas — sales deck, pitch deck, one-pager, leave-behind, doc de objeções, análise de ROI por deal, demo script, talk track, playbook, template de proposta e buyer persona. Use ao criar qualquer documento ou asset que ajude vendedores a fechar negócios."
 version: "2.0.1"
 updated: "2026-09-25"
+source: "https://github.com/coreyhaines31/marketingskills"
 metadata:
   version: 2.0.1
 ---

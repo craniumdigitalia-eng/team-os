@@ -3,8 +3,18 @@
 # Usage: ./install-suggested-skills.sh <owner/repo> <skill-slug>
 #   OR bulk: passa pela stdin, uma por linha: owner/repo@slug
 # Limpa .agents/ extra criada pelo CLI — SÓ se ela não existia antes da execução
+# (manda para a Lixeira via trash.sh — nunca apaga).
+#
+# Opcional — usado só no passo "sugerir skills" do `*create` (SKILL.md do creator),
+# e só depois de o usuário confirmar cada skill. Precisa de rede.
+# CLI com versão FIXA (supply chain): troque SKILLS_CLI_VERSION conscientemente,
+# só para uma versão publicada há pelo menos 2 semanas.
 
-# Registrar ANTES de instalar se .agents/ já existia (senão o rm -rf do final
+SKILLS_CLI_VERSION="${SKILLS_CLI_VERSION:-1.7.1}"
+# shellcheck source=/dev/null
+. "$(cd "$(dirname "$0")" && pwd)/trash.sh"
+
+# Registrar ANTES de instalar se .agents/ já existia (senão a limpeza do final
 # apagaria um diretório legítimo do projeto)
 if [ -d ".agents" ]; then
   AGENTS_DIR_PREEXISTED=1
@@ -34,7 +44,7 @@ install_one() {
   fi
 
   echo "⬇️  Instalando $repo → $slug..."
-  if npx --yes skills add "$repo" -s "$slug" -a claude-code -y --copy >/dev/null 2>&1; then
+  if npx --yes "skills@${SKILLS_CLI_VERSION}" add "$repo" -s "$slug" -a claude-code -y --copy >/dev/null 2>&1; then
     echo "✅ $slug instalada"
   else
     echo "⚠️  Falha ao instalar $slug (rede? repo privado?)"
@@ -65,13 +75,13 @@ fi
 
 # Limpar .agents/ extra criado pelo CLI (só se não existia antes da execução)
 if [ -d ".agents" ] && [ "${AGENTS_DIR_PREEXISTED:-0}" -eq 0 ]; then
-  rm -rf .agents
+  team_os_trash .agents >/dev/null
 fi
 
 # Limpar pastas de outras ferramentas + lockfile criados pelo CLI (só o que não existia)
 for j in $CLI_JUNK skills-lock.json; do
   case " $JUNK_PREEXISTED " in *" $j "*) continue ;; esac
-  [ -e "$j" ] && rm -rf "$j"
+  [ -e "$j" ] && team_os_trash "$j" >/dev/null
 done
 
 exit $EXIT

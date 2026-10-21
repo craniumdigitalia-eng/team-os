@@ -3,6 +3,7 @@ name: negotiation
 description: "Preparar e conduzir negociações com empatia tática, perguntas calibradas e método Ackerman (Chris Voss). Use em negociação salarial, termos de contrato, objeções, conversa difícil, BATNA, ancoragem, pedir aumento, negociar com fornecedor ou disputa de preço. Cobre accusation audit, Black Swans e a técnica 'That's Right'."
 version: "1.5.0"
 updated: "2026-09-25"
+source: "https://github.com/wondelai/skills"
 license: MIT
 metadata:
   author: wondelai

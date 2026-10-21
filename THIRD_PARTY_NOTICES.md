@@ -50,21 +50,37 @@ o texto integral da MIT é o mesmo de [LICENSE](./LICENSE), trocando-se o titula
 
 | Skill | Autor | Licença | Origem / observação |
 |---|---|---|---|
-| `accessibility` | não identificado no arquivo (frontmatter declara apenas `license: MIT`) | MIT | origem não declarada; conteúdo baseado em WCAG 2.2 (W3C) e Lighthouse — **verificar autoria antes de redistribuir** |
+| `accessibility` | Addy Osmani | MIT — `Copyright (c) 2026 Addy Osmani` (LICENSE conferido em 2026-10-20) | https://github.com/addyosmani/web-quality-skills — adaptada (skill `accessibility`); conteúdo baseado em WCAG 2.2 (W3C) e Lighthouse |
 | `deep-research` | 199 Biotechnologies | MIT (README, "modify as needed") | https://github.com/199-biotechnologies/claude-deep-research-skill |
-| `negotiation` | wondelai | MIT | origem não declarada em URL (`metadata.author: wondelai`, v1.5.0) |
+| `negotiation` | Wondel.ai sp. z o.o. | MIT — `Copyright (c) 2025 Wondel.ai sp. z o.o.` (LICENSE conferido em 2026-10-20) | https://github.com/wondelai/skills (commit 0dea03f; `metadata.author: wondelai`, v1.5.0) |
 | `presentation-design` | jwynia | MIT | origem não declarada em URL (`metadata.author: jwynia`, v1.0) |
-| `pricing` | não declarado (`metadata.version: 2.1.1`; referencia skills irmãs `paywalls`, `offers`) | **licença upstream não localizada; verificar antes de redistribuir** | origem não declarada |
-| `sales-enablement` | não declarado (`metadata.version: 2.0.1`; referencia skills irmãs `competitors`, `copywriting`, `cold-email`, `offers`) | **licença upstream não localizada; verificar antes de redistribuir** | origem não declarada |
-| `slides` | claudekit | **licença upstream não localizada; verificar antes de redistribuir** | `metadata.author: claudekit`, v1.0.0; repositório não localizado |
+| `slides` | Next Level Builder (`metadata.author: claudekit`) | MIT — `Copyright (c) 2024 Next Level Builder` (LICENSE conferido em 2026-10-20) | https://github.com/nextlevelbuilder/ui-ux-pro-max-skill (skill `slides` do mesmo repositório da `ui-ux-pro-max`) |
 | `startup-financial-modeling` | não declarado (corpo menciona adaptação ao "Codex 8 KB skill body cap") | **licença upstream não localizada; verificar antes de redistribuir** | origem não declarada |
-| `ui-ux-pro-max` | nextlevelbuilder | MIT (LICENSE do repositório upstream, conferido em 2026-09-25) | https://github.com/nextlevelbuilder/ui-ux-pro-max-skill — inclui dados derivados de Google Fonts (licenças por família em `data/google-font-licenses.json`) e Phosphor Icons (`data/phosphor-icons-upstream.json`, MIT) |
+| `ui-ux-pro-max` | Next Level Builder | MIT — `Copyright (c) 2024 Next Level Builder` (LICENSE conferido em 2026-09-25) | https://github.com/nextlevelbuilder/ui-ux-pro-max-skill — inclui dados derivados de Google Fonts (licenças por família em `data/google-font-licenses.json`) e Phosphor Icons (`data/phosphor-icons-upstream.json`, MIT) |
 | `ai-ml-data-science` | não declarado | **licença upstream não localizada; verificar antes de redistribuir** | importada em 2026-06-18 (commit 65743d2) sem metadados de origem; cita `data/sources.json` |
 | `ai-ml-timeseries` | não declarado | **licença upstream não localizada; verificar antes de redistribuir** | idem |
 | `data-analytics-engineering` | não declarado | **licença upstream não localizada; verificar antes de redistribuir** | idem |
 | `data-lake-platform` | não declarado | **licença upstream não localizada; verificar antes de redistribuir** | idem |
 | `data-sql-optimization` | não declarado | **licença upstream não localizada; verificar antes de redistribuir** | idem |
-| `web-design-guidelines` | João Guirunas (skill) — carrega as **Vercel Web Interface Guidelines** em runtime | MIT (skill); guidelines © Vercel, uso conforme o repositório da Vercel | conteúdo externo não é vendorizado |
+| `web-design-guidelines` | João Guirunas (skill); guidelines: Vercel Labs | MIT (skill); guidelines MIT — `Copyright (c) 2025 Vercel Labs` (LICENSE conferido em 2026-10-20) | https://github.com/vercel-labs/web-interface-guidelines — `guidelines-cache.md` **é cópia vendorizada** dessas guidelines |
+
+## marketingskills (Corey Haines)
+
+Repositório [coreyhaines31/marketingskills](https://github.com/coreyhaines31/marketingskills), licença MIT —
+`Copyright (c) 2025 Corey Haines` (LICENSE conferido em 2026-10-20, commit 22dcd26).
+
+| Skill | Origem no repositório | Como entrou no pack |
+|---|---|---|
+| `pricing` | `skills/pricing` (v2.1.4) | importada e traduzida para pt-BR, com correções (Van Westendorp, guardrail de página buscada, skills relacionadas e contexto via smart-memory) |
+| `sales-enablement` | `skills/sales-enablement` | importada e adaptada |
+| `traffic-paid-ads-optimization` | `skills/ads` (ex-`paid-ads`) | adaptada (método reescrito em pt-BR, expandido) |
+| `traffic-analytics-tracking` | `skills/analytics` (ex-`analytics-tracking`) | adaptada (método reescrito em pt-BR, expandido) |
+
+## superpowers (Jesse Vincent)
+
+| Skill | Origem | Licença | Como entrou no pack |
+|---|---|---|---|
+| `verify-before-done` | [obra/superpowers](https://github.com/obra/superpowers) — `skills/verification-before-completion` | MIT — `Copyright (c) 2025 Jesse Vincent` (LICENSE conferido em 2026-10-20) | adaptada (reescrita em pt-BR no padrão do pack) |
 
 ## Conteúdo adaptado de agency-agents
 

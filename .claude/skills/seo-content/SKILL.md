@@ -1,8 +1,8 @@
 ---
 name: seo-content
 description: "Qualidade de conteúdo e E-E-A-T com avaliação de prontidão para citação por IA, mais limpeza final de rascunho (frases típicas de IA e caracteres Unicode invisíveis). Use ao pedir 'content quality', 'E-E-A-T', 'readability', 'thin content', 'content audit', 'humanize', 'AI phrasing' ou 'remove watermarks'."
-version: "2.3.1"
-updated: "2026-09-25"
+version: "2.3.2"
+updated: "2026-10-20"
 user-invocable: true
 argument-hint: "[url]"
 license: MIT
@@ -141,8 +141,8 @@ For "humanize this", "remove watermarks", or "clean up this draft", run the
 bundled cleanup script on the user's own content:
 
 ```bash
-"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run content_humanize.py draft.md -o cleaned.md
-cat draft.md | "${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run content_humanize.py --json
+"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run content_humanize.py draft.md -o cleaned.md
+cat draft.md | "${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run content_humanize.py --json
 ```
 
 Two deterministic passes, both logged in the JSON output:

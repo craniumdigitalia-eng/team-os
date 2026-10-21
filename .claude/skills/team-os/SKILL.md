@@ -3,8 +3,8 @@ name: team-os
 description: "Bootstrap e orquestração de sessão para Claude Code Agent Teams. Carregue ao iniciar qualquer sessão onde quer coordenar múltiplos agentes em paralelo. Verifica e configura o ambiente (AGENT_TEAMS, teammateMode), lê ou cria a smart-memory, pergunta o objetivo, analisa o paralelismo real e propõe um time dimensionado para máxima velocidade. Trigger: /team-os"
 user-invocable: true
 argument-hint: "[*env | *memory | *compact [--auto] | *tasks | *spawn <objetivo> | *status]"
-version: "3.0"
-updated: "2026-09-25"
+version: "3.1"
+updated: "2026-10-20"
 ---
 
 # team-os — Agent Teams Bootstrap
@@ -139,7 +139,7 @@ Executar em paralelo, sem output:
 1. (Gate 0 já confirmou o runtime) Ler `teammateMode` em `~/.claude/settings.json`
 2. Listar `.claude/agents/` **do projeto atual** → contar os agentes **instalados aqui** e agrupar por squad (prefixo `dev-`/`sites-`/`social-`/`traffic-`/`pm-`/`sales-`/`brand-`/`finance-`/`legal-`/`seo-`/`security-`). **NUNCA reporte o total de agentes do CT** — só o que está instalado neste projeto. Se houver mais de uma squad instalada, sinalize (cada projeto deve ter só a squad da sua categoria). **Exceção:** se o projeto é o próprio CT — detectado pela existência de `.claude/skills/team-os-creator/` — múltiplas squads são o esperado (é o repositório fonte): **não** mostre o aviso de múltiplas squads.
 3. Verificar `docs/smart-memory/INDEX.md` → ler se existe (contexto geral). As **stories ativas** são extraídas **diretamente de `docs/smart-memory/stories/active/*.md`** (frontmatter `summary`/`status` de cada arquivo) — não do INDEX.
-4. **Pesar a smart-memory** (barato, determinístico) → rodar `bash "$CLAUDE_PROJECT_DIR/.claude/skills/team-os/scripts/weigh-memory.sh" --quiet --save-start` e capturar o bloco `WEIGH_*` (o `--save-start` grava a baseline do **placar** da sessão). O script emite:
+4. **Pesar a smart-memory** (barato, determinístico) → rodar `bash "${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/team-os/scripts/weigh-memory.sh" --quiet --save-start` e capturar o bloco `WEIGH_*` (o `--save-start` grava a baseline do **placar** da sessão). O script emite:
    - `WEIGH_DASHBOARD` — **só o valor** (sem prefixo de rótulo; o rótulo `smart-memory :` é do painel da Fase 1)
    - `WEIGH_BOOTSTRAP_<AREA>` — custo estimado de leitura inicial (L0) por área, em tokens, mais o pior caso (`WEIGH_BOOTSTRAP_MAX`) e o budget (default **2000 tokens**)
    - `WEIGH_STATUS` — se `HEAVY`, o painel sinaliza a compactação. Ver "Smart-Memory Compaction".
@@ -188,7 +188,7 @@ Sugerir (não forçar): `"auto"` — split panes quando tmux/iTerm2 disponível,
 
 **C) Settings do projeto (garantia dura, idempotente) — rodar o script, NUNCA editar settings à mão:**
 ```bash
-bash "$CLAUDE_PROJECT_DIR/.claude/skills/team-os/scripts/ensure-settings.sh"          # --dry-run mostra o merge sem gravar
+bash "${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/team-os/scripts/ensure-settings.sh"          # --dry-run mostra o merge sem gravar
 ```
 O script garante no `.claude/settings.json` do projeto (criando o arquivo se não existir, preservando todo o resto): `env.CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS="1"`, `"worktree": { "bgIsolation": "none" }` (desliga worktree automático de background tasks), `"subagentPromptCacheTtl": "1h"` e os hooks padrão — **PreToolUse** do `block-worktree.sh` (matchers `Agent|Task|EnterWorktree` e `Bash` — bloqueia `isolation: worktree`, EnterWorktree e `git worktree add`), `guard-smart-memory-read.sh` (`Read|Bash`) e `guard-message-size.sh` (`SendMessage`), **TaskCreated** (`task-quality.sh` — rejeita task vaga) e **TaskCompleted** com os 5 gates (`check-story-progress.sh` — story só fecha com evidência; `check-social-progress.sh`, `check-proposal-progress.sh`, `check-finance-progress.sh`, `check-legal-progress.sh` — publicação, proposta, dinheiro e saída jurídica só com PASS + confirmação do usuário). Só adiciona o que falta — nunca duplica nem remove chaves existentes, e valida o JSON final. Rodá-lo é exceção legítima da Lead Discipline (bootstrap de orquestração).
 Se o script avisar hook ausente em `.claude/hooks/`, rodar `/team-os-creator *propagate` no CT (os hooks são distribuídos de lá).
@@ -198,7 +198,7 @@ Se o script avisar hook ausente em `.claude/hooks/`, rodar `/team-os-creator *pr
   `"Smart-memory não encontrada. Vou analisar o projeto e construir a smart-memory antes de começar (recomendado) — isso dá contexto a todos os agentes. Pode ser?"`
 - **Existe mas incompleta** (faltam áreas `agents/<squad>/<área>/` da squad instalada, `DIGEST.md` de área, `_inbox/`, subpastas de `stories/`; ou layout antigo `agents/<área>/` sem squad): o **caminho padrão de conserto é `--repair`** — só completa o que falta, **nunca sobrescreve** conteúdo existente, e **migra** (`mv`, logado) `agents/<área>/` → `agents/<squad>/<área>/` quando há uma só squad instalada e `docs/smart-memory/pm/*.md` → `agents/pm/`:
   ```bash
-  bash "$CLAUDE_PROJECT_DIR/.claude/skills/team-os/scripts/discovery.sh" --repair
+  bash "${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/team-os/scripts/discovery.sh" --repair
   ```
 - **`--force`** regenera a base do zero, mas faz **backup automático** da base atual antes de tocar em qualquer arquivo — use só com pedido explícito do usuário, nunca como conserto de rotina.
 
@@ -308,7 +308,7 @@ Quando `docs/smart-memory/` não existe, o team-os **não cria scaffolding vazio
 **Processo de discovery:**
 1. **Rodar o script determinístico** (faz a detecção e gera a base populada):
    ```bash
-   bash "$CLAUDE_PROJECT_DIR/.claude/skills/team-os/scripts/discovery.sh"          # ou --dry-run para só inspecionar
+   bash "${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/team-os/scripts/discovery.sh"          # ou --dry-run para só inspecionar
    ```
    Detecta stack e módulos e gera `INDEX.md` (linka `[[agents/<squad>/<área>/DIGEST]]` e `[[stories/active/]]`), `project/*.md`, `stories/BACKLOG.md` + `stories/{backlog,active,in-review,done}/`, `decisions/`, `_inbox/` e as áreas **`agents/<squad>/<área>/`** — lidas da linha `**Área na smart-memory:**` de cada agente em `.claude/agents/` (fallback: tabela por squad) — cada uma com seu `DIGEST.md`. Self-contained (só depende da skill team-os).
    **Modos:** `--repair` completa uma base existente sem sobrescrever nada (caminho padrão de conserto); `--force` regenera do zero com backup automático da base atual.
@@ -323,7 +323,7 @@ Use `team-os/reference/obsidian-patterns.md` para o padrão de frontmatter/wikil
 
 ## Leitura em camadas (L0 → L1 → L2)
 
-Regra de ouro: **summary-first** — ninguém abre nota inteira sem o `summary` do frontmatter confirmar relevância (é o que o `*memory` verifica e o bloco do CLAUDE.md impõe a todo agente). **L0** (sempre, e só isto): `INDEX.md` + `DIGEST.md` da sua área (`agents/<squad>/<área>/DIGEST.md`, path na linha `**Área na smart-memory:**` do agente) + `stories/active/*.md`. O DIGEST tem "Core (permanente)" e "Contexto recente (expira ~14 dias)"; todo fato é atômico e datado, fato novo **substitui** o antigo. **L1**: `bash "$CLAUDE_PROJECT_DIR/.claude/skills/team-os/scripts/sm-find.sh" "<termo>"` — busca pelos `summary` e devolve `path / kind / status / summary` sem abrir nota. **L2**: nota inteira só com summary confirmando — **máx 3 notas por tarefa**. ⛔ Nunca ler pastas inteiras, `_archive/` ou notas "para ver se tem algo útil" — o hook `guard-smart-memory-read.sh` bloqueia `_archive/`, pasta inteira e a 4ª nota L2 sem nova busca (o `sm-find.sh` zera o contador). O custo do L0 por área é o `WEIGH_BOOTSTRAP_<AREA>` do `weigh-memory.sh` (budget 2000 tokens) — linha `bootstrap` do painel.
+Regra de ouro: **summary-first** — ninguém abre nota inteira sem o `summary` do frontmatter confirmar relevância (é o que o `*memory` verifica e o bloco do CLAUDE.md impõe a todo agente). **L0** (sempre, e só isto): `INDEX.md` + `DIGEST.md` da sua área (`agents/<squad>/<área>/DIGEST.md`, path na linha `**Área na smart-memory:**` do agente) + `stories/active/*.md`. O DIGEST tem "Core (permanente)" e "Contexto recente (expira ~14 dias)"; todo fato é atômico e datado, fato novo **substitui** o antigo. **L1**: `bash "${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/team-os/scripts/sm-find.sh" "<termo>"` — busca pelos `summary` e devolve `path / kind / status / summary` sem abrir nota. **L2**: nota inteira só com summary confirmando — **máx 3 notas por tarefa**. ⛔ Nunca ler pastas inteiras, `_archive/` ou notas "para ver se tem algo útil" — o hook `guard-smart-memory-read.sh` bloqueia `_archive/`, pasta inteira e a 4ª nota L2 sem nova busca (o `sm-find.sh` zera o contador). O custo do L0 por área é o `WEIGH_BOOTSTRAP_<AREA>` do `weigh-memory.sh` (budget 2000 tokens) — linha `bootstrap` do painel.
 
 ---
 

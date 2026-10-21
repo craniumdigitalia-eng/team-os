@@ -42,7 +42,7 @@ content abuse.
 - For per-page hreflang validation, stay inside `seo-hreflang`.
 - For broader scaled-content scoring (entropy of translated pages,
   AI-pattern detection in body), defer to `seo-content` via
-  `"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run content_quality.py`.
+  `"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run content_quality.py`.
 - For "is this translated by Google's own auto-translate widget"
   detection, look for the `.goog-te-banner-frame` iframe. There is **no
   per-mechanism exemption**: in June 2025 Google removed the

@@ -1,8 +1,8 @@
 ---
 name: seo-ahrefs
 description: "Analista da API Ahrefs via MCP @ahrefs/mcp — referring domains, backlinks, keywords orgânicas e Content Explorer. Combina com seo-backlinks para ponderação de confiança multi-fonte. Use ao pedir dados Ahrefs, DR/UR ou backlinks ao vivo."
-version: "2.3.1"
-updated: "2026-09-25"
+version: "2.3.2"
+updated: "2026-10-20"
 user-invocable: true
 argument-hint: "[metrics|backlinks|organic|content] <url|topic>"
 metadata:
@@ -50,7 +50,7 @@ point to the `.mcp.json` / `claude mcp add` setup above.
 
 Ahrefs API usage is metered per unit. Before running a batch (>= 50 URLs):
 
-1. Estimate cost with `"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run dataforseo_costs.py` (the cost-tracker module is generic and supports Ahrefs unit accounting).
+1. Estimate cost with `"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run dataforseo_costs.py` (the cost-tracker module is generic and supports Ahrefs unit accounting).
 2. Surface the estimate to the orchestrator.
 3. Log actual cost after each call.
 

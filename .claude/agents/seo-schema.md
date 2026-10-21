@@ -50,7 +50,7 @@ JSON-LD é o formato — microdata e RDFa só entram no relatório quando já ex
 ## Como roda
 
 ```bash
-SEO="${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo"
+SEO="${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo"
 "$SEO" run schema_generate.py --help            # gera JSON-LD por tipo
 "$SEO" run schema_ecommerce_validate.py --help  # Product/Offer/AggregateRating
 "$SEO" run gbp_deprecation_lint.py --help       # propriedades locais aposentadas

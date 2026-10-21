@@ -66,7 +66,7 @@ Dado de campo (CrUX, GSC) descreve usuários reais; dado de laboratório (Lighth
 ## Como roda
 
 ```bash
-SEO="${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo"
+SEO="${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo"
 "$SEO" run google_auth.py --check        # há credencial?
 "$SEO" run gsc_query.py --help           # performance de busca
 "$SEO" run gsc_inspect.py --help         # inspeção de URL

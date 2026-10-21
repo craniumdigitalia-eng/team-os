@@ -52,7 +52,7 @@ Cada categoria devolve: status, os achados com severidade, e o comando que produ
 ## Como roda
 
 ```bash
-SEO="${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo"
+SEO="${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo"
 "$SEO" run fetch_page.py --help          # busca segura (SSRF/DNS-rebinding)
 "$SEO" run parse_html.py --help          # meta, canonical, headers
 "$SEO" run render_page.py --help         # render headless para SPA

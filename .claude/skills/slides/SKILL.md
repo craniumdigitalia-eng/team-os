@@ -3,6 +3,7 @@ name: slides
 description: "Criar apresentações HTML estratégicas com Chart.js, design tokens, layouts responsivos, fórmulas de copywriting e estratégias de slide por contexto. Use ao montar deck de marketing, pitch ou slides com dados."
 version: "1.0.0"
 updated: "2026-09-25"
+source: "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill"
 user-invocable: true
 argument-hint: "[topic] [slide-count]"
 metadata:

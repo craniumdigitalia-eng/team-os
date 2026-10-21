@@ -53,7 +53,7 @@ Uma keyword só entra num cluster com a evidência da sobreposição registrada.
 ## Como roda
 
 ```bash
-SEO="${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo"
+SEO="${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo"
 "$SEO" run nlp_analyze.py --help        # entidades e proximidade semântica
 "$SEO" run keyword_planner.py --help    # volume via Google Ads (exige credencial)
 ```

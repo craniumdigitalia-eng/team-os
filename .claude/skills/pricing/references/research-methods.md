@@ -1,152 +1,171 @@
-# Pricing Research Methods
+# Métodos de pesquisa de preço
 
-## Contents
-- Van Westendorp Price Sensitivity Meter (The Four Questions, How to Analyze, Survey Tips, Sample Output)
-- MaxDiff Analysis (How It Works, Example Survey Question, Analyzing Results, Using MaxDiff for Packaging)
-- Willingness to Pay Surveys
-- Usage-Value Correlation Analysis
+## Conteúdo
+- Van Westendorp (as quatro perguntas, como analisar, dicas, exemplo de saída)
+- MaxDiff (como funciona, exemplo de pergunta, leitura, uso no empacotamento)
+- Pesquisas de disposição a pagar
+- Correlação uso × valor
 
-## Van Westendorp Price Sensitivity Meter
+## Van Westendorp (Price Sensitivity Meter)
 
-The Van Westendorp survey identifies the acceptable price range for your product.
+A pesquisa Van Westendorp mapeia a faixa de preço que o público **percebe** como aceitável. Ela mede percepção, não demanda.
 
-### The Four Questions
+### As quatro perguntas
 
-Ask each respondent:
-1. "At what price would you consider [product] to be so expensive that you would not consider buying it?" (Too expensive)
-2. "At what price would you consider [product] to be priced so low that you would question its quality?" (Too cheap)
-3. "At what price would you consider [product] to be starting to get expensive, but you still might consider it?" (Expensive/high side)
-4. "At what price would you consider [product] to be a bargain—a great buy for the money?" (Cheap/good value)
+Pergunte a cada respondente:
+1. "A partir de que preço você acharia [produto] tão caro que nem consideraria comprar?" (Caro demais)
+2. "A partir de que preço você acharia [produto] tão barato que duvidaria da qualidade?" (Barato demais)
+3. "A partir de que preço você acharia [produto] caro, mas ainda consideraria?" (Caro)
+4. "A partir de que preço você acharia [produto] uma pechincha — ótima compra pelo que custa?" (Barato / bom negócio)
 
-### How to Analyze
+### Como analisar
 
-1. Plot cumulative distributions for each question
-2. Find the intersections:
-   - **Point of Marginal Cheapness (PMC):** "Too cheap" crosses "Expensive"
-   - **Point of Marginal Expensiveness (PME):** "Too expensive" crosses "Cheap"
-   - **Optimal Price Point (OPP):** "Too cheap" crosses "Too expensive"
-   - **Indifference Price Point (IDP):** "Expensive" crosses "Cheap"
+1. **Valide as respostas antes de plotar.** Tudo na mesma moeda, no mesmo período de cobrança (mensal ou anual) e para a mesma descrição de produto. Sinalize resposta faltando, não numérica ou com ordem inconsistente — a ordem esperada é `barato demais ≤ barato ≤ caro ≤ caro demais`. Registre quantas respostas foram excluídas e por quê; nunca "corrija" uma resposta em silêncio.
+2. **Monte as quatro curvas** com o preço candidato no eixo x e a fração de respondentes no eixo y. As duas curvas de "barato" **caem** à medida que o preço sobe; as duas de "caro" **sobem**. Para cada preço candidato `p`:
 
-**The acceptable price range:** PMC to PME
-**Optimal pricing zone:** Between OPP and IDP
+   | Curva | Fração a plotar | Direção |
+   |-------|-----------------|---------|
+   | Barato demais | respondentes cujo limite "barato demais" é **≥ `p`** | decrescente |
+   | Barato / bom negócio | respondentes cujo limite "barato" é **≥ `p`** | decrescente |
+   | Caro | respondentes cujo limite "caro" é **≤ `p`** | crescente |
+   | Caro demais | respondentes cujo limite "caro demais" é **≤ `p`** | crescente |
 
-### Survey Tips
-- Need 100-300 respondents for reliable data
-- Segment by persona (different willingness to pay)
-- Use realistic product descriptions
-- Consider adding purchase intent questions
+   Para os pontos marginais use também as **curvas invertidas**: **"não barato" = 1 − "barato"** (crescente) e **"não caro" = 1 − "caro"** (decrescente).
 
-### Sample Output
+   **Erro clássico:** aplicar uma distribuição acumulada crescente às quatro perguntas. Isso inverte o sentido das curvas de "barato" e desloca todos os cruzamentos. A curva "barato demais" tem de cair conforme o preço sobe (ver o [exemplo da Sawtooth](https://sawtoothsoftware.com/resources/blog/posts/van-westendorp-pricing-sensitivity-meter)).
+
+   **Regra de empate:** respostas exatamente iguais a `p` entram com a convenção da tabela (≥ nas curvas de barato, ≤ nas de caro). Use a mesma convenção em todas as curvas e registre-a no relatório. Quando o cruzamento cair entre dois preços da grade, interpole linearmente entre eles e diga que interpolou; se as curvas se tocam num intervalo, informe o intervalo, não um ponto.
+3. **Encontre os cruzamentos:**
+   - **Ponto de barateza marginal (PMC):** "barato demais" cruza **"não barato"**
+   - **Ponto de carestia marginal (PME):** "caro demais" cruza **"não caro"**
+   - **Optimal Price Point (OPP):** "barato demais" cruza "caro demais"
+   - **Ponto de indiferença (IDP):** "barato" cruza "caro"
+
+**Faixa de preço aceitável (percebida):** de PMC a PME.
+**Preços candidatos a teste:** OPP e IDP ajudam a montar uma lista curta; **não** definem uma zona economicamente ótima.
+
+As quatro perguntas medem percepção de preço, não probabilidade de compra. Antes de projetar demanda, use pesquisa adicional de intenção de compra (por exemplo a extensão Newton-Miller-Smith, declarando as premissas), um estudo de escolha (conjoint) ou teste real de preço. Compare receita, margem e retenção: um preço aceitável mais alto **não garante** demanda igual. Ver a [explicação da Sawtooth sobre o método e seus limites](https://sawtoothsoftware.com/resources/blog/posts/van-westendorp-pricing-sensitivity-meter).
+
+### Dicas de pesquisa
+- 100–300 respondentes para um resultado confiável (por segmento analisado)
+- Segmente por persona (disposição a pagar muda)
+- Use descrições realistas do produto
+- Acrescente perguntas de intenção de compra se for falar de demanda
+
+### Exemplo de saída
 
 ```
-Price Sensitivity Analysis Results:
+Sensibilidade a preço — resultado:
 ─────────────────────────────────
-Point of Marginal Cheapness:  $29/mo
-Optimal Price Point:          $49/mo
-Indifference Price Point:     $59/mo
-Point of Marginal Expensiveness: $79/mo
+Respostas válidas:              212 de 230 (18 excluídas: ordem inconsistente)
+Convenção de empate:            ≥ nas curvas de barato, ≤ nas de caro
+Ponto de barateza marginal:     29/mês
+Optimal Price Point:            49/mês
+Ponto de indiferença:           59/mês
+Ponto de carestia marginal:     79/mês
 
-Recommended range: $49-59/mo
-Current price: $39/mo (below optimal)
-Opportunity: 25-50% price increase without significant demand impact
+Preços candidatos a teste:      49 e 59/mês
+Preço atual:                    39/mês
+Variação:                       +25,6% e +51,3%
+Impacto em demanda, conversão e churn: NÃO medido por estas quatro perguntas
+Próximo passo: validar comportamento de compra e unit economics antes de implantar
 ```
 
 ---
 
-## MaxDiff Analysis (Best-Worst Scaling)
+## MaxDiff (Best-Worst Scaling)
 
-MaxDiff identifies which features customers value most, informing packaging decisions.
+O MaxDiff mostra quais funcionalidades o cliente mais valoriza e orienta o empacotamento.
 
-### How It Works
+### Como funciona
 
-1. List 8-15 features you could include
-2. Show respondents sets of 4-5 features at a time
-3. Ask: "Which is MOST important? Which is LEAST important?"
-4. Repeat across multiple sets until all features compared
-5. Statistical analysis produces importance scores
+1. Liste 8–15 funcionalidades candidatas
+2. Mostre conjuntos de 4–5 por vez
+3. Pergunte: "Qual é a MAIS importante? Qual é a MENOS importante?"
+4. Repita em vários conjuntos até comparar todas
+5. A análise estatística gera um índice de importância
 
-### Example Survey Question
+### Exemplo de pergunta
 
 ```
-Which feature is MOST important to you?
-Which feature is LEAST important to you?
+Qual funcionalidade é a MAIS importante para você?
+Qual funcionalidade é a MENOS importante para você?
 
-□ Unlimited projects
-□ Custom branding
-□ Priority support
-□ API access
-□ Advanced analytics
+□ Projetos ilimitados
+□ Marca própria
+□ Suporte prioritário
+□ Acesso à API
+□ Analytics avançado
 ```
 
-### Analyzing Results
+### Leitura
 
-Features are ranked by utility score:
-- High utility = Must-have (include in base tier)
-- Medium utility = Differentiator (use for tier separation)
-- Low utility = Nice-to-have (premium tier or cut)
+Funcionalidades ordenadas pelo índice de utilidade:
+- Alta = obrigatória (entra no plano de entrada)
+- Média = diferencial (separa os planos)
+- Baixa = desejável (plano premium ou corte)
 
-### Using MaxDiff for Packaging
+### Uso no empacotamento
 
-| Utility Score | Packaging Decision |
-|---------------|-------------------|
-| Top 20% | Include in all tiers (table stakes) |
-| 20-50% | Use to differentiate tiers |
-| 50-80% | Higher tiers only |
-| Bottom 20% | Consider cutting or premium add-on |
+| Faixa de utilidade | Decisão |
+|--------------------|---------|
+| 20% do topo | Em todos os planos (o mínimo esperado) |
+| 20–50% | Diferencia os planos |
+| 50–80% | Só nos planos mais altos |
+| 20% de baixo | Cortar ou virar add-on premium |
 
 ---
 
-## Willingness to Pay Surveys
+## Pesquisas de disposição a pagar
 
-**Direct method (simple but biased):**
-"How much would you pay for [product]?"
+**Pergunta direta (simples, mas enviesada):**
+"Quanto você pagaria por [produto]?"
 
-**Better: Gabor-Granger method:**
-"Would you buy [product] at [$X]?" (Yes/No)
-Vary price across respondents to build demand curve.
+**Melhor: Gabor-Granger:**
+"Você compraria [produto] por [X]?" (sim/não)
+Varie o preço entre respondentes para montar uma curva de demanda declarada.
 
-**Even better: Conjoint analysis:**
-Show product bundles at different prices
-Respondents choose preferred option
-Statistical analysis reveals price sensitivity per feature
+**Ainda melhor: análise conjunta (conjoint):**
+Mostre pacotes com preços diferentes; o respondente escolhe o preferido. A análise revela a sensibilidade a preço por funcionalidade.
+
+Todas medem intenção declarada. Antes de prometer impacto em receita, confirme com comportamento real (teste de preço com clientes novos).
 
 ---
 
-## Usage-Value Correlation Analysis
+## Correlação uso × valor
 
-### 1. Instrument usage data
-Track how customers use your product:
-- Feature usage frequency
-- Volume metrics (users, records, API calls)
-- Outcome metrics (revenue generated, time saved)
+### 1. Instrumente o uso
+- Frequência de uso por funcionalidade
+- Métricas de volume (usuários, registros, chamadas de API)
+- Métricas de resultado (receita gerada, tempo economizado)
 
-### 2. Correlate with customer success
-- Which usage patterns predict retention?
-- Which usage patterns predict expansion?
-- Which customers pay the most, and why?
+### 2. Cruze com sucesso do cliente
+- Que padrões de uso preveem retenção?
+- Que padrões preveem expansão?
+- Quem paga mais, e por quê?
 
-### 3. Identify value thresholds
-- At what usage level do customers "get it"?
-- At what usage level do they expand?
-- At what usage level should price increase?
+### 3. Ache os limiares de valor
+- Em que nível de uso o cliente "entende" o produto?
+- Em que nível ele expande?
+- Em que nível o preço deveria subir?
 
-### Example Analysis
+### Exemplo
 
 ```
-Usage-Value Correlation Analysis:
+Correlação uso × valor:
 ─────────────────────────────────
-Segment: High-LTV customers (>$10k ARR)
-Average monthly active users: 15
-Average projects: 8
-Average integrations: 4
+Segmento: clientes de LTV alto (>10 mil/ano)
+Usuários ativos/mês (média): 15
+Projetos (média): 8
+Integrações (média): 4
 
-Segment: Churned customers
-Average monthly active users: 3
-Average projects: 2
-Average integrations: 0
+Segmento: clientes que cancelaram
+Usuários ativos/mês (média): 3
+Projetos (média): 2
+Integrações (média): 0
 
-Insight: Value correlates with team adoption (users)
-        and depth of use (integrations)
+Leitura: valor acompanha adoção pelo time (usuários)
+         e profundidade de uso (integrações)
 
-Recommendation: Price per user, gate integrations to higher tiers
+Recomendação: cobrar por usuário, integrações nos planos mais altos
 ```

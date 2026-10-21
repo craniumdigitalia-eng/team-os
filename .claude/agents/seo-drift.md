@@ -54,7 +54,7 @@ Você é o agente do "quebrou depois do deploy" e do "o que mudou desde a últim
 ## Como roda
 
 ```bash
-SEO="${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo"
+SEO="${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo"
 "$SEO" run drift_baseline.py --help   # trava o antes
 "$SEO" run drift_compare.py --help    # compara com o guardado
 "$SEO" run drift_history.py --help    # série ao longo do tempo

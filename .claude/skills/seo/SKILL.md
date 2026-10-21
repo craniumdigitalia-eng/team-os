@@ -1,8 +1,8 @@
 ---
 name: seo
 description: "Análise de SEO completa para qualquer site ou negócio — auditoria full, página única, SEO técnico (crawl, indexação, Core Web Vitals/INP), schema, qualidade de conteúdo (E-E-A-T), imagens, sitemap e GEO para AI Overviews/ChatGPT/Perplexity, com detecção de setor. Gatilhos: SEO, audit, schema, Core Web Vitals, sitemap, E-E-A-T, AI Overviews, GEO, page speed."
-version: "2.3.1"
-updated: "2026-09-25"
+version: "2.3.2"
+updated: "2026-10-20"
 user-invocable: true
 argument-hint: "[command] [url]"
 license: MIT
@@ -17,9 +17,9 @@ metadata:
 **Invocation:** `/seo $1 $2` where `$1` is the command and `$2` is the URL or argument.
 
 **Runtime:** Run bundled Python tools through
-`"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run <script.py>`. That is the single
+`"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run <script.py>`. That is the single
 canonical form used by every skill and agent. Claude Code expands
-`${CLAUDE_PROJECT_DIR}/.claude/skills/seo` to the installed plugin directory, so the launcher is
+`${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo` to the installed plugin directory, so the launcher is
 found without any `PATH` entry; the repository ships no top-level `bin/`
 directory because hosted marketplaces reject one. Repository users run
 `./scripts/claude-seo`; manual installers rewrite the canonical form to
@@ -35,8 +35,8 @@ integration + 2 extension mirrors) and 15 sub-agents (ver "Subagents").
 Pré-requisitos e setup do runtime isolado (feito uma vez por máquina, por projeto):
 
 1. **Python 3.10+** disponível como `python3` (ou aponte um interpretador com `CLAUDE_SEO_PYTHON=/caminho/python3`).
-2. Rode `"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" setup` (ou `/seo setup`). O launcher cria um venv isolado, instala `requirements.txt` (BeautifulSoup, Playwright, trafilatura, WeasyPrint, clientes Google etc.) e baixa o **Chromium via Playwright** para a renderização headless. Nada é instalado globalmente.
-3. Confira com `"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" doctor --json` (ou `/seo doctor`).
+2. Rode `"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" setup` (ou `/seo setup`). O launcher cria um venv isolado, instala `requirements.txt` (BeautifulSoup, Playwright, trafilatura, WeasyPrint, clientes Google etc.) e baixa o **Chromium via Playwright** para a renderização headless. Nada é instalado globalmente.
+3. Confira com `"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" doctor --json` (ou `/seo doctor`).
 4. Chaves opcionais por variável de ambiente (bloco `env` do `~/.claude/settings.json` ou `.mcp.json`): `GOOGLE_APPLICATION_CREDENTIALS`/`GOOGLE_API_KEY` (seo-google), `BING_WEBMASTER_API_KEY`/`INDEXNOW_KEY` (seo-bing), `MOZ_API_KEY`/`KEYWORDSEVERYWHERE_API_KEY` (seo-backlinks), `DATAFORSEO_USERNAME`/`DATAFORSEO_PASSWORD` (seo-dataforseo), `GEMINI_API_KEY` (seo-image-gen), `API_KEY` do MCP Ahrefs (seo-ahrefs).
 
 `.venv/` e `ms-playwright/` dentro desta pasta são runtime local (ignorados pelo git).
@@ -78,12 +78,12 @@ Pré-requisitos e setup do runtime isolado (feito uma vez por máquina, por proj
 
 Run setup only when the user explicitly invokes `/seo setup` or explicitly asks
 to repair dependencies. Execute
-`"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" setup`, report core and Chromium
+`"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" setup`, report core and Chromium
 status separately, and do not fall back to global or user package installation.
 For diagnosis, execute
-`"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" doctor --json`; its output
+`"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" doctor --json`; its output
 intentionally omits absolute paths and environment values. If any
-`"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run` command reports that setup is
+`"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run` command reports that setup is
 required, suggest `/seo setup` and do not improvise a `pip install`.
 
 ## Orchestration Logic
@@ -91,14 +91,14 @@ required, suggest `/seo setup` and do not improvise a `pip install`.
 When the user invokes `/seo audit`, delegate to subagents in parallel:
 1. Detect business type (SaaS, local, ecommerce, publisher, agency, other)
 2. Spawn subagents: seo-technical, seo-content, seo-schema, seo-sitemap, seo-performance, seo-geo (screenshots/mobile/above-the-fold ficam com seo-performance via `capture_screenshot.py` e `analyze_visual.py`)
-3. If Google API credentials detected (`"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run google_auth.py --check`), also spawn seo-google agent
+3. If Google API credentials detected (`"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run google_auth.py --check`), also spawn seo-google agent
 4. If local business detected, also spawn seo-local agent
 5. If local business detected AND DataForSEO MCP available, also run the seo-maps sub-skill (não há agente dedicado; o seo-local a executa)
-6. If backlink APIs detected (`"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run backlinks_auth.py --check`), also spawn seo-backlinks agent
+6. If backlink APIs detected (`"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run backlinks_auth.py --check`), also spawn seo-backlinks agent
 7. Discover site URLs with `sitemap_discovery.py` before analysis
 8. If content strategy signals detected (blog, pillar pages, topic clusters), also spawn seo-cluster agent
 9. If e-commerce detected, also spawn seo-ecommerce agent
-10. If drift baseline exists for this URL (`"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run drift_history.py <url>`), also spawn seo-drift agent
+10. If drift baseline exists for this URL (`"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run drift_history.py <url>`), also spawn seo-drift agent
 11. Always include seo-sxo in full audits (search experience applies to all sites)
 12. Collect results and generate unified report with SEO Health Score (0-100)
 13. **Synthesize via the 10-principle framework** (see "Synthesis Methodology" below), walk PERCEIVE → ANALYZE → VALIDATE → ACT before bucketing findings into Critical / High / Medium / Low
@@ -106,7 +106,7 @@ When the user invokes `/seo audit`, delegate to subagents in parallel:
 15. **Offer PDF report**: "Generate a professional PDF report? Use `/seo google report full`"
 
 For individual commands, load the relevant sub-skill directly.
-After any analysis command completes, offer to generate a PDF report via `"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run google_report.py`.
+After any analysis command completes, offer to generate a PDF report via `"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run google_report.py`.
 
 ## Synthesis Methodology
 

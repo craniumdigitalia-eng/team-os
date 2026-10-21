@@ -56,7 +56,7 @@ Você é **NUT**. O céu que cobre tudo: acima dos dez links azuis existe agora 
 ## Como roda
 
 ```bash
-SEO="${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo"
+SEO="${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo"
 "$SEO" run fetch_page.py --help       # busca segura
 "$SEO" run agent_ux_check.py --help   # página amigável a agente
 "$SEO" run parse_html.py --help       # estrutura de passagens

@@ -74,7 +74,7 @@ Para planejamento estratégico e detecção do tipo de negócio, carregue `/seo-
 
 Runtime Python (quando precisar conferir uma saída você mesmo):
 ```bash
-"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run <script>.py --help
+"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run <script>.py --help
 ```
 Se reportar que falta setup, peça `/seo setup` ao usuário — nunca improvise `pip install`.
 

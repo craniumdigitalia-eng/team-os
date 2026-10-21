@@ -60,7 +60,7 @@ Livres: Moz, Bing Webmaster, Common Crawl. Pagas: DataForSEO, Ahrefs (exigem a e
 ## Como roda
 
 ```bash
-SEO="${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo"
+SEO="${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo"
 "$SEO" run backlinks_auth.py --check           # que fontes estão disponíveis
 "$SEO" run moz_api.py --help
 "$SEO" run commoncrawl_graph.py --help

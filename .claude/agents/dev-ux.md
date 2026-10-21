@@ -208,13 +208,13 @@ Invoque a skill correspondente no momento certo do workflow:
 
   ```bash
   # Fase 1 — ponto de partida: gera o design system completo do produto
-  python3 "$CLAUDE_PROJECT_DIR/.claude/skills/ui-ux-pro-max/scripts/search.py" "<tipo de produto> <setor> <palavras-chave>" --design-system -p "<Projeto>"
+  python3 "${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/ui-ux-pro-max/scripts/search.py" "<tipo de produto> <setor> <palavras-chave>" --design-system -p "<Projeto>"
 
   # Fase 2 — aprofundar por domínio (style, color, ux, typography, chart, icons, gsap, product, landing, react, web, google-fonts)
-  python3 "$CLAUDE_PROJECT_DIR/.claude/skills/ui-ux-pro-max/scripts/search.py" "<termo>" --domain <domínio>
+  python3 "${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/ui-ux-pro-max/scripts/search.py" "<termo>" --domain <domínio>
 
   # Fase 2 — regras do stack real do projeto
-  python3 "$CLAUDE_PROJECT_DIR/.claude/skills/ui-ux-pro-max/scripts/search.py" "<termo>" --stack <stack>
+  python3 "${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/ui-ux-pro-max/scripts/search.py" "<termo>" --stack <stack>
   ```
 
   Regras de uso: o stack do `--stack` é o stack **real** do projeto (leia a smart-memory, não presuma). Nenhuma paleta, tipografia ou preset de animação entra numa spec sem ter saído de uma dessas buscas — estética pessoal não é justificativa.

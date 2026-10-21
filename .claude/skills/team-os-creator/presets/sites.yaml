@@ -8,7 +8,7 @@ agents:
     role_title: Sites Architect
     description: "Sites architect and story creator. Use for architecture decisions, tech stack selection, page structure, creating stories (EXCLUSIVE), validating stories with 5-point checklist (EXCLUSIVE), and module documentation for website projects."
     color: purple
-    skills: [dev-technical-writing, dev-api-design, sites-seo-technical, sites-frontend-design]
+    skills: [dev-technical-writing, dev-api-design, sites-seo-technical, sites-frontend-stack, sites-copy]
   - name: sites-analyst
     archetype: researcher
     persona: Lyra-S
@@ -22,14 +22,14 @@ agents:
     role_title: UX Specialist
     description: "UX specialist for website projects (research, user flows, wireframes, component specs, accessibility, visual design). Use for UX research before complex features and UI specification before sites-dev-alpha implements."
     color: pink
-    skills: [ui-ux-pro-max, accessibility, web-design-guidelines, sites-frontend-design, sites-ux-interaction, sites-canvas-design, sites-web-accessibility, sites-tailwind-design-system, sites-scroll-motion]
+    skills: [ui-ux-pro-max, accessibility, web-design-guidelines, sites-frontend-stack, sites-ux-interaction, sites-canvas-design, sites-scroll-motion]
   - name: sites-dev-alpha
     archetype: implementer
     persona: Nova-S
     role_title: Frontend Developer
     description: "Frontend developer for website projects (React, Next.js, Tailwind, shadcn/ui, UI components, landing pages, client-side logic). Use for frontend stories and UI implementation in website projects."
     color: yellow
-    skills: [dev-typescript-patterns, dev-testing-strategy, sites-shadcn-ui, sites-tailwind-design-system, sites-frontend-design, sites-ux-interaction]
+    skills: [dev-typescript-patterns, dev-testing-strategy, sites-frontend-stack, sites-ux-interaction, sites-scroll-motion, nextjs-react-best-practices]
   - name: sites-dev-beta
     archetype: implementer
     persona: Rex-S
@@ -43,7 +43,7 @@ agents:
     role_title: Fullstack/Integration Developer
     description: "Fullstack developer for website projects (cross-layer integration, CRO features, SEO implementation, content/copy, analytics wiring). Use for stories that don't clearly belong to frontend or backend alone."
     color: green
-    skills: [dev-typescript-patterns, dev-api-design, sites-page-cro, sites-seo-technical, sites-seo-keywords, sites-copywriting, sites-content-strategy]
+    skills: [dev-typescript-patterns, dev-api-design, sites-page-cro, sites-seo-technical, sites-seo-keywords, sites-copy, sites-scroll-motion]
   - name: sites-dev-delta
     archetype: hardening
     persona: Kron-S
@@ -57,7 +57,7 @@ agents:
     role_title: QA Master
     description: "Quality assurance master for website projects. Issues formal verdicts — PASS / CONCERNS / FAIL / WAIVED. Use for story reviews, QA gates, accessibility, copy quality, SEO validation, and performance checks."
     color: red
-    skills: [dev-security-patterns, dev-testing-strategy, sites-copy-editing, sites-web-accessibility]
+    skills: [dev-security-patterns, dev-testing-strategy, sites-copy, accessibility, web-design-guidelines, sites-seo-technical]
   - name: sites-devops
     archetype: devops
     persona: Grav-S

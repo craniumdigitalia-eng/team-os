@@ -16,7 +16,7 @@
 #   hooks.TaskCompleted → check-story-progress.sh (story só fecha com evidência)
 #
 # Uso:
-#   bash ensure-settings.sh                     # aplica em $CLAUDE_PROJECT_DIR (ou cwd)
+#   bash ensure-settings.sh                     # aplica na raiz do projeto (CLAUDE_PROJECT_DIR ou cwd)
 #   bash ensure-settings.sh --dry-run           # mostra o merge sem gravar nada
 #   bash ensure-settings.sh --project-dir <p>   # projeto explícito (combinável com --dry-run)
 #

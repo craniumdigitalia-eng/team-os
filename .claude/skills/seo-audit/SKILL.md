@@ -1,8 +1,8 @@
 ---
 name: seo-audit
-description: "Auditoria SEO completa de um site com delegação paralela a subagentes — rastreia até 500 páginas, detecta tipo de negócio, aciona até 15 especialistas e gera health score. Use quando o usuário pedir 'audit', 'auditoria SEO completa', 'analise meu site' ou 'saúde do site'."
-version: "2.3.1"
-updated: "2026-09-25"
+description: "Auditoria SEO completa de um site com delegação paralela a subagentes — rastreia até 500 páginas, detecta tipo de negócio, aciona até 14 especialistas e gera health score. Use quando o usuário pedir 'audit', 'auditoria SEO completa', 'analise meu site' ou 'saúde do site'."
+version: "2.3.2"
+updated: "2026-10-20"
 user-invocable: true
 argument-hint: "[url]"
 license: MIT
@@ -18,7 +18,7 @@ metadata:
 
 ## Process
 
-1. **Render homepage**: use `"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run render_page.py <url> --mode auto --json` to capture raw HTML, rendered HTML, extracted text, SPA status, and accessibility data when needed
+1. **Render homepage**: use `"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run render_page.py <url> --mode auto --json` to capture raw HTML, rendered HTML, extracted text, SPA status, and accessibility data when needed
 2. **Detect business type**: analyze homepage signals per seo orchestrator
 3. **Crawl site**: follow internal links up to 500 pages, respect robots.txt
 4. **Delegate to subagents** (if available, otherwise run inline sequentially):
@@ -26,16 +26,15 @@ metadata:
    - `seo-content` -- E-E-A-T, readability, thin content, AI citation readiness
    - `seo-schema` -- detection, validation, generation recommendations
    - `seo-sitemap` -- structure analysis, quality gates, missing pages
-   - `seo-performance` -- LCP, INP, CLS measurements
-   - `seo-visual` -- screenshots, mobile testing, above-fold analysis
+   - `seo-performance` -- LCP, INP, CLS measurements; screenshots, mobile testing, above-fold analysis (headless browser render)
    - `seo-geo` -- AI crawler access, llms.txt, citability, brand mention signals
    - `seo-local` -- GBP signals, NAP consistency, reviews, local schema, industry-specific local factors (spawn when Local Service industry detected: brick-and-mortar, SAB, or hybrid business type)
    - `seo-maps` -- Geo-grid rank tracking, GBP audit, review intelligence, competitor radius mapping (spawn when Local Service detected AND DataForSEO MCP available)
-   - `seo-google` -- CWV field data (CrUX), URL indexation (GSC), organic traffic (GA4) (spawn when Google API credentials detected via `"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run google_auth.py --check`)
-   - `seo-backlinks` -- Backlink profile data: DA/PA, referring domains, anchor text, toxic links (spawn when Moz or Bing API credentials detected via `"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run backlinks_auth.py --check`, or always include Common Crawl domain-level metrics)
+   - `seo-google` -- CWV field data (CrUX), URL indexation (GSC), organic traffic (GA4) (spawn when Google API credentials detected via `"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run google_auth.py --check`)
+   - `seo-backlinks` -- Backlink profile data: DA/PA, referring domains, anchor text, toxic links (spawn when Moz or Bing API credentials detected via `"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run backlinks_auth.py --check`, or always include Common Crawl domain-level metrics)
    - `seo-cluster` -- Semantic clustering analysis (spawn when content strategy signals detected: blog, pillar pages, topic clusters)
    - `seo-sxo` -- Search experience analysis: page-type mismatch, user stories, persona scoring (always include in full audits)
-   - `seo-drift` -- Drift analysis: compare against stored baseline (spawn when drift baseline exists for the URL via `"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run drift_history.py <url>`)
+   - `seo-drift` -- Drift analysis: compare against stored baseline (spawn when drift baseline exists for the URL via `"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run drift_history.py <url>`)
    - `seo-ecommerce` -- Product schema, marketplace intelligence (spawn when E-commerce industry detected)
 5. **Score** -- aggregate into SEO Health Score (0-100)
 6. **Persist audit artifacts** -- write all outputs under `{domain}-audit/`
@@ -57,13 +56,13 @@ Delay between requests: 1 second
 - `{domain}-audit/FULL-AUDIT-REPORT.md`: Comprehensive findings
 - `{domain}-audit/ACTION-PLAN.md`: Prioritized recommendations (Critical > High > Medium > Low)
 - `{domain}-audit/audit-data.json`: Structured audit envelope for report generation
-- `{domain}-audit/findings/*.md`: Per-category specialist findings (`technical.md`, `content.md`, `schema.md`, `performance.md`, `visual.md`, etc.)
+- `{domain}-audit/findings/*.md`: Per-category specialist findings (`technical.md`, `content.md`, `schema.md`, `performance.md`, etc.)
 - `{domain}-audit/screenshots/`: Desktop + mobile captures (if Playwright available)
-- **PDF Report** (recommended): Generate a professional A4 PDF using `"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run google_report.py --type full --data {domain}-audit/audit-data.json --domain <domain> --output-dir {domain}-audit/`. This produces a white-cover enterprise report with TOC, executive summary, charts (Lighthouse gauges, query bars, index donut), metric cards, threshold tables, prioritized recommendations with effort estimates, and implementation roadmap. Always offer PDF generation after completing an audit.
+- **PDF Report** (recommended): Generate a professional A4 PDF using `"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run google_report.py --type full --data {domain}-audit/audit-data.json --domain <domain> --output-dir {domain}-audit/`. This produces a white-cover enterprise report with TOC, executive summary, charts (Lighthouse gauges, query bars, index donut), metric cards, threshold tables, prioritized recommendations with effort estimates, and implementation roadmap. Always offer PDF generation after completing an audit.
 
 ## Structured Audit Data Envelope
 
-Write `{domain}-audit/audit-data.json` with this shape so `"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run google_report.py --type full --data {domain}-audit/audit-data.json --domain <domain> --output-dir {domain}-audit/` can generate a report even when Google API data is unavailable:
+Write `{domain}-audit/audit-data.json` with this shape so `"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run google_report.py --type full --data {domain}-audit/audit-data.json --domain <domain> --output-dir {domain}-audit/` can generate a report even when Google API data is unavailable:
 
 ```json
 {
@@ -174,7 +173,7 @@ If DataForSEO MCP tools are available, spawn the `seo-dataforseo` agent alongsid
 
 ## Google API Integration (Optional)
 
-If Google API credentials are configured (`"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run google_auth.py --check`), spawn the `seo-google` agent to enrich the audit with real Google field data: CrUX Core Web Vitals (replaces lab-only estimates), GSC URL indexation status, search performance (clicks, impressions, CTR), and GA4 organic traffic trends. The Performance (CWV) category score benefits most from field data.
+If Google API credentials are configured (`"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run google_auth.py --check`), spawn the `seo-google` agent to enrich the audit with real Google field data: CrUX Core Web Vitals (replaces lab-only estimates), GSC URL indexation status, search performance (clicks, impressions, CTR), and GA4 organic traffic trends. The Performance (CWV) category score benefits most from field data.
 
 ## Error Handling
 

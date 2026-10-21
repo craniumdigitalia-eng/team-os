@@ -1,8 +1,8 @@
 ---
 name: seo-dataforseo
 description: "Dados de SEO ao vivo via MCP DataForSEO — SERP, keyword research (volume, dificuldade, intenção, tendências), backlinks, on-page, concorrentes, listagens locais, visibilidade em IA (menções em LLMs) e analytics de domínio. Exige o MCP configurado. Use ao pedir 'dataforseo', 'live SERP', 'keyword volume', 'backlink data' ou 'real search data'."
-version: "2.3.1"
-updated: "2026-09-25"
+version: "2.3.2"
+updated: "2026-10-20"
 user-invocable: true
 argument-hint: "[command] [query]"
 license: MIT
@@ -41,7 +41,7 @@ DataForSEO charges per API call. Be efficient:
 
 **Before every DataForSEO MCP call**, run cost estimation:
 ```
-"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run dataforseo_costs.py check <endpoint> [--count N]
+"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run dataforseo_costs.py check <endpoint> [--count N]
 ```
 
 - If `"status": "approved"` → proceed with the API call
@@ -50,7 +50,7 @@ DataForSEO charges per API call. Be efficient:
 
 **After each API call completes**, log the cost:
 ```
-"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run dataforseo_costs.py log <endpoint> <actual_cost>
+"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run dataforseo_costs.py log <endpoint> <actual_cost>
 ```
 
 **User commands for cost management:**

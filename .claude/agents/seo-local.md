@@ -60,7 +60,7 @@ Quando houver fonte de dados disponível: geo-grid de ranking, raio de concorren
 ## Como roda
 
 ```bash
-SEO="${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo"
+SEO="${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo"
 "$SEO" run consistency_check.py --help      # NAP entre fontes
 "$SEO" run gbp_deprecation_lint.py --help   # atributos GBP aposentados
 ```
