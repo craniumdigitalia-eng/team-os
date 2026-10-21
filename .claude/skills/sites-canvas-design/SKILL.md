@@ -1,8 +1,8 @@
 ---
 name: sites-canvas-design
-description: "Design de componentes visuais complexos com Canvas HTML5 e SVG — gráficos, partículas, ilustrações e backgrounds custom. Use ao criar visual que CSS não resolve — animação de partículas, gráficos dinâmicos, ícones SVG otimizados ou backgrounds avançados (grid, mesh, noise)."
-version: "1.0"
-updated: "2026-09-04"
+description: "Design de componentes visuais complexos com Canvas HTML5 e SVG — gráficos, partículas, ilustrações e backgrounds custom. Use ao criar visual que CSS não resolve — animação de partículas, gráficos dinâmicos, ícones SVG otimizados ou backgrounds derivados da paleta da marca (tonal, textura, padrão da identidade)."
+version: "1.1"
+updated: "2026-10-20"
 ---
 
 # Sites Canvas Design — HTML5 Canvas e SVG
@@ -38,19 +38,23 @@ export function Icon({ className }: { className?: string }) {
 
 ## Backgrounds CSS avançados
 
+**Fundo deriva da paleta da marca; gradiente só se a marca pedir.** Mesh gradient azul/violeta/rosa e
+grid de linhas finas cinza atrás do hero são o sinal nº 1 de "cara de IA" — não são padrão aqui. Antes
+de qualquer fundo decorativo, pergunte o que ele diz sobre o assunto da página; se a resposta for
+"nada", use cor sólida do token (`--color-background`, `--color-muted`) e deixe o conteúdo trabalhar.
+
 ```css
-/* Grid background */
-.bg-grid {
-  background-image: linear-gradient(to right, #e5e7eb 1px, transparent 1px),
-                    linear-gradient(to bottom, #e5e7eb 1px, transparent 1px);
-  background-size: 32px 32px;
+/* Fundo tonal da marca — duas paradas da PRÓPRIA paleta, contraste baixo.
+   Só use se o sistema visual do projeto previr gradiente. */
+.bg-marca {
+  background: linear-gradient(180deg, var(--color-background) 0%, var(--color-muted) 100%);
 }
 
-/* Gradient mesh */
-.bg-mesh {
-  background: radial-gradient(at 40% 20%, hsl(220, 90%, 80%) 0px, transparent 50%),
-              radial-gradient(at 80% 0%, hsl(262, 80%, 85%) 0px, transparent 50%),
-              radial-gradient(at 0% 50%, hsl(355, 85%, 80%) 0px, transparent 50%);
+/* Padrão geométrico só quando ele vem da identidade (ex.: grade de planta para arquitetura,
+   pauta para educação) — traço e cor saem dos tokens, nunca cinza genérico fixo */
+.bg-padrao-marca {
+  background-image: linear-gradient(to right, var(--color-border) 1px, transparent 1px);
+  background-size: var(--padrao-passo, 48px) 100%;
 }
 
 /* Noise texture */

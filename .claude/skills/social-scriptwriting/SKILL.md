@@ -1,8 +1,8 @@
 ---
 name: social-scriptwriting
 description: "Roteiros para vídeos sociais — Reels, TikToks, Stories e Shorts com estrutura narrativa, timing e texto em tela. Use ao roteirizar vídeo curto, estruturar hook, desenvolvimento e CTA, definir timing de cenas ou escrever texto em tela e narração."
-version: "1.0"
-updated: "2026-09-04"
+version: "1.1"
+updated: "2026-10-20"
 ---
 
 # Social Scriptwriting — Roteiros para Vídeo
@@ -17,7 +17,7 @@ updated: "2026-09-04"
 **Plataforma:** Instagram Reel | TikTok | YouTube Shorts
 **Duração:** 30s | 60s | 90s
 **Formato:** Talking head | B-roll | Slideshow | Screen recording
-**Objectivo:** Educação | Entretenimento | Conversão | Awareness
+**Objetivo:** Educação | Entretenimento | Conversão | Awareness
 
 ---
 
@@ -71,6 +71,6 @@ Logo + tagline
 |---|---|
 | Tutorial | Problema → Steps numerados → Resultado |
 | Storytelling | Situação → Conflito → Resolução → Lição |
-| Lista | Hook numérico → Items → Bónus final |
+| Lista | Hook numérico → Items → Bônus final |
 | Reação | Setup → Reação → Opinião → CTA |
 | POV | Cena imersiva → Twist → Identificação |

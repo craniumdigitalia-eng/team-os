@@ -1,8 +1,8 @@
 ---
 name: social-carousel-design
 description: "Design de carousels para redes sociais — estrutura narrativa slide a slide, consistência visual e especificações técnicas. Use ao criar carousel para Instagram ou LinkedIn, estruturar a sequência de slides, definir capa e CTA final ou validar specs antes da produção."
-version: "1.0"
-updated: "2026-09-04"
+version: "1.1"
+updated: "2026-10-20"
 ---
 
 # Social Carousel Design — Estrutura e Padrões
@@ -35,14 +35,14 @@ Slide final — CTA
 | Facebook | 1:1 | 10 | 1080x1080 |
 | LinkedIn | 1.91:1 (documento) | 300 | 1080x565 |
 
-## Tipos de carousel por objectivo
+## Tipos de carousel por objetivo
 
 ### Educativo (mais popular)
 ```
-Slide 1: "X erros que estás a cometer"
+Slide 1: "X erros que você está cometendo"
 Slides 2-7: Um erro por slide + solução
 Slide 8: Resumo visual
-Slide 9: CTA ("Guarda para não esquecer")
+Slide 9: CTA ("Salve para não esquecer")
 ```
 
 ### Tutorial/How-to

@@ -1,8 +1,8 @@
 ---
 name: social-editorial-validation
 description: "Validação editorial de conteúdo social — checklist de qualidade, alinhamento estratégico e compliance. Use ao revisar conteúdo antes de publicar, validar alinhamento com a estratégia da marca, checar compliance ou emitir aprovação editorial de posts e campanhas."
-version: "1.0"
-updated: "2026-09-04"
+version: "1.1"
+updated: "2026-10-20"
 ---
 
 # Social Editorial Validation — Checklist VERA
@@ -12,10 +12,10 @@ updated: "2026-09-04"
 ## Checklist completo de validação
 
 ### 1. Alinhamento estratégico
-- [ ] Conteúdo serve o objectivo da campanha (awareness/engagement/conversão)
+- [ ] Conteúdo serve o objetivo da campanha (awareness/engagement/conversão)
 - [ ] Mensagem alinha com posicionamento da marca
 - [ ] Tom de voz consistente com guidelines
-- [ ] Público-alvo correcto para o conteúdo
+- [ ] Público-alvo correto para o conteúdo
 
 ### 2. Qualidade de copy
 - [ ] Hook eficaz (para-scroll nos primeiros 3 segundos/linhas)
@@ -34,16 +34,16 @@ updated: "2026-09-04"
 
 ### 4. Compliance e risco
 - [ ] Sem claims não substantiados ("o melhor", "o único")
-- [ ] Sem comparações directas com concorrentes sem dados
+- [ ] Sem comparações diretas com concorrentes sem dados
 - [ ] Direitos de imagem verificados
 - [ ] Direitos musicais verificados (para vídeo)
 - [ ] Sem conteúdo potencialmente ofensivo
 - [ ] Políticas da plataforma respeitadas
 
 ### 5. Plataforma específica
-- [ ] Formato correcto para a plataforma
+- [ ] Formato correto para a plataforma
 - [ ] Specs técnicas verificadas
-- [ ] Horário de publicação optimizado
+- [ ] Horário de publicação otimizado
 
 ## Veredictos possíveis
 

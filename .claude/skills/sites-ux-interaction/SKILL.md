@@ -1,8 +1,8 @@
 ---
 name: sites-ux-interaction
 description: "Padrões de UX e interação para websites — header sticky, nav mobile, micro-interações, animações de entrada e scroll-triggered. Use ao implementar navegação, hover states, animações com Motion ou comportamento de scroll em Next.js ou Astro."
-version: "1.1"
-updated: "2026-09-20"
+version: "1.2"
+updated: "2026-10-20"
 ---
 
 # Sites UX Interaction — Padrões de Interação
@@ -19,7 +19,7 @@ useEffect(() => {
 }, [])
 
 <header className={cn(
-  "fixed top-0 w-full z-50 transition-all duration-300",
+  "fixed top-0 w-full z-50 transition-[background-color,box-shadow,backdrop-filter] duration-300",
   scrolled ? "bg-white/95 backdrop-blur shadow-sm" : "bg-transparent"
 )}>
 ```
@@ -53,6 +53,13 @@ useEffect(() => {
 ## Animações com Motion (`motion/react`, ex-Framer Motion)
 
 ### Enter animations
+
+**Um momento de assinatura por página, não em toda seção.** Fade-up repetido em cada bloco é um dos
+sinais mais claros de "cara de IA": cansa, atrasa a leitura e não diz nada. Escolha **um** momento que
+carrega a ideia da página (o hero, a revelação do produto, o número principal) e deixe o resto entrar
+sem animação ou com um fade curto de opacidade. Toda animação de entrada precisa de versão reduzida
+(ver **Reduced motion** abaixo e `/sites-scroll-motion` — seção `prefers-reduced-motion`).
+
 ```tsx
 // Fade in up (elemento)
 <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
@@ -77,15 +84,21 @@ a API do Motion não muda, só a forma como ela é hidratada.
 ## Micro-interações
 
 ```css
-/* Hover em card */
-.card { @apply transition-all duration-200 hover:-translate-y-1 hover:shadow-lg; }
+/* Hover em card clicável — feedback sutil na borda/cor, sem levantar o card inteiro.
+   "translate-y + shadow-lg" em todo card é padrão de template; só use elevação se o
+   sistema visual do projeto tiver elevação como linguagem. */
+.card { @apply border border-border transition-colors duration-150 hover:border-foreground/30 focus-visible:outline-2 focus-visible:outline-offset-2; }
 
-/* Button press */
-.btn { @apply active:scale-95 transition-transform duration-100; }
+/* Button press — escala mínima, só transform (nunca transition-all) */
+.btn { @apply active:scale-[0.96] transition-transform duration-100 motion-reduce:active:scale-100; }
 
-/* Link underline animado */
-.link { @apply relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-current hover:after:w-full after:transition-all after:duration-300; }
+/* Link underline animado — anima só a largura do traço */
+.link { @apply relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-current hover:after:w-full after:transition-[width] after:duration-300 motion-reduce:after:transition-none; }
 ```
+
+**Regra:** sempre listar as propriedades que transicionam (`transition-colors`, `transition-transform`,
+`transition-[width]`). `transition-all` anima o que não deveria (layout, cor de texto ao trocar tema) e
+custa performance.
 
 ## Reduced motion
 

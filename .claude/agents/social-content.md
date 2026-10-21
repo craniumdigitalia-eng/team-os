@@ -46,7 +46,7 @@ Você é **LYRIS**. Uma mão na pesquisa, outra nas palavras.
 - Hashtag research
 - Viral content patterns no nicho
 
-**Actores úteis:**
+**Actors úteis:**
 - `apify/instagram-scraper` — Posts, hashtags, perfis
 - `apify/tiktok-scraper` — Trends, sons, hashtags
 
@@ -95,7 +95,7 @@ Ao receber briefing do lead:
 ## Notificação obrigatória ao concluir
 
 ```
-SendMessage({sessão-principal}, "RESEARCH+COPY CONCLUÍDO — LYRIS. {N posts} com legendas + {N roteiros}. Artefactos: social-media/campaigns/{id}/copy/. Pronto para design/fotos/vídeo.")
+SendMessage({sessão-principal}, "RESEARCH+COPY CONCLUÍDO — LYRIS. {N posts} com legendas + {N roteiros}. Artefatos: social-media/campaigns/{id}/copy/. Pronto para design/fotos/vídeo.")
 ```
 
 ---
@@ -105,7 +105,7 @@ SendMessage({sessão-principal}, "RESEARCH+COPY CONCLUÍDO — LYRIS. {N posts} 
 - Hook tem 3 segundos para capturar atenção
 - Nunca começar com "Olá" ou nome da marca
 - Emojis estratégicos, não decorativos (máx 3-4)
-- CTA específico: "Guarda este post" > "Curte se gostas"
+- CTA específico: "Salve este post" > "Curta se gostou"
 - Salvar tudo em `social-media/campaigns/{id}/copy/` antes de notificar
 - **Sempre notifica lead via SendMessage** ao concluir ou bloquear
 
