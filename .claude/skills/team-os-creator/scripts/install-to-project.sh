@@ -182,6 +182,10 @@ agents_copied=0
 agents_skipped=0
 agents_updated=0
 agents_list=""
+# Arquivos dos agentes que o destino terá (um por linha — nomes de pasta podem ter
+# espaço). Usado depois para descobrir quais skills esses agentes citam.
+SELECTED_AGENTS="$(mktemp "${TMPDIR:-/tmp}/install-agents.XXXXXX")" || exit 1
+trap 'rm -f "$SELECTED_AGENTS"' EXIT
 
 for agent_file in "$SOURCE/.claude/agents/"*.md; do
   [ -f "$agent_file" ] || continue
@@ -196,6 +200,7 @@ for agent_file in "$SOURCE/.claude/agents/"*.md; do
     [ $match -eq 0 ] && { agents_skipped=$((agents_skipped + 1)); continue; }
   fi
 
+  printf '%s\n' "$agent_file" >> "$SELECTED_AGENTS"
   target_file="$TARGET/.claude/agents/$agent_name.md"
 
   if [ -f "$target_file" ]; then
@@ -223,6 +228,23 @@ echo "AGENTS_SKIPPED=$agents_skipped"
 echo "AGENTS_LIST=${agents_list# }"
 
 # ── Skills — sempre copiadas (incluindo team-os obrigatória) ─────────────────
+
+# Skills citadas pelos agentes que existem no destino (os que acabaram de ser
+# instalados + os customizados que só vivem lá, ex.: crm-*). O filtro por squad
+# sozinho deixa de fora skill de OUTRA squad que o agente cita — ex.: os agentes
+# `sites-*` citam `/dev-typescript-patterns`. Sem isso, a skill some do destino
+# (ou fica congelada numa versão antiga), e o agente aponta para o vazio.
+referenced_skills=$({
+  while IFS= read -r sel; do
+    [ -f "$sel" ] && grep -ohE '/[a-z0-9][a-z0-9-]*' "$sel" 2>/dev/null
+  done < "$SELECTED_AGENTS"
+  # agentes customizados que só existem no destino (ex.: crm-*) também contam
+  for tgt in "$TARGET/.claude/agents"/*.md; do
+    [ -f "$tgt" ] && grep -ohE '/[a-z0-9][a-z0-9-]*' "$tgt" 2>/dev/null
+  done
+} | tr -d '/' | sort -u | while IFS= read -r ref; do
+      [ -n "$ref" ] && [ -d "$SOURCE/.claude/skills/$ref" ] && printf '%s ' "$ref"
+    done)
 
 do_mkdir "$TARGET/.claude/skills"
 
@@ -270,6 +292,11 @@ for skill_path in "$SOURCE/.claude/skills"/*/; do
     # team-os é sempre incluída; team-os-creator fica só no projeto de origem
     [[ "$skill_name" == "team-os" ]] && match=1
     [ $extra -eq 1 ] && match=1
+    # Skill que o destino JÁ tem → atualiza (CT é fonte da verdade; nunca deixa
+    # skill instalada congelada só porque o prefixo é de outra squad)
+    [ -d "$TARGET/.claude/skills/$skill_name" ] && match=1
+    # Skill citada por agente do destino → entra mesmo sendo de outra squad
+    case " $referenced_skills " in *" $skill_name "*) match=1 ;; esac
     [ $match -eq 0 ] && { skills_skipped=$((skills_skipped + 1)); continue; }
   fi
 

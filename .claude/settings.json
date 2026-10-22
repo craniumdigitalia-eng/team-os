@@ -1,7 +1,8 @@
 {
   "env": {
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
-    "CLAUDE_SEO_PYTHON": "/opt/homebrew/bin/python3"
+    "CLAUDE_SEO_PYTHON": "/opt/homebrew/bin/python3",
+    "SLASH_COMMAND_TOOL_CHAR_BUDGET": "80000"
   },
   "permissions": {
     "allow": [
