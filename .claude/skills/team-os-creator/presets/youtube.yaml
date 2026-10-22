@@ -1,0 +1,25 @@
+name: youtube
+description: Squad do canal YouTube (3 agentes). Linha do canal e gate (pauta, roteiro, pacote), conteúdo (pauta 90d, roteiro longo e Shorts, pacote título+thumb+descrição+capítulos) e publicação v1 sem MCP (pacote private+publishAt para o Studio) com métricas 24h/7d. Thumb e edição vêm do estúdio social (social-design, social-photo, social-video); anúncios são do traffic-google.
+project_archetypes: [youtube-channel, video-content, content-marketing]
+agents:
+  - name: youtube-strategist
+    archetype: strategist
+    persona: KAIROS
+    role_title: Estrategista do Canal
+    description: "KAIROS, estrategista e gate da squad YouTube. Define a linha do canal e aprova pauta, roteiro e pacote — claims com fonte, direitos de mídia, mídia sintética e valor original. Nunca escreve nem publica."
+    color: purple
+    skills: [social-editorial-validation, youtube-scriptwriting, youtube-packaging, youtube-publishing, youtube-analytics]
+  - name: youtube-content
+    archetype: implementer
+    persona: ECHO
+    role_title: Conteúdo do Canal
+    description: "ECHO, conteúdo da squad YouTube. Pauta de 90 dias, roteiro longo e de Shorts com lista de claims, pacote com título, thumb, descrição e capítulos do corte final."
+    color: yellow
+    skills: [youtube-scriptwriting, youtube-packaging, social-scriptwriting, social-copywriting, copy-humanize]
+  - name: youtube-publisher
+    archetype: implementer
+    persona: ORBIT
+    role_title: Publicação e Métricas
+    description: "ORBIT, publicação e métricas da squad YouTube. Pacote de upload private+publishAt para o usuário subir no Studio e loop 24h/7d com mediana do canal. Só com PASS da youtube-strategist e confirmação do usuário."
+    color: green
+    skills: [youtube-publishing, youtube-analytics, youtube-packaging, social-format-specs]

@@ -10,7 +10,7 @@ Trigger auto-continuation when report exceeds 18,000 words in single run.
 
 1. Generate sections 1-10 (stay under 18K words)
 2. Save continuation state file with context preservation
-3. Spawn continuation agent via Task tool
+3. Spawn continuation agent via the Agent tool
 4. Continuation agent: Reads state -> Generates next batch -> Spawns next if needed
 5. Chain continues recursively until complete
 
@@ -69,10 +69,10 @@ Trigger auto-continuation when report exceeds 18,000 words in single run.
 
 ## Spawning Continuation Agent
 
-Use Task tool:
+Use the Agent tool:
 
 ```
-Task(
+Agent(
   subagent_type="general-purpose",
   description="Continue deep-research report generation",
   prompt="""
@@ -150,7 +150,7 @@ Calculate: Current words + remaining sections x avg_words_per_section
 - Generate final content sections
 - Generate COMPLETE bibliography from state.citations.bibliography_entries
 - Read entire assembled report
-- Run validation: `python scripts/validate_report.py --report [path]`
+- Run validation: `python3 "${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/deep-research/scripts/validate_report.py" --report [path]`
 - Delete continuation_state.json (cleanup)
 - Report complete to user
 

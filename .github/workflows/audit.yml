@@ -7,13 +7,46 @@ on:
   workflow_dispatch:
 
 jobs:
-  audit-agents:
+  audit:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
       - name: Validar compliance dos agentes (Native Teams Protocol)
         run: bash .claude/skills/team-os-creator/scripts/validate-agent.sh
+
+      - name: Lint das skills (frontmatter, descrição, versão)
+        run: bash .claude/skills/team-os-creator/scripts/validate-agent.sh --skills
+
+      - name: Testar hooks com payloads reais do Claude Code
+        run: bash .claude/skills/team-os-creator/scripts/test-hooks.sh
+
+      - name: Instalar rsync (usado pelos testes de propagação)
+        run: command -v rsync >/dev/null 2>&1 || sudo apt-get install -y rsync
+
+      - name: Testar o *update (herméticos, sem rede)
+        run: bash .claude/skills/team-os-creator/scripts/test-update.sh
+
+      - name: Testar o *install/*propagate (herméticos, sem perder edição do usuário)
+        run: bash .claude/skills/team-os-creator/scripts/test-propagate.sh
+
+      - name: Testar a migração da social para squads por plataforma (hermético)
+        run: bash .claude/skills/team-os-creator/scripts/test-migrate-social.sh
+
+      - name: Testar a migração da Sala de Controle para o CT (hermético)
+        run: bash .claude/skills/team-os-creator/scripts/test-migrate-sala.sh
+
+      - name: Hooks executáveis e sintaxe bash
+        run: |
+          fail=0
+          for f in .claude/hooks/*.sh; do
+            [ -x "$f" ] || { echo "❌ sem bit de execução: $f"; fail=1; }
+            bash -n "$f" || { echo "❌ erro de sintaxe: $f"; fail=1; }
+          done
+          for f in .claude/skills/team-os/scripts/*.sh .claude/skills/team-os-creator/scripts/*.sh; do
+            bash -n "$f" || { echo "❌ erro de sintaxe: $f"; fail=1; }
+          done
+          exit $fail
 
       - name: Garantir zero symlinks quebrados em skills
         run: |
@@ -32,3 +65,34 @@ jobs:
             exit 1
           fi
           echo "✅ Sem resíduo do padrão antigo."
+
+      - name: Manifest do pack em dia (pack-manifest.json)
+        run: bash .claude/skills/team-os-creator/scripts/pack-manifest.sh --check
+
+      - name: Contagens do README e do CLAUDE.md batem com o manifest do pack
+        # Conta só o que está no pack-manifest.json: agentes `origin: custom` e skills
+        # próprias de quem usa o pack não entram.
+        run: |
+          agents=$(python3 -c "import json; print(sum(1 for k in json.load(open('pack-manifest.json'))['files'] if k.startswith('.claude/agents/') and k.endswith('.md')))")
+          skills=$(python3 -c "import json; print(len({k.split('/')[2] for k in json.load(open('pack-manifest.json'))['files'] if k.startswith('.claude/skills/') and k.count('/') >= 3}))")
+          hooks=$(python3 -c "import json; print(sum(1 for k in json.load(open('pack-manifest.json'))['files'] if k.startswith('.claude/hooks/') and k.endswith('.sh')))")
+          echo "agentes=$agents skills=$skills hooks=$hooks (do manifest)"
+          fail=0
+          grep -q "$agents agentes" README.md || { echo "❌ README não cita '$agents agentes'"; fail=1; }
+          grep -q "$skills skills" README.md   || { echo "❌ README não cita '$skills skills'"; fail=1; }
+          grep -q "$agents agentes" CLAUDE.md || { echo "❌ CLAUDE.md não cita '$agents agentes'"; fail=1; }
+          grep -q "$skills skills" CLAUDE.md  || { echo "❌ CLAUDE.md não cita '$skills skills'"; fail=1; }
+          exit $fail
+
+      - name: Nada específico de máquina versionado
+        run: |
+          if grep -rnE '/Users/[a-z]+|/Volumes/|/opt/homebrew' --include='*.md' --include='*.json' --include='*.sh' --include='*.py' --include='*.yaml' . \
+               --exclude-dir=.git --exclude-dir=.venv --exclude-dir=ms-playwright \
+               | grep -v 'settings.local.json' | grep -v 'CHANGELOG.md'; then
+            echo "❌ Caminho de máquina encontrado (veja acima)."
+            exit 1
+          fi
+          echo "✅ Sem caminhos de máquina."
+
+      - name: docs/agentes.html está atualizado
+        run: python3 .claude/skills/team-os-creator/scripts/generate-agents-page.py --check

@@ -1,46 +1,25 @@
 name: social
-description: Social media production squad (6 agentes). Cobre estratégia/validação, copy/roteiros + research (Apify MCP), design gráfico (Stitch MCP), fotos AI (Freepik MCP), edição de vídeo (ffmpeg) e publicação/analytics (Meta MCP).
-project_archetypes: [social-media, content-marketing, brand-social]
+description: Estúdio comum de produção (3 agentes) que atende as squads de plataforma (instagram, tiktok, youtube, linkedin) e o tráfego pago. Design gráfico e Key Visuals (Stitch MCP), fotos com IA (Freepik MCP) e vídeo vertical e 16:9 com ffmpeg e avatar de IA (HeyGen). Produz só sob brief de um <plataforma>-strategist/<plataforma>-content com pauta aprovada (ou do traffic-strategist para anúncio); nunca aprova nem publica. Sozinho não tem gate — instale junto de ao menos uma squad de plataforma.
+project_archetypes: [content-production, creative-studio]
 agents:
-  - name: social-strategist
-    archetype: strategist
-    persona: VERA
-    role_title: Strategist & Validadora
-    description: "VERA, Strategist and editorial validator for the Social squad. NEVER creates content — validates and directs. Approval is mandatory before social-publisher publishes any content."
-    color: red
-    skills: [social-editorial-validation]
-  - name: social-content
-    archetype: implementer
-    persona: LYRIS
-    role_title: Content Creator
-    description: "LYRIS, Content Creator for the Social squad. Dual function — research via Apify MCP and copywriting (captions, scripts, hooks, hashtags)."
-    color: yellow
-    skills: [social-copywriting, social-scriptwriting, social-apify-research]
   - name: social-design
     archetype: ux
     persona: AEON
-    role_title: Graphic Designer
-    description: "AEON, Graphic Designer for the Social squad. Creates Key Visuals, carousels, templates and overlays using Google Stitch MCP."
+    role_title: Designer Gráfica do Estúdio
+    description: "AEON, designer gráfica do estúdio comum. Cria Key Visuals, carrosséis, thumbs, templates e overlays via Google Stitch MCP — só sob brief com pauta aprovada pelo estrategista da plataforma (ou do traffic-strategist para anúncio). Nunca aprova nem publica."
     color: pink
-    skills: [social-key-visual, social-stitch-workflow, social-carousel-design]
+    skills: [social-key-visual, social-stitch-workflow, social-carousel-design, social-format-specs]
   - name: social-photo
     archetype: ux
     persona: IRIS
-    role_title: Photo Creator
-    description: "IRIS, Photo Creator for the Social squad. Generates AI photos via Freepik MCP for covers, carousels, posts, hero images and cinematic backgrounds."
+    role_title: Criadora de Fotos do Estúdio
+    description: "IRIS, criadora de fotos do estúdio comum. Gera fotos com IA via Freepik MCP para capas, thumbs, carrosséis, posts e fundos cinematográficos — só sob brief com pauta aprovada pelo estrategista da plataforma (ou do traffic-strategist para anúncio). Nunca aprova nem publica."
     color: cyan
     skills: [social-freepik-generation, social-cinematic-composition]
   - name: social-video
     archetype: implementer
     persona: FLUX
-    role_title: Video Editor
-    description: "FLUX, Video Editor for the Social squad. Creates and edits Reels, Stories, TikToks and Shorts using ffmpeg."
+    role_title: Editora de Vídeo do Estúdio
+    description: "FLUX, editora de vídeo do estúdio comum. Edita vídeo vertical (Reels, Stories, TikTok, Shorts) e 16:9 (YouTube, LinkedIn) com ffmpeg e gera vídeo com avatar de IA via HeyGen — só sob brief com pauta aprovada pelo estrategista da plataforma (ou do traffic-strategist para anúncio). Nunca aprova nem publica."
     color: orange
-    skills: [social-video-editing, social-format-specs]
-  - name: social-publisher
-    archetype: implementer
-    persona: PULSE
-    role_title: Publisher & Analytics
-    description: "PULSE, Publisher and Analytics for the Social squad. Publishing via Meta MCP + metrics analysis. CRITICAL RULE: only publishes after social-strategist approves AND user confirms."
-    color: green
-    skills: [social-meta-publishing, social-analytics]
+    skills: [social-video-editing, social-format-specs, social-heygen-avatar]

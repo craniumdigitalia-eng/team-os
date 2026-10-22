@@ -1,12 +1,8 @@
 ---
 name: seo-sxo
-description: >
-  Search Experience Optimization: reads Google SERPs backwards to detect page-type
-  mismatches, derives user stories from search intent signals, and scores pages
-  from multiple persona perspectives. Identifies why well-optimized pages fail
-  to rank by analyzing what Google rewards for each keyword. Use when user says
-  "SXO", "search experience", "page type mismatch", "SERP analysis", "user story",
-  "persona scoring", "why isn't my page ranking", "intent mismatch", or "wireframe".
+description: "Search Experience Optimization — lê a SERP do Google ao contrário para detectar descasamento de tipo de página, deriva user stories da intenção de busca e pontua páginas por persona; explica por que páginas bem otimizadas não ranqueiam. Use ao pedir 'SXO', 'page type mismatch', 'SERP analysis', 'persona scoring', 'intent mismatch' ou 'por que minha página não ranqueia'."
+version: "2.4.0"
+updated: "2026-10-20"
 user-invocable: true
 argument-hint: "<url> [keyword]"
 license: MIT
@@ -43,8 +39,8 @@ well-optimized it is.
 
 ### Step 1: Target Acquisition
 
-1. Fetch the target URL via `"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run render_page.py <URL> --mode auto` (SPA-aware and SSRF-safe)
-2. Parse with `"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run parse_html.py <URL>` to extract: title, H1, meta description,
+1. Fetch the target URL via `"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run render_page.py <URL> --mode auto` (SPA-aware and SSRF-safe)
+2. Parse with `"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run parse_html.py <URL>` to extract: title, H1, meta description,
    headings hierarchy, word count, schema markup, CTAs, media elements
 3. If no keyword provided, extract primary keyword from title tag + H1 overlap
 4. Validate keyword is non-empty before proceeding
@@ -132,6 +128,18 @@ Compare the target page against SERP expectations across 7 dimensions:
 | Freshness | Last updated, date signals, content recency | 0-10 |
 
 **Total: 0-100 SXO Gap Score** (lower = larger gap, higher = better alignment)
+
+### Diagnóstico contra o top 3
+
+Para página que já ranqueia (candidata das faixas de `seo-google/references/rankings-push.md`, lista com `#id` da SESHAT), abra os três resultados acima dela e escreva, para cada um, o motivo concreto de estar na frente. Quase sempre é uma destas cinco causas:
+
+1. **Intenção** — eles respondem à pergunta que a pessoa fez; a nossa página responde a uma vizinha (ex.: query de preço respondida por página de recursos).
+2. **Seção ausente** — cobrem uma subpergunta que pulamos; o "As pessoas também perguntam" e os subtítulos do top 3 mostram o que se espera.
+3. **Frescor** — dados, prints ou ano atualizados; os nossos, não.
+4. **Formato** — têm a tabela, o passo a passo ou a ferramenta que a query pede.
+5. **Links** — recebem mais links, e mais fortes, de dentro e de fora do site.
+
+**Se não dá para nomear a causa, não recomende reescrita.** A diferença tende a ser autoridade, e o caminho é link (`seo-backlinks`, ANUBIS), não conteúdo. Cada causa nomeada sai com link e data da leitura da SERP.
 
 ### Step 6: Persona-Based Scoring
 
@@ -244,7 +252,7 @@ The SXO score is **separate** from the main SEO Health Score.
 ## Quality Checklist
 
 Before delivering results, verify:
-- [ ] Target URL was fetched via `"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run render_page.py <URL> --mode auto` (not raw curl/fetch)
+- [ ] Target URL was fetched via `"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run render_page.py <URL> --mode auto` (not raw curl/fetch)
 - [ ] Page type classification uses taxonomy from references
 - [ ] At least 5 SERP results were analyzed
 - [ ] User stories cite specific SERP signals as evidence

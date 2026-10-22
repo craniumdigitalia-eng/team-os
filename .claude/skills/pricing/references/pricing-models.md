@@ -1,66 +1,66 @@
-# Pricing Models
+# Modelos de preço
 
-The eight core ways to structure *how* you charge. This is distinct from the value metric (what unit you charge on) and the tier structure (how you package). Most real products **combine** two or more of these.
+Os oito jeitos centrais de estruturar *como* você cobra. É diferente da métrica de valor (a unidade sobre a qual cobra) e da estrutura de planos (como empacota). A maioria dos produtos reais **combina** dois ou mais.
 
-## Contents
-- The 8 Pricing Models
-- Combining Models
-- The Value/Price Ratio
-- The Low-Price Retention Counterpoint
-
----
-
-## The 8 Pricing Models
-
-| Model | How it works | Best when | Reference |
-|-------|-------------|-----------|-----------|
-| **Flat-rate** | One price, one product, everyone pays the same | Simple product, one persona, you want zero pricing friction | Basecamp |
-| **Usage-based** | Pay for what you consume (metered) | Value scales directly with volume; consumption is variable and easy to meter | Stripe |
-| **Tier-based** | Good-better-best packages at set prices | Distinct segments with different needs and budgets | Kinsta |
-| **User-based** | Price per seat/user | Value grows as more people in the org use it (collaboration) | Notion |
-| **Feature-based** | Price gated by which capabilities are unlocked | Clear feature tiers map to willingness to pay | Intercom |
-| **Credit-based** | Buy a bucket of credits, spend them on actions | Usage is lumpy or bursty; you want prepaid commitment and simple mental accounting | Audible |
-| **Outcome-based** | Pay per result delivered (resolution, task completed) | You can measure and attribute the outcome, and the outcome is what the buyer actually wants | Intercom Fin, Zapier |
-| **Hybrid** | Deliberate mix (e.g. platform fee + usage, or seats + credits) | A single model under- or over-charges different customers | Drift |
-
-### When to reach for each
-
-- **Flat-rate** — reach for it first if you can. It's the easiest to sell, easiest to understand, easiest to forecast. The tradeoff: you leave money on the table with your biggest customers.
-- **Usage-based** — the fairest model when consumption tracks value, but revenue is less predictable and buyers fear a surprise bill. Pair with spend caps or alerts.
-- **Tier-based** — the default for self-serve SaaS. Lets one page serve SMB through mid-market.
-- **User-based** — only if value genuinely rises with headcount. If it doesn't, seats punish adoption (teams share logins to avoid paying).
-- **Feature-based** — powerful for segmentation, but don't gate the feature that delivers your core value; gate the ones that separate casual from serious users.
-- **Credit-based** — good for AI/actions-based products where each action has a cost. Credits decouple price from a single unit and make prepayment feel natural.
-- **Outcome-based** — the emerging model for AI agents (charge per resolved ticket, per automation run). Highest trust because the buyer only pays when they win — but only viable when the outcome is measurable and clearly attributable to you.
-- **Hybrid** — where most mature products end up. A base platform fee for predictability plus a usage/outcome component for upside.
+## Conteúdo
+- Os 8 modelos
+- Combinando modelos
+- A razão valor/preço
+- O contraponto: preço baixo e retenção
 
 ---
 
-## Combining Models
+## Os 8 modelos
 
-These aren't mutually exclusive. Common combinations:
+| Modelo | Como funciona | Melhor quando | Referência |
+|--------|---------------|---------------|------------|
+| **Valor fixo** | Um preço, um produto, todos pagam igual | Produto simples, uma persona, zero atrito de preço | Basecamp |
+| **Por uso** | Paga o que consome (medido) | Valor cresce direto com volume; consumo variável e fácil de medir | Stripe |
+| **Por plano (tier)** | Pacotes bom-melhor-ótimo com preço definido | Segmentos distintos com necessidades e orçamentos diferentes | Kinsta |
+| **Por usuário** | Preço por assento/usuário | Valor cresce com mais gente da empresa usando (colaboração) | Notion |
+| **Por funcionalidade** | Preço conforme as capacidades liberadas | Níveis claros de funcionalidade casam com disposição a pagar | Intercom |
+| **Por crédito** | Compra um pacote de créditos e gasta em ações | Uso irregular ou em picos; você quer compromisso pré-pago e conta mental simples | Audible |
+| **Por resultado** | Paga por resultado entregue (resolução, tarefa concluída) | O resultado é mensurável, atribuível e é o que o comprador quer | Intercom Fin, Zapier |
+| **Híbrido** | Mistura deliberada (ex.: taxa de plataforma + uso, ou assentos + créditos) | Um modelo só cobra de menos ou de mais de clientes diferentes | Drift |
 
-- **Tiers + per-user** — seats within each package (most B2B SaaS)
-- **Platform fee + usage** — predictable base, variable upside (Twilio-style)
-- **Seats + credits** — pay per person, then top up credits for heavy actions
-- **Feature tiers + outcome** — unlock capabilities by tier, charge per result on top
+### Quando usar cada um
 
-Pick the primary model from the value metric, then layer a second only if a single model clearly mis-prices a real segment.
+- **Valor fixo** — use primeiro, se der. É o mais fácil de vender, entender e prever. O custo: deixa dinheiro na mesa com os maiores clientes.
+- **Por uso** — o mais justo quando consumo acompanha valor, mas a receita é menos previsível e o comprador teme a conta surpresa. Combine com teto de gasto ou alertas.
+- **Por plano** — o padrão do SaaS self-serve. Uma página atende de PME a mid-market.
+- **Por usuário** — só se o valor de fato cresce com o número de pessoas. Se não cresce, assento pune a adoção (o time compartilha login para não pagar).
+- **Por funcionalidade** — ótimo para segmentar, mas não bloqueie a funcionalidade que entrega o valor central; bloqueie as que separam o uso casual do sério.
+- **Por crédito** — bom para produtos de IA/ações em que cada ação tem custo. Crédito desacopla o preço de uma unidade só e torna o pré-pagamento natural.
+- **Por resultado** — o modelo emergente para agentes de IA (cobrar por ticket resolvido, por automação executada). Confiança máxima, porque o comprador só paga quando ganha — mas só funciona se o resultado for mensurável e claramente atribuível a você.
+- **Híbrido** — onde a maioria dos produtos maduros termina. Uma taxa base de plataforma para previsibilidade + um componente de uso/resultado para o potencial.
 
 ---
 
-## The Value/Price Ratio
+## Combinando modelos
 
-Aim for roughly a **10:1 value-to-price ratio** (Ryan Kulp): the customer should perceive about **10x more value than they pay**. This is the buffer that makes the purchase feel obvious rather than negotiated, and it leaves headroom to raise prices later as you add value.
+Não são excludentes. Combinações comuns:
 
-If you can't articulate 10x value, the problem is usually the offer or the positioning, not the price point.
+- **Planos + por usuário** — assentos dentro de cada pacote (a maioria do SaaS B2B)
+- **Taxa de plataforma + uso** — base previsível, variável por cima (estilo Twilio)
+- **Assentos + créditos** — paga por pessoa e recarrega créditos para ações pesadas
+- **Planos por funcionalidade + resultado** — libera capacidades por plano e cobra por resultado por cima
+
+Escolha o modelo principal a partir da métrica de valor e só acrescente um segundo se um modelo único claramente errar o preço de um segmento real.
 
 ---
 
-## The Low-Price Retention Counterpoint
+## A razão valor/preço
 
-Charging too little is not the safe choice. **Low prices hurt retention** (Patrick Campbell / ProfitWell data, echoed by operators like Josh Pigford of SpyFu and Tyler Tringas): under-priced customers churn *more*, not less, because a low price signals low value and attracts the least-committed, most price-sensitive buyers.
+Mire algo em torno de **10:1 de valor para preço** (Ryan Kulp): o cliente deve perceber cerca de **10x mais valor do que paga**. É a folga que faz a compra parecer óbvia em vez de negociada e deixa espaço para subir o preço depois, conforme você agrega valor.
 
-Related: the **discount-asker signal** — customers who negotiate for a discount tend to churn at roughly **2x** the rate of full-price customers. Discounting to close a deal often buys a customer who leaves anyway.
+Se você não consegue articular 10x de valor, o problema costuma ser a oferta ou o posicionamento, não o preço.
 
-**Implication:** when in doubt, price higher. It's easier to grandfather a price down than to claw one up, and a higher price selects for better-fit, longer-retained customers.
+---
+
+## O contraponto: preço baixo e retenção
+
+Cobrar pouco não é a escolha segura. **Preço baixo prejudica a retenção** (dados de Patrick Campbell / ProfitWell, ecoados por operadores como Josh Pigford e Tyler Tringas): cliente com preço baixo cancela *mais*, não menos, porque preço baixo sinaliza pouco valor e atrai o comprador menos comprometido e mais sensível a preço.
+
+Relacionado: o **sinal de quem pede desconto** — clientes que negociam desconto tendem a cancelar em torno de **2x** a taxa dos que pagam cheio. Dar desconto para fechar muitas vezes compra um cliente que sai de qualquer jeito. (Desconto em proposta específica: piso definido pelo `sales-strategist` e calculado pela `sales-finance`.)
+
+**Consequência:** na dúvida, cobre mais. É mais fácil reduzir um preço para quem já é cliente do que recuperar um preço baixo, e preço mais alto seleciona clientes mais aderentes e que ficam mais tempo.

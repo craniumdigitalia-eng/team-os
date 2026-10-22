@@ -5,8 +5,10 @@
 ### Citation Verification
 
 ```bash
-python scripts/verify_citations.py --report [path]
+python3 "${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/deep-research/scripts/verify_citations.py" --report [path]
 ```
+
+**Network:** this script makes outbound requests — a GET to `https://doi.org/<doi>` for each DOI and a HEAD to each bibliography URL. Offline or behind a firewall, failures here mean "could not check", not "fabricated".
 
 **Checks:**
 - DOI resolution (verifies citation exists)
@@ -18,7 +20,7 @@ python scripts/verify_citations.py --report [path]
 ### Structure & Quality Validation
 
 ```bash
-python scripts/validate_report.py --report [path]
+python3 "${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/deep-research/scripts/validate_report.py" --report [path]
 ```
 
 **9 automated checks:**
@@ -36,19 +38,40 @@ python scripts/validate_report.py --report [path]
 - Attempt 2: Manual review + correction
 - After 2 failures: STOP, report issues, ask user
 
+### Claim Ledger (claims.jsonl)
+
+Run after the report and `evidence.jsonl` exist (stdlib only, no network):
+
+```bash
+DR="${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/deep-research/scripts"
+# Link each main factual claim to the sources/evidence that support it
+python3 "$DR/extract_claims.py" add --dir [folder] --json '{"section_id": "finding-1", "text": "...", "claim_type": "factual", "cited_source_ids": ["<source_id>"], "evidence_ids": ["<evidence_id>"]}'
+# Optional inventory of every sentence (claims arrive UNLINKED, so keep it in a separate folder)
+mkdir -p [folder]/inventory && python3 "$DR/extract_claims.py" extract --report [report.md] --dir [folder]/inventory
+# Verify support (updates support_status in claims.jsonl) and summarize
+python3 "$DR/verify_claim_support.py" verify --dir [folder] --strict
+python3 "$DR/verify_claim_support.py" report --dir [folder]
+python3 "$DR/extract_claims.py" stats --dir [folder]
+```
+
+Statuses: `supported`, `partial`, `needs_review`, `unsupported`. With `--strict`, any unsupported factual claim exits 1. Synthesis/recommendation need traceability with a softer threshold; speculation has no support gate.
+
+**Report in pt-BR with English sources:** the check is lexical (token overlap, entities, numbers, dates) and tuned for English, so a Portuguese claim against an English quote yields false negatives. In that case the ledger gate becomes **human review**: run `verify` without `--strict`, manually check every factual claim marked `needs_review`/`unsupported` against its cited quote, and state in the Methodology appendix that claim support was reviewed manually.
+
 ### Validation Loop Protocol
 
 **After generating ANY report, run this loop:**
 
-1. Run `python scripts/validate_report.py --report [path]`
-2. Run `python scripts/verify_citations.py --report [path]`
-3. If EITHER fails:
+1. Run `python3 "${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/deep-research/scripts/validate_report.py" --report [path]`
+2. Run `python3 "${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/deep-research/scripts/verify_citations.py" --report [path]`
+3. Run the claim ledger (`verify_claim_support.py verify`, see above)
+4. If ANY fails:
    - Read error output carefully
    - Fix the specific issues identified
-   - Re-run BOTH validators
-4. Maximum 3 retry cycles. If still failing after 3 cycles: STOP and report issues to user.
+   - Re-run all validators
+5. Maximum 3 retry cycles. If still failing after 3 cycles: STOP and report issues to user.
 
-**Do NOT skip validation.** Every report must pass both scripts before delivery.
+**Do NOT skip validation.** Every report must pass the validators and the claim ledger (or its documented human review, for pt-BR reports) before delivery.
 
 ---
 

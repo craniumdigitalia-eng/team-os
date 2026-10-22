@@ -1,11 +1,8 @@
 ---
 name: seo-content
-description: >
-  Content quality and E-E-A-T analysis with AI citation readiness assessment,
-  plus last-mile draft cleanup (AI-typical phrasing and invisible Unicode
-  watermark characters). Use when user says "content quality", "E-E-A-T",
-  "content analysis", "readability check", "thin content", "content audit",
-  "humanize", "AI phrasing", "remove watermarks", or "invisible characters".
+description: "Qualidade de conteúdo e E-E-A-T com avaliação de prontidão para citação por IA, mais limpeza final de rascunho (frases típicas de IA e caracteres Unicode invisíveis). Use ao pedir 'content quality', 'E-E-A-T', 'readability', 'thin content', 'content audit', 'humanize', 'AI phrasing' ou 'remove watermarks'."
+version: "2.3.3"
+updated: "2026-10-20"
 user-invocable: true
 argument-hint: "[url]"
 license: MIT
@@ -140,12 +137,14 @@ Google's raters assess low-quality, scaled, copied, or AI-generated main content
 
 ## Draft Cleanup: AI Phrasing & Invisible Watermarks
 
+> **Texto em pt-BR:** o checklist de "cara de IA" (tiques estruturais, léxico pt-BR, tipografia, painel de 5 sinais e ajuste por canal) vive em `/copy-humanize`. Esta seção continua dona do script abaixo (invisíveis + tabela de frases em inglês) e da regra de escopo; para rascunho em português, rode o script para os invisíveis e aplique `/copy-humanize` no texto.
+
 For "humanize this", "remove watermarks", or "clean up this draft", run the
 bundled cleanup script on the user's own content:
 
 ```bash
-"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run content_humanize.py draft.md -o cleaned.md
-cat draft.md | "${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run content_humanize.py --json
+"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run content_humanize.py draft.md -o cleaned.md
+cat draft.md | "${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run content_humanize.py --json
 ```
 
 Two deterministic passes, both logged in the JSON output:

@@ -1,8 +1,8 @@
 ---
 name: sites-scroll-motion
-description: Scroll cinematográfico, parallax, animações avançadas e cenas 3D para websites — do CSS puro ao Three.js WebGPU. Use ao implementar efeitos de scroll, parallax, animações scroll-triggered ou cenas 3D em sites que pedem experiência imersiva, em Next.js ou Astro.
-version: "1.1"
-updated: "2026-09-20"
+description: "Scroll cinematográfico, parallax, animações avançadas e cenas 3D para websites — do CSS puro, Motion e GSAP + ScrollTrigger ao Three.js WebGPU, com prefers-reduced-motion obrigatório. Use ao implementar efeitos de scroll, parallax, seções presas (pin/scrub), animações scroll-triggered ou cenas 3D em sites que pedem experiência imersiva, em Next.js ou Astro."
+version: "1.3"
+updated: "2026-10-20"
 ---
 
 # Sites Scroll Motion
@@ -10,6 +10,55 @@ updated: "2026-09-20"
 Dois sistemas de referência que informam esta skill:
 - **Fonte A:** `/agentes` page (Next.js + React Three Fiber + Framer Motion)
 - **Fonte B:** Verdana Digital Oasis (HTML vanilla + Three.js WebGPU + TSL + GPU Compute)
+
+---
+
+## Regra zero — `prefers-reduced-motion` (obrigatório)
+
+**Toda animação de scroll tem versão reduzida.** Sem exceção: reveal, parallax, sticky scroll-driven,
+câmera 3D. Quem ativou "reduzir movimento" no sistema (labirintite, enxaqueca, TDAH) recebe o mesmo
+conteúdo, na posição final, sem deslocamento — no máximo um fade curto de opacidade. Nenhum conteúdo
+pode depender da animação para aparecer. QA reprova se a versão reduzida não existir.
+
+**CSS — base para tudo que é CSS/IntersectionObserver:**
+```css
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] { opacity: 1; transform: none; transition: opacity 0.2s ease; }
+  html { scroll-behavior: auto; }
+  .parallax, [data-parallax] { transform: none !important; }
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
+}
+```
+
+**JS vanilla / Astro — checar antes de registrar observers e listeners:**
+```js
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+if (reduce) {
+  document.querySelectorAll('[data-reveal]').forEach(el => el.classList.add('revealed'));
+} else {
+  // registrar IntersectionObserver / scroll listeners normalmente
+}
+```
+
+**React (Motion / Framer Motion) — hook `useReducedMotion`:**
+```tsx
+import { useReducedMotion, useScroll, useTransform, motion } from 'motion/react' // ou 'framer-motion'
+
+function SecaoParallax() {
+  const reduce = useReducedMotion()
+  const { scrollYProgress } = useScroll()
+  const y = useTransform(scrollYProgress, [0, 1], reduce ? [0, 0] : [0, -120])
+  return <motion.div style={{ y }} />
+}
+```
+Para o projeto todo de uma vez: `<MotionConfig reducedMotion="user">` no layout raiz — o Motion
+desliga transform/layout e mantém opacidade quando o usuário pede.
+
+**Three.js / R3F:** com `reduce`, a câmera vai direto para o keyframe do estágio atual (sem `lerp`
+contínuo), drift e rotação automáticos param, e o canvas pode virar imagem estática.
+
+**Um momento de assinatura por página.** Movimento de scroll em toda seção é ruído (e sinal de "cara
+de IA"). Escolha onde a animação carrega a ideia — o resto entra sem animação.
 
 ---
 
@@ -34,6 +83,12 @@ Objetivo de movimento
     │
     ├── Seção com efeito sticky + scroll-driven
     │     └── min-h-[150vh] + sticky child + Framer Motion useScroll    [→ Seção 5]
+    │
+    ├── Sequência longa amarrada ao scroll (timeline com várias etapas, pin, scrub,
+    │   vários elementos coordenados no mesmo trecho)
+    │     ├── Motion/useScroll já resolve (1-3 valores, sem pin)? → fique nele [→ Seção 5]
+    │     └── Precisa de pin + scrub + timeline coordenada → GSAP + ScrollTrigger [→ Seção 5A]
+    │     (NÃO use GSAP para reveal simples, hover ou fade — CSS/Motion bastam e pesam menos)
     │
     ├── CSS nativo de scroll snapping
     │     └── scroll-snap-type y proximity + scroll-snap-align start    [→ Seção 3]
@@ -61,6 +116,7 @@ Objetivo de movimento
 ## Seção 2 — IntersectionObserver + CSS Reveal (Zero deps)
 
 **Quando usar:** reveal simples de elementos ao entrar na viewport. Não requer Framer Motion (~40kb).
+Versão reduzida obrigatória: ver **Regra zero** (CSS `[data-reveal]` + checagem antes do observer).
 
 ```js
 const revealObserver = new IntersectionObserver((entries) => {
@@ -135,6 +191,7 @@ progressBar.style.width = `${(scrollY / (document.body.scrollHeight - innerHeigh
 ## Seção 4 — Dual-ref Scroll (Sem re-render)
 
 **Regra:** nunca usar `useState` para posição de scroll em animações de alta frequência. Refs não causam re-render.
+Com `prefers-reduced-motion: reduce`, não registrar o listener — ver **Regra zero**.
 
 ### React — `useScrollProgress` hook
 
@@ -210,6 +267,8 @@ useFrame((_, delta) => {
 
 ## Seção 5 — Framer Motion Scroll Avançado
 
+Todo `useTransform` de deslocamento usa `useReducedMotion()` para zerar o intervalo (ver **Regra zero**).
+
 ### useScroll básico (elemento)
 
 ```tsx
@@ -265,6 +324,76 @@ const cardsY   = useTransform(cardsProgress,  [0, 1], [60, 0]);
 // Easing (determinístico, previsível para scroll-driven)
 <motion.div style={{ opacity }} /> // useTransform já usa linear por padrão
 ```
+
+---
+
+## Seção 5A — GSAP + ScrollTrigger (timeline longa, pin, scrub)
+
+**Quando usar:** um trecho da página vira uma "cena" — a seção fica presa (`pin`) enquanto várias
+etapas acontecem em ordem, com o progresso amarrado ao scroll (`scrub`). **Quando NÃO usar:** reveal,
+fade, hover, parallax de 1 elemento — CSS ou Motion resolvem sem mais uma dependência. GSAP não é o
+padrão do pack; é a ferramenta para o caso acima. Licença: GSAP e todos os plugins (inclusive
+ScrollTrigger e SplitText) são gratuitos, também para uso comercial, pelo pacote público `gsap` no npm.
+
+**React / Next.js — `useGSAP` (pacote `@gsap/react`):** escopo no container e limpeza automática no
+unmount (tweens, timelines e ScrollTriggers criados dentro do hook são revertidos). Componente com
+`'use client'`; registre os plugins uma vez, fora do componente.
+```tsx
+'use client'
+import { useRef } from 'react'
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { useGSAP } from '@gsap/react'
+gsap.registerPlugin(ScrollTrigger, useGSAP)
+
+export function CenaProduto() {
+  const root = useRef<HTMLElement>(null)
+  useGSAP(() => {
+    const mm = gsap.matchMedia()
+    mm.add({ motion: '(prefers-reduced-motion: no-preference)', reduce: '(prefers-reduced-motion: reduce)' }, (ctx) => {
+      if (ctx.conditions!.reduce) { gsap.set('.etapa', { autoAlpha: 1, y: 0 }); return } // Regra zero
+      gsap.timeline({
+        scrollTrigger: { trigger: root.current, start: 'top top', end: '+=200%', pin: true, scrub: 1,
+                         invalidateOnRefresh: true, markers: process.env.NODE_ENV === 'development' },
+      })
+        .from('.etapa-1', { y: 60, autoAlpha: 0 })
+        .from('.etapa-2', { x: () => -window.innerWidth * 0.2, autoAlpha: 0 }) // função = recalcula no refresh
+        .to('.etapa-1', { autoAlpha: 0.3 }, '<')
+    })
+  }, { scope: root }) // seletores '.etapa-*' só valem dentro de root
+  return <section ref={root}>…</section>
+}
+```
+Handlers criados depois (clique, timer) que animam: envolva com `contextSafe` do `useGSAP` para
+entrarem na limpeza.
+
+**Fora do React (vanilla, Astro):** `gsap.context(() => { … }, raiz)` agrupa tudo; em troca de
+página (View Transitions do Astro, SPA) chame `ctx.revert()` para matar tweens e ScrollTriggers.
+
+**`gsap.matchMedia()` + Regra zero:** `prefers-reduced-motion: reduce` é sempre uma condição do
+`matchMedia` — no ramo reduzido o conteúdo fica na posição final, sem pin e sem scrub. Use o mesmo
+`matchMedia` para breakpoints (ex.: pin só em `(min-width: 768px)`; no mobile, seções empilhadas).
+Quando a condição muda, o GSAP reverte o ramo antigo sozinho.
+
+**`ScrollTrigger.refresh()`:** posições são medidas na criação. Se imagens sem dimensão, fontes web
+ou conteúdo assíncrono mudam a altura depois, chame `ScrollTrigger.refresh()` após
+`document.fonts.ready` e o `load` das imagens (ou dê `width`/`height` às imagens — melhor ainda).
+Crie os triggers na ordem em que aparecem na página (ou use `refreshPriority`).
+
+**Pin sem quebrar layout:** o `pin` envolve o elemento num spacer com a altura do trecho (`end`);
+não aplique `pin` em elemento com `transform` no pai nem dentro de container com `overflow: hidden`
+que não seja o scroller. Em flex/grid, teste o `pinSpacing` (padrão `true`; `false` só quando a
+sobreposição é intencional). Confira em 390px e 1440px que nada pula ao entrar/sair do pin.
+
+**`markers`:** só em desenvolvimento (condição acima). Marcador em produção é bug de QA.
+
+**Não fazer:**
+- Animar `width`, `height`, `top`, `left`, `margin` — use `x`, `y`, `scale`, `autoAlpha` (compositor, sem reflow).
+- Criar ScrollTrigger dentro de loop/`forEach` sem escopo de limpeza (`useGSAP`/`gsap.context`) — vaza trigger a cada re-render ou navegação.
+- Valor dependente da viewport sem `invalidateOnRefresh: true` + valor em função — o resize deixa a cena com medidas velhas.
+- Usar `scrub` e `toggleActions` no mesmo trigger — escolha um.
+- Aninhar ScrollTrigger em tween que já está dentro de timeline com ScrollTrigger — o trigger fica na timeline.
+- Esquecer o ramo reduzido do `matchMedia` — QA reprova (Regra zero).
 
 ---
 
@@ -419,6 +548,8 @@ useFrame(() => {
 ---
 
 ## Seção 8 — Three.js / React Three Fiber — Cenas 3D
+
+Com movimento reduzido: câmera salta para o estágio, sem drift/rotação automática (ver **Regra zero**).
 
 ### Setup mínimo — Canvas fixo atrás do conteúdo
 
@@ -694,6 +825,7 @@ Para protótipos e demos HTML sem Next.js/Vite:
 9. **DoF desligado em mobile** — verifique `navigator.userAgent` e use `sceneColor` diretamente
 10. **Fog é mais barato que frustum culling** para objetos distantes — `FogExp2` esconde a distância sem custo de render
 11. **`renderer.setAnimationLoop()` em vez de loop `rAF` manual no WebGPU** — necessário para o pipeline async do WebGPU funcionar corretamente
+12. **`prefers-reduced-motion` respeitado em toda animação de scroll** — versão reduzida existe e foi testada (DevTools → Rendering → Emulate CSS prefers-reduced-motion). Ver **Regra zero**
 
 ---
 
@@ -706,6 +838,7 @@ Para protótipos e demos HTML sem Next.js/Vite:
 | Progress bar de scroll | `div` width = scrollY / scrollHeight | ⬤○○ |
 | Cards que deslizam com scroll | Framer Motion useScroll + useTransform | ⬤⬤○ |
 | Seção sticky + scroll-driven | Framer Motion + min-h-[150vh] | ⬤⬤○ |
+| Cena presa com várias etapas (pin + scrub) | GSAP timeline + ScrollTrigger + matchMedia | ⬤⬤○ |
 | Mouse parallax (CSS vars) | `--mx`, `--my` + translate | ⬤⬤○ |
 | Câmera 3D com scroll | CameraRig keyframe pattern (R3F) | ⬤⬤⬤ |
 | Planetas com atmosfera | Planet.tsx (Three.js R3F) | ⬤⬤⬤ |

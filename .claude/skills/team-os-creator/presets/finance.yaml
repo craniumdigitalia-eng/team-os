@@ -8,7 +8,7 @@ agents:
     role_title: Financial Research
     description: "NILO, pesquisador da squad Finance. Coleta e classifica documentos do período (extratos, notas, contratos, faturas), extrai os dados para o controller e pesquisa benchmarks de custo, tarifas, índices e taxas — toda cifra com documento ou fonte primária datada. Entrega evidência; não lança, não decide."
     color: cyan
-    skills: [finance-bookkeeping, deep-research, dev-defuddle]
+    skills: [finance-bookkeeping, deep-research, dev-defuddle, doc-to-markdown]
   - name: finance-strategist
     archetype: strategist
     persona: AMAZONAS

@@ -106,7 +106,7 @@ Save to `~/.config/claude-seo/google-api.json`:
 ## Step 8: Verify Setup
 
 ```bash
-"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run google_auth.py --check
+"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run google_auth.py --check
 ```
 
 Expected output at Tier 2 (full):

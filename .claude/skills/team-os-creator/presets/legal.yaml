@@ -8,7 +8,7 @@ agents:
     role_title: Legal Research
     description: "VERITAS, pesquisadora da squad Legal. Pesquisa lei, regulamento, jurisprudência, doutrina e o histórico contratual da própria empresa — toda afirmação com fonte primária, artigo ou número de acórdão e data; separa achado de leitura e nunca emite parecer. Entrega evidência; outros decidem."
     color: cyan
-    skills: [legal-research, deep-research, dev-defuddle]
+    skills: [legal-research, deep-research, dev-defuddle, doc-to-markdown]
   - name: legal-strategist
     archetype: strategist
     persona: PRUDENTIA
@@ -29,7 +29,7 @@ agents:
     role_title: Contract Drafter
     description: "CONCORDIA, redatora da squad Legal. Redige e revisa contratos, aditivos, distratos, NDAs, termos e políticas a partir do modelo da biblioteca e da postura aprovada, com matriz de desvios em toda minuta e revisão marcada de minutas da contraparte. Nunca inventa cláusula sem origem, nunca envia, nunca decide ceder."
     color: yellow
-    skills: [legal-contract-drafting, legal-clause-library, legal-research]
+    skills: [legal-contract-drafting, legal-clause-library, legal-research, doc-to-markdown]
   - name: legal-compliance
     archetype: data
     persona: FIDES

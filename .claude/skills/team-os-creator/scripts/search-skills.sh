@@ -3,7 +3,13 @@
 # Usage: ./search-skills.sh <keyword> [min_installs]
 # Output: tab-separated: owner/repo@skill<TAB>installs<TAB>trusted_author
 # Default min_installs: 1500
+#
+# Opcional — usado só no passo "sugerir skills" do `*create` (SKILL.md do creator),
+# e só com confirmação do usuário. Precisa de rede (consulta o catálogo skills.sh).
+# CLI com versão FIXA (supply chain): troque SKILLS_CLI_VERSION conscientemente,
+# só para uma versão publicada há pelo menos 2 semanas.
 
+SKILLS_CLI_VERSION="${SKILLS_CLI_VERSION:-1.7.1}"
 KEYWORD="${1:-}"
 MIN_INSTALLS="${2:-1500}"
 
@@ -17,7 +23,7 @@ TRUSTED_AUTHORS=" vercel-labs supabase anthropic microsoft figma better-auth sha
 
 # Rodar busca e parsear
 # Output do `skills find` tem padrão: "owner/repo@slug" + "\nXX.XK installs"
-RAW=$(npx --yes skills find "$KEYWORD" 2>&1)
+RAW=$(npx --yes "skills@${SKILLS_CLI_VERSION}" find "$KEYWORD" 2>&1)
 
 # Parsear linhas no formato "owner/repo@skill ... XX.XK installs"
 # Usar awk pra extrair pares

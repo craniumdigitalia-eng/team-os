@@ -1,6 +1,8 @@
 <!-- Updated: 2026-06-21 -->
 # Core Web Vitals Thresholds (June 2026)
 
+> No pack team-os: diagnóstico e correção (subpartes do LCP, fases do INP, causas de CLS, campo × laboratório) ficam em `/core-web-vitals`. Este arquivo guarda só os fatos de SEO sobre CWV (limiares, peso no ranking, CrUX, mitos).
+
 ## Current Metrics
 
 | Metric | Good | Needs Improvement | Poor |

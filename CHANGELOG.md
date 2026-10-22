@@ -1,0 +1,187 @@
+# Changelog
+
+Todas as mudanças relevantes deste repositório. Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/); commits seguem [Conventional Commits](https://www.conventionalcommits.org/pt-br/).
+
+## [Não lançado]
+
+Evolução a partir da análise de ~50 repositórios (guia "15 skills essenciais" + 11 Reels). Método trazido para dentro das nossas skills, em pt-BR; créditos em `THIRD_PARTY_NOTICES.md` ("Métodos adaptados (2026-10)").
+
+### Corrigido
+- Scripts de skills não achavam a pasta do projeto fora de hooks: `$CLAUDE_PROJECT_DIR` ganhou fallback para a raiz do git em 33 skills e 17 agentes; o `*audit` barra uso sem fallback.
+- `pricing` 2.1.4: Van Westendorp com curvas corretas e sem a promessa "25–50% sem impacto".
+- Créditos de licença: verify-before-done, pricing, sales-enablement, traffic-*, accessibility, slides, web-design-guidelines e negotiation.
+- Presets citavam 8 skills inexistentes; o `*audit` passa a conferir.
+- Skills de site deixaram de ensinar "cara de IA" (Inter fixo, transition-all, card que sobe com sombra, mesh gradient roxo); `prefers-reduced-motion` obrigatório.
+- `seo-audit` delegava a um agente inexistente; social-* e agentes VERA/LYRIS/PULSE saíram do pt-PT.
+
+### Alterado
+- verify-before-done 1.1, team-os (`*grill`, texto enxuto), deep-research 3.0.1-ct, negotiation 1.6 pt-BR com regras do pack, security com filtro do candidato / três estados / refutação cruzada, SEO (rankings-push, top 3, painel de visibilidade em IA), ui-ux-pro-max 2.15, web-design-guidelines com cache fixado, accessibility 2.0 enxuta, social-video-editing 2.0, social-* (ganchos com nota, carrossel 4:5, outlier pela mediana, hashtags 3–5), GSAP na sites-scroll-motion.
+- `slides` consolidada em `sales-deck-production`.
+- **Social dividida por plataforma:** `social` vira estúdio comum (AEON, IRIS, FLUX) + squads `instagram` (VERA/LYRIS/PULSE, inclui Facebook e Threads), `tiktok` (RIFF/BEAT/LOOP), `youtube` (KAIROS/ECHO/ORBIT) e `linkedin` (STRATA/QUILL/RELAY). Aprovação não se transfere entre plataformas; impulsionar é sempre da squad traffic. Squads derivadas dos presets (15).
+
+### Adicionado
+- Skills: instagram-strategy, instagram-dm-flows, instagram-publishing (ex-social-meta-publishing), tiktok-publishing, youtube-scriptwriting/packaging/analytics/publishing, linkedin-strategy, linkedin-publishing, copy-humanize, ui-craft, doc-to-markdown, dev-debugging, core-web-vitals.
+- `migrate-social-split.sh` (dry-run padrão) + aviso de agente órfão no `*propagate`; `*feedback` + convenção `[skill-feedback]`; "Automações sugeridas" no Discovery; hook opcional `guard-env-files.sh` (`--with-env-guard`); `marketing-context.md`.
+- Pressure-tests: 3 cenários na squad security e 9 nas squads de plataforma, todos limpos.
+- Contagens: 111 agentes · 124 skills · 15 squads · 14 hooks.
+
+### Alterado — Sala de Controle no CT
+- A Sala de Controle mora no próprio CT (exclusiva do CT, como o `team-os-creator`): acabou a pasta separada `1 | Sala de Controle`. Raiz padrão = `0 | Centro de Treinamento` + uma pasta por negócio; memória em `docs/smart-memory/sala-de-controle/` do CT (fora do git).
+- `/sala-de-controle` sem argumento faz a rodada e abre o painel ao vivo (`127.0.0.1:8787`) no navegador do Claude; `*painel` reabre, `*painel stop` derruba.
+- Dois painéis com papéis claros e link cruzado: `/sala-de-controle *painel` = agentes em produção (8787, ao vivo); `/team-os-creator *painel` = mapa do pack (8788).
+- `*install` recusa `--extra-skills sala-de-controle` (`ERROR=sala_mora_no_ct`); `*propagate` numa pasta de Sala antiga não atualiza e avisa `LEGACY_CONTROL_ROOM`. O Command Center avisa a pasta antiga e sugere a migração.
+- Novo `migrate-sala-to-ct.sh` (+ `test-migrate-sala.sh` no CI): simula por padrão; com `--apply` copia registro, histórico e organização para o CT sem sobrescrever (colisão vira `-da-pasta-antiga`) e manda a pasta antiga para a Lixeira.
+
+### Removido — maestri-os
+- Skill `maestri-os` (Sala de Controle no modo Maestri) e todas as referências: a Sala única é a `sala-de-controle`, no CT. Pasta antiga com `maestri-os` entra na mesma migração (o histórico vai como arquivo). Contagem: 125 → 124 skills.
+
+## [2.4.0] — 2026-10-14
+
+### Adicionado
+- **Squad `security` (7 agentes, personas nórdicas) + 4 skills `security-*`** — add-on de projetos com código (`--squads sites,security` ou `dev,security`), adaptada de `msitarzewski/agency-agents` (MIT, ver `THIRD_PARTY_NOTICES.md`). Audita, prioriza e especifica a correção. **Nunca** edita o código (dev/sites corrige), **nunca** rotaciona credencial nem executa contenção em produção (usuário/devops), **nunca** testa contra terceiro (teste ativo só em local/staging com escopo escrito).
+  - **Agentes:**
+    - `security-architect` (MIMIR, opus) — modelos de ameaça, stories de segurança e ordem de correção (exclusivo)
+    - `security-appsec` (HEIMDALL) — autorização/IDOR, entrada, sessão, headers, dependências, webhooks
+    - `security-ai-code` (HUGIN) — código gerado por IA, inclusive no histórico do git, e apps com LLM: injeção de prompt, tools sem confirmação, saída do modelo confiada
+    - `security-secrets` (VÁR) — fonte única do inventário de credenciais e dos roteiros de rotação; nunca toca no valor
+    - `security-privacy` (FRIGG) — fonte única do mapa técnico de dados pessoais; base legal fica com `legal-compliance`/advogado
+    - `security-incident` (VIDAR) — SEV, linha do tempo em UTC, preservação de evidência, post-mortem; comunicação externa é do usuário
+    - `security-qa` (FORSETI, opus) — veredictos e fechamento de achados; nunca WAIVED de CRITICAL
+  - **Skills:**
+    - `security-audit-method` — escopo autorizado, severidade, formato `SEC-{NN}`, nunca expor segredo, fechamento por nova varredura, waiver
+    - `security-threat-modeling` — STRIDE por fronteira → REQ-SEC testáveis
+    - `security-incident-response`
+    - `security-privacy-data-map`
+  - **Integração:** registrada no `validate-agent.sh`, `install-to-project.sh`, `discovery.sh` (áreas `agents/security/*`), 4 hooks `check-*-progress.sh`, `generate-agents-page.py` e templates. O `detect-project-signals.sh` sugere `security` como add-on quando o `package.json` tem banco, auth, pagamento ou IA, ou quando existe `supabase/migrations/`.
+  - **Pressure-test:** 21 cenários ad-hoc (3 por agente), todos limpos. Um deles achou um exemplo enganoso no `security-secrets` (linha de inventário com rotação "confirmada" e data real), que foi trocado por um modelo neutro.
+  - **Contagens:** 95 → 102 agentes, 108 → 112 skills, 10 → 11 squads. Política de modelos: 25 `opus` e 77 `inherit`. `block-git-push.sh` em 99 agentes.
+- **`scripts/release.sh X.Y.Z` (só mantenedor)**: exige `.team-os-maintainer`, recusa árvore git suja fora de `VERSION`/`CHANGELOG.md`/`docs/agentes.html`/`pack-manifest.json`, fora da `main`, tag já existente ou `[Não lançado]` vazio; grava `VERSION`, converte `## [Não lançado]` em `## [X.Y.Z] — AAAA-MM-DD` (recriando um vazio acima), regera `docs/agentes.html` e o manifest, roda audit, `--skills`, `test-hooks.sh`, `test-update.sh` e `test-propagate.sh` (se falhar, devolve os arquivos ao estado anterior) e cria o commit `release: vX.Y.Z` e a tag anotada, só locais. **Imprime** `git push origin main vX.Y.Z` e nunca dá push. `--dry-run` mostra o que faria sem alterar nada.
+- **`MAINTAINERS.md`**: o ciclo do mantenedor (editar → audit → testes → manifest → CHANGELOG → commit → propagate → release → push manual), o papel do `.team-os-maintainer`, como fazer um release e como regerar o manifest. Entra na lista de documentos do pack (`pack-manifest.sh` e `update-pack.py`).
+- **README: seção "Instalar e atualizar"** (clone, `*install`, `*update` passo a passo, o que ele nunca toca, o que acontece com arquivo editado, como desfazer, "Onde ficam os meus agentes") com o aviso de que versões anteriores à 2.4.0 não têm `*update` e se atualizam uma única vez com `git pull` (ou baixando de novo).
+- **CI**: passos "Manifest do pack em dia" (`pack-manifest.sh --check`), `test-update.sh` e `test-propagate.sh` (instala `rsync` se faltar).
+- **`/team-os-creator *update` — atualizar o pack sem perder o que você criou.** `scripts/update-pack.sh` (`--check` · `--apply [--yes]` · `--to vX.Y.Z` · `--from <pasta>` · `--upstream` · `--status` · `--resolve <arquivo>=keep|new` · `--undo`) descobre a versão mais nova (maior tag `vX.Y.Z`; sem git, pela API e pelo pacote do GitHub), baixa para uma pasta temporária, confere o sha256 de cada arquivo e só então aplica, arquivo por arquivo — nunca roda `git pull`/`commit`/`push` nem mexe no índice git. Arquivo do pack que o usuário editou nunca é sobrescrito: a versão nova fica ao lado (`<arquivo>.new`) e o `SKILL.md` pergunta, um por um, manter o meu / usar o novo / ver a diferença. Cópia de segurança só dos arquivos trocados em `.team-os/backups/<data>/` (guarda 3), arquivos que saíram do pack em `.team-os/removed/`, relatório em `.team-os/update-report.md`, bloco Native Teams Protocol reinjetado nos agentes próprios e `*audit` ao final.
+- **`VERSION` e `pack-manifest.json`** (raiz): a versão do pack e a lista dos arquivos que são do pack, com sha256. `scripts/pack-manifest.sh` gera o manifest (`--check` só confere). Tudo fora dele é do usuário e o `*update` nunca toca. Estado local por máquina em `.team-os/` (no `.gitignore`).
+- **Agentes próprios (`origin: custom`)**: sem `.team-os-maintainer`, o `*create`/`generate-agent.sh` gera o agente com `origin: custom` e o registra em `presets/custom/custom.yaml` — pasta do usuário, fora do pack. O `validate-agent.sh` lê `presets/custom/*.yaml`, aplica as mesmas checagens e conta à parte ("95 do pack + N próprios"); `generate-agents-page.py`, `scan-ct-projects.sh` e o Command Center contam só o pack (e mostram os próprios à parte).
+- `scripts/trash.sh`: "mandar para a Lixeira" portável (macOS `~/.Trash`; Linux `gio trash` → `trash-put` → `~/.local/share/Trash` com `.trashinfo`), usável como comando ou `source`. Nunca apaga.
+- `scripts/test-update.sh`: teste hermético do `*update` (HOME/TMPDIR falsos, upstream git local com 3 versões) — conflito sem perda, agente próprio intacto, arquivo novo/removido, pulo de 2 versões, sem git, `--from`, `--undo`, keep/new, pacote adulterado recusado, sem `installed.json`, clone git intacto, 3 backups, trava do mantenedor.
+- **`*install`/`*propagate` sem perder o que foi editado no projeto.** Cada destino ganha `.team-os/installed.json` (versão do pack + sha256 de cada agente, arquivo de skill e hook gravado; `.team-os/` entra no `.gitignore` do destino). Arquivo editado no projeto que o CT também mudou nunca é sobrescrito: a versão nova fica ao lado (`<arquivo>.new`), a saída lista `CONFLICT_FILES=<n>` e `CONFLICT=<arquivo>` (exit 0) e o `SKILL.md` pergunta, um por um, manter o meu / usar o novo / ver a diferença, reexecutando com `--only <nome>` e `--on-conflict keep|new` (o do usuário vai para `.team-os/backups/<data>/`, guarda 3). Editado e o CT não mudou → fica o do usuário, sem perguntar. Destino antigo sem `installed.json`: a 1ª propagação sobrescreve o que difere, como antes, e grava a base (`BASELINE_CREATED=1`). Arquivo de skill que saiu do pack vai para `.team-os/removed/<data>/`; o que o usuário criou no destino nunca é tocado. Motor por arquivo em `scripts/propagate-sync.py`.
+- `install-to-project.sh --custom <nome1,nome2|all>`: leva agentes próprios do CT (`origin: custom`) para o projeto; os que já estão lá são atualizados pelo `*propagate` (`--match-target-squads`).
+- `scripts/test-propagate.sh`: teste hermético do `*install`/`*propagate` (HOME/TMPDIR falsos, CT real como fonte) — destino sem base, 2ª propagação idempotente, conflito sem perda, `--on-conflict new|keep`, `--only`, arquivos do usuário intocados, arquivo que saiu do pack, agente próprio com/sem `--custom`, `--dry-run` sem escrita, Sala de Controle, backups do `*install`.
+- **Contador de tokens no painel da Sala** (`/sala-de-controle *painel`): micro-indicador em cada sessão (tokens que sobem + barra de contexto, amarelo >200k e vermelho >400k), detalhe no painel lateral (novos x relidos, ritmo por minuto, consumo por agente) e total no topo. `tokens.py` lê os transcripts de forma incremental, em thread de fundo, deduplicando por resposta (o `usage` se repete por bloco).
+- **Smart-memory do painel no estilo Obsidian**: grafo com física ao vivo (nós arrastáveis, zoom, brilho e destaque da vizinhança ao passar o mouse, nomes sem sobreposição), modos Foco/Tudo, painel de ajustes (busca, grupos por pasta, tamanho, forças, hubs e notas sem ligação) com preferências salvas; árvore de pastas recolhível com contagem e cores; nota com caminho em migalhas, propriedades em etiquetas e tipografia nova.
+- **Hook `context-watch.sh`** (`UserPromptSubmit`): avisa quando o contexto da sessão passa de 200k e de 400k tokens e propõe registrar o ledger e `/compact` (ou sessão nova). Anti-spam, nunca bloqueia, fail-open; `TEAM_OS_CTX_WARN` / `TEAM_OS_CTX_HIGH` / `TEAM_OS_CTX_WATCH=0`. Registrado pelo `ensure-settings.sh`; 12 casos novos em `test-hooks.sh` (505).
+- **NTP regra 8 — "Contexto curto: entregue e encerre"**: uma peça por agente; ao concluir (ou perto de 80 turnos) registra o estado no `_inbox/`, manda `[handoff]` e pede ao lead um agente novo; passa path em vez de colar conteúdo. Reaplicada nos 95 agentes e 9 modelos via `migrate-ntp.sh`.
+- `team-os`: seção "Contexto grande é o maior custo" em `reference/otimizacao-de-tokens.md` (dados medidos: ~97% dos tokens são releitura de histórico; agentes somam 2–3× o líder).
+
+### Alterado
+- **Painel da Sala (`/sala-de-controle *painel`) — barra do topo como único lugar de informação:** Sessões, Agentes ativos, Precisam de você, Atividade e Tokens viram botões; cada um abre um painel suspenso (um por vez, fecha com clique fora ou Esc) com a lista clicável que leva ao nó no mapa. Legenda, dica de uso e feed flutuante saem da tela e entram nesses painéis. Tokens contam **desde o último "Zerar contagem"** (base por sessão guardada no navegador), com ranking por sessão e contexto colorido; o micro-indicador de tokens sai dos nós do mapa.
+- **Sessão fora da raiz aparece no mapa da Sala:** sessão aberta numa pasta fora da raiz do Command Center (ex.: outro cliente no Drive) vira um projeto "fora da raiz" com os agentes dela, em vez de sumir.
+- **README — "Do zero ao time rodando":** o guia de instalação virou um passo a passo de 7 etapas (pasta pai e projetos → clone → Command Center → `*install` → `/team-os` no projeto → Sala de Controle → manutenção), cada uma com o porquê e o que você deve ver. Correções no caminho: um projeto pode ter mais de uma squad (`sites,seo`, `dev,security`); a pasta pai é descoberta sozinha (`.team-os-root` só se os projetos estiverem em outro lugar); a Sala de Controle exige abrir uma sessão na pasta dela; o `*audit` valida o padrão do CT, e quem mostra projeto desatualizado é o Command Center.
+- **README — Agent Teams sem configuração manual:** a seção de pré-requisitos mandava editar `~/.claude/settings.json` à mão, mas o `*install` já grava a flag no projeto (`ensure-settings.sh`) e a `/team-os` confere o runtime e a acrescenta no global se faltar. O texto passa a dizer isso, com o único cuidado real: a flag só vale em sessão aberta depois de ela existir.
+- **Segurança de código gerado por IA nos QAs e nos agentes de banco** (adaptado de `agency-agents`, MIT — ver `THIRD_PARTY_NOTICES.md`):
+  - **Skill `dev-security-patterns` 1.2:** nova seção "Varredura de código gerado por IA", com 5 buscas testadas em bash e zsh: segredo com prefixo público, chave literal, `service_role` no cliente, RLS aberta/`user_metadata`/tabela sem RLS e dado da requisição no prompt de sistema. Traz também a tabela de severidade, a lista do que não acusar (anon key, `pk_`, catálogo público, formulário só com `INSERT`), "segredo vazado = rotacionar" e "correção só vale com nova varredura". O exemplo de policy de admin passou a usar `app_metadata` (antes usava a claim `role` de topo, que nunca casa).
+  - **`dev-qa` e `sites-qa`:** a varredura entra no item de segurança do checklist, com piso de severidade (CRITICAL → FAIL, nunca WAIVED; HIGH → FAIL, WAIVED só com decisão explícita do usuário com data e prazo; sem acesso às policies → NÃO VERIFICÁVEL). Quatro linhas novas na Lei de Ferro ("RLS está ativo", "já tirei a chave", "a correção foi aplicada", "é só protótipo/landing").
+  - **`dev-data-engineer` e `sites-data`:** policy por identidade, nunca `user_metadata`, `service_role` só no servidor, regra de formulário público e busca 4 anexada ao handoff.
+  - **Pressure-test:** 8 cenários ad-hoc. Um falso positivo (formulário de leads só com `INSERT` tratado como CRITICAL) foi corrigido na regra e re-testado.
+- **Contagens do CI vêm do manifest do pack**: "95 agentes"/"108 skills" no README e no `CLAUDE.md` passam a ser conferidas pelo `pack-manifest.json` (agentes `origin: custom` e skills próprias de quem usa o pack não entram) — o `CLAUDE.md` também precisa citar as "108 skills".
+- **`CLAUDE.md` enxuto, voltado a quem usa o pack**: o ciclo de commit/CHANGELOG/release saiu de lá e foi para o `MAINTAINERS.md`, mantendo a regra de que commit/push são só do mantenedor (`.team-os-maintainer`). README §13 aponta o ciclo do mantenedor para o `MAINTAINERS.md`; §7 D e §11 atualizados; `CONTRIBUTING.md` separa "usar o pack" (sem commit no CT) de "contribuir via PR" (commit normal no próprio fork; manifest em dia, sem mexer em `VERSION`).
+- README não propõe mais "commit por projeto" ao propagar: o `*propagate` não faz commit e o texto diz que o commit, se o usuário quiser, é dele.
+- **Commit/push/CHANGELOG no CT passam a ser só do mantenedor.** A Definition of Done e o `CLAUDE.md` mandavam commitar no CT para qualquer pessoa que baixasse o pack. Agora o ciclo de commit só vale com o arquivo `.team-os-maintainer` na raiz (ignorado pelo git); sem ele, o ciclo termina no `*audit`/`*propagate` e nada propõe commit, push ou CHANGELOG.
+- **`/team-os *compact`: o archivist deixa de ser um agente improvisado.** O fluxo mandava "spawnar um teammate archivist", agente que não existe em nenhum projeto — o lead acabava usando um agente da squad (ex.: `sites-analyst`) e ainda descrevia isso ao usuário. Agora o archivist é um **subagent built-in** (`general-purpose`, Sonnet, missão fixa) que funciona em qualquer projeto, com trava de escopo (compara `git status` fora de `docs/smart-memory/` antes e depois) e plano de confirmação em linguagem simples, sem mecânica de agente. `reference/compact-flow.md` e `SKILL.md`.
+- **Sala de Controle nunca tem backup** (só carrega uma cópia da skill; o CT é a fonte). O `*install` pula o backup em `CONTROL_ROOM`.
+- **Backups `.claude.bak-*` só no `*install`**: o `*propagate` deixa de copiar o `.claude/` do destino a cada rodada (as cópias somavam 3,9 GB e uma pasta chegou a 18). O `*install` guarda as 3 mais recentes (`BACKUP_KEEP`) e manda as antigas para a Lixeira.
+- **Lixeira portável no `*install`**: as cópias antigas de `.claude.bak-*` vão para a Lixeira via `trash.sh` (macOS e Linux) — antes era `~/.Trash`, só macOS.
+- `install-to-project.sh` grava skills arquivo por arquivo (sem `rsync --delete`): arquivos que o usuário criou dentro de uma skill do pack não são mais apagados, e não remove mais ícones de pasta (`Icon\r`) do destino. `scan-ct-projects.sh`, `diff-agents.sh` e o Command Center contam à parte os arquivos editados no projeto (`DRIFT_CONFLICT`, `SKILLS_CONFLICT`, `CONFLICT_LIST`) em vez de marcá-los como desatualizados; o destino não pode ser outra cópia do pack (`ERROR=target_is_pack`).
+
+### Corrigido
+- **`release.sh` em pasta com acento no macOS:** a checagem "raiz do pack = raiz do git" comparava os caminhos como texto, e o git devolve "ã" numa forma Unicode diferente da do shell — o release recusava rodar em `/Volumes/João…`. Agora compara a pasta (`-ef`).
+- **Tokens da Sala só ficam "prontos" quando líder e todos os agentes já foram lidos** (`tokens.py`) — antes o total aparecia parcial e pulava enquanto os transcripts dos agentes ainda eram lidos.
+- **`serve.py` da Sala usa um PID por porta**: parar um painel de teste (`--port`) não derruba mais o principal (8787).
+- `install-to-project.sh` passa a copiar o `context-watch.sh` (a lista de hooks do instalador é fixa): sem isso o `ensure-settings.sh` registrava o hook nos settings do projeto e o arquivo não existia.
+- **Sala de Controle lê a smart-memory no layout atual**: `project-context.py` passa a ler os DIGESTs em `agents/<squad>/<área>/DIGEST.md` (convenção desde a 2.2.0) — antes só enxergava o layout antigo `agents/<área>/` e projetos já migrados apareciam sem "Contexto recente". O layout antigo continua sendo lido até o `/team-os --repair` migrar cada projeto.
+- `project-context.py` entende `summary: >` / `|` (bloco YAML em várias linhas) — o resumo do projeto saía como `>`.
+- **Leitor de smart-memory dos painéis volta a aparecer** (`/sala-de-controle *painel` e `/team-os-creator *painel`): a regra `.top` absoluta do layout enterprise (00f5902) tirava a barra do leitor do grid, e árvore, nota e grafo ficavam espremidos em 56 px atrás dela. O frontmatter do leitor da Sala também passa a mostrar `summary: >` por extenso.
+
+## [2.3.0] — 2026-09-26 · Economia de tokens e painéis ao vivo
+
+### Adicionado
+- **`/sala-de-controle *painel`** — mapa vivo em tempo real (atualiza a cada segundo) no navegador do próprio Claude: a Sala no centro, um nó por projeto, um nó por sessão e os agentes de cada uma, com estado por cor, mensagens entre agentes, feed de eventos e leitor da smart-memory de cada projeto no estilo Obsidian (árvore, wikilinks, grafo). Mostra só quem está operando ou esperando o usuário; agentes parados somem após 30 minutos. Só lê, servidor apenas em `127.0.0.1:8787` (59dc366 … 7139309).
+- **`/team-os-creator *painel`** — mapa vivo do CT em `127.0.0.1:8788`: raio no centro, as 10 squads no anel, agentes (persona + cargo) e skills; clique abre o perfil e o arquivo inteiro; layout com barra superior, busca e drawer (443b7a9 … 00f5902).
+- **Compactação automática**: no início de cada `/team-os`, se a memória estiver pesada ou tiver notas arquiváveis, a fase mecânica do compact roda sozinha (só `mv`, nunca apaga). Opt-out: `TEAM_OS_AUTO_COMPACT=0`. A fase semântica continua no `*compact`.
+- **Teto de DIGEST por script**: `weigh-memory.sh` marca todo `DIGEST.md` acima de 60 linhas (`DIGEST_MAX_LINES`) como HEAVY e o archivist tem o enxugamento como item obrigatório.
+- **Hook `guard-smart-memory-read.sh`**: bloqueia leitura de `_archive/`, de pasta inteira e a 4ª nota fora do L0 sem nova busca (`sm-find.sh` zera o contador).
+- **Hook `guard-message-size.sh`**: mensagens entre agentes com teto de 20 linhas / 1.500 caracteres; `[handoff]` até 60 linhas.
+- **Placar da sessão**: `weigh-memory.sh --save-start` no início e `--report` no fim de rodada, no `*status` e no `*compact` ("Memória: 1.240 → 1.180 linhas (−60) · …").
+- `compact-memory.sh --mechanical-only` e saída `COMPACT_MOVED=<n>`; 91 casos novos em `test-hooks.sh` (493 no total).
+
+### Corrigido
+- Modelos da Sala de Controle e do maestri-os trocam caminhos reais de máquina por exemplos genéricos (`<raiz>/Minha Marca/…`); o CI volta a checar essas pastas.
+- `*install` da Sala de Controle põe `docs/smart-memory/sala-de-controle/snapshot.json` no `.gitignore` — o snapshot guarda trechos das conversas de todas as sessões da máquina.
+- Painel da Sala: casa sessão ↔ projeto com acento, não pisca ao redimensionar, clique não se perde, botão da smart-memory aceita aspas no caminho.
+
+### Alterado
+- Bloco Native Teams Protocol (regras 1 e 4) cita os dois hooks novos e remove a brecha "grep de frontmatter"; reaplicado nos 95 agentes e 9 templates via `migrate-ntp.sh`.
+
+## [2.2.0] — 2026-09-25 · Auditoria completa aplicada
+
+### Corrigido
+- **Hooks de task (`task-quality`, `check-*-progress`) estavam inertes**: liam `title`/`subject` em vez dos campos reais `task_subject`/`task_description` do Claude Code. Corrigidos e cobertos por `scripts/test-hooks.sh`.
+- **Guards de git** (`block-git-push`, `block-worktree`, `guard-push-branch`): bloqueiam shell embutido (`sh -c`, `eval`, `xargs`, heredoc, `python -c`), alias inline (`git -c alias.x=push`), `send-pack`, `gh release`/`repo sync`; `guard-push-branch` decide pela branch do repo alvo; `block-worktree` deixa de bloquear `git branch -m/-M/-u`.
+- **Regex dos gates em português**: "relatório das campanhas" não bloqueia mais; "Pagar fornecedor X" agora exige PASS; negação ("não aprovado") não conta como aprovação; particípios ("contrato enviado pela contraparte") não bloqueiam.
+- **`*install`/`*propagate` copiava 1,3 GB** de runtime da skill `seo` (`.venv`, `ms-playwright`) para cada projeto destino.
+- **`*install` cortava skills citadas pelos agentes** de outra squad; agora a lista é derivada do que os agentes instalados citam.
+- **`discovery.sh` criava áreas que os agentes não liam** (e não cobria `seo`); áreas agora derivadas da linha `**Área na smart-memory:**` de cada agente.
+- Squad `seo` ausente das listas do `team-os`, do `team-os-creator` e do `detect-project-signals.sh`.
+- Referências quebradas em skills (`extensions/` inexistente nas `seo-*`, links para repositórios de origem em `sales-enablement`, `data-lake-platform`, `seo-flow`, `slides`).
+- Nomes de tools MCP inválidos na squad Social.
+- README: contagens, política de modelos, archetypes (9), presets (10), estrutura §5/§6, dimensionamento, comandos e flags do `team-os-creator`.
+- `CLAUDE.md` contradizia a si mesmo sobre `block-git-push.sh`.
+- Caminho de Python de uma máquina (`CLAUDE_SEO_PYTHON`) commitado em `.claude/settings.json` (movido para `settings.local.json`).
+
+### Alterado
+- **Convenção de smart-memory por squad**: `docs/smart-memory/agents/<squad>/<área>/` (antes `agents/<área>/`, que colidia quando duas squads dividiam a mesma pasta). PM sai de `docs/smart-memory/pm/` para `agents/pm/`.
+- **Convenção única de stories**: `stories/BACKLOG.md` + `stories/{backlog,active,in-review,done}/<id>-<slug>.md`.
+- Squad PM tornada genérica (schema/RPCs específicos de um produto saíram dos agentes).
+- Descrições de agentes e skills em português; teto de tamanho (300/400 caracteres).
+- `team-os/SKILL.md` reduzido; seções longas movidas para `reference/` (carga sob demanda).
+- `validate-agent.sh`: novos checks (`permissionMode`/`effort` obrigatórios, linha de área, paths canônicos, tools MCP contra `reference/mcp-servers.md`, `hooks:` do frontmatter, modo `--skills`).
+- `*install` faz merge de `settings.json` (via `ensure-settings.sh`) e backup `.claude.bak-<data>/`.
+- `docs/agentes.html` sem fontes externas; verificado no CI (`--check`).
+
+### Adicionado
+- `LICENSE` (MIT) e `THIRD_PARTY_NOTICES.md` com a origem e a licença de cada skill importada.
+- `scripts/test-hooks.sh`, `scripts/migrate-ntp.sh`, `reference/mcp-servers.md`, `reference/ntp-canonical.md`.
+- `CONTRIBUTING.md`, `CHANGELOG.md`, `.editorconfig`, `.gitattributes`.
+- CI: teste dos hooks, lint das skills, checagem da página de agentes e dos hooks executáveis.
+
+## [2.1.0] — 2026-09-25
+
+### Adicionado
+- `sala-de-controle`: skill opt-in que roteia pedidos entre as sessões do Claude Code (18b1fe2, 411fbba, aaa682c).
+- `docs/agentes.html`: perfil completo em modal e tabela de totais por squad (393c5b0, bcc527d).
+- Squad **SEO** — 15 agentes, 27 skills, incorporação do claude-seo v2.3.1 (0abf135).
+- Squads **Finance** e **Legal** — 16 agentes, 10 skills, 2 hooks de garantia (5fb6182).
+- Squad **Brand** — 8 agentes, 6 skills, 2 gates (b869e85).
+- Squad **Sales** — 8 agentes, 11 skills, gate de envio (9972c52).
+- `maestri-os`: Sala de Controle para o Maestri (3281163 … fbcbc94).
+- Squad Sites ganha Astro (85b6c93); `ui-ux-pro-max` v2.13 ligado aos agentes UX (7462a01).
+
+### Corrigido
+- Removido o teto arbitrário de 10 agentes simultâneos/por squad (59400e1).
+
+## [2.0.0] — 2026-09-05
+
+### Adicionado
+- Ondas 1–5: auditoria aplicada, Smart-Memory v3 (orçamento de tokens, fatos atômicos, TTL, inbox), orquestração de elite, main blindada e fábrica com pressure-test (1e1acb4, 9b672aa, 36fee5a).
+- Página oficial dos agentes + gerador (ac80ba7, 9b33ba8).
+- Skills dos MCPs oficiais do Google (Ads + GA4) na squad Traffic (baa2bbf).
+
+### Alterado
+- Repositório autossuficiente, zero referências a projetos pessoais (130ee5b).
+
+## [1.x] — 2026-04-23 → 2026-08-26
+
+- Commit inicial com agentes, skills e hooks (b70017d).
+- Squads Dev, Sites, Social, Traffic e PM; identidade dos agentes; Native Teams Protocol (7f3f64a); rebrand para team-os (2ae05b6).
+- Garantia anti-worktree em todo o ecossistema (4274c32); Smart-Memory v2 (b2c900b); compactação (bbf0803).
+- Auditoria de agosto: correções críticas, consistência, 6 skills novas (3592555).

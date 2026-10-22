@@ -1,15 +1,23 @@
 #!/usr/bin/env python3
-"""generate-agents-page.py — gera docs/agentes.html (página oficial dos agentes do CT).
+"""generate-agents-page.py — gera docs/agentes.html (página oficial dos agentes do team-os).
+
+Card inteiro clicável abre modal de PERFIL COMPLETO por agente (bio, matriz de autoridade,
+regras absolutas, skills) e modal de skill enriquecido (versão, seções), com navegação
+cruzada entre os dois modais. JSON embutido protegido contra fechamento prematuro de
+<script> (safe_json escapa "</" — nunca confiar em texto livre sem escapar).
 
 Fontes de dados (tudo do repositório, nada manual na página):
-  - .claude/agents/*.md          → frontmatter + persona + autoridade exclusiva
+  - .claude/agents/*.md          → frontmatter + persona + autoridade exclusiva + bio (1º parágrafo
+                                    após o H1) + matriz de autoridade + regras absolutas (para o modal)
   - README.md                    → coluna "Skills relacionadas" (última célula das tabelas §5)
-  - .claude/skills/*/SKILL.md    → descrição de cada skill (para o modal)
+  - .claude/skills/*/SKILL.md    → descrição, versão, data e títulos de seção de cada skill (para o modal)
   - RESUMOS_PT (dict abaixo)     → resumo em PT por agente (fallback: 1ª frase da description)
   - fotos (opcional): docs/fotos-agentes/<nome>.png no próprio CT, ou --photos <dir> → comprimidas e embutidas
     como data URI (agente sem foto fica com o monograma).
 
-Uso:  python3 generate-agents-page.py [--photos <dir>] [--out <path>]
+Uso:  python3 generate-agents-page.py [--photos <dir>] [--out <path>] [--check]
+  --check   não escreve: exit 0 se docs/agentes.html já está igual ao que seria gerado,
+            exit 1 se está desatualizado (ou ausente) — para uso no CI/pre-commit.
 Rode a partir de qualquer lugar — o script resolve a raiz do CT sozinho.
 """
 import os, re, sys, json, base64, subprocess, tempfile, html
@@ -21,11 +29,19 @@ OUT = os.path.join(ROOT, "docs", "agentes.html")
 args = sys.argv[1:]
 if "--photos" in args: PHOTOS = args[args.index("--photos") + 1]
 if "--out" in args: OUT = args[args.index("--out") + 1]
+CHECK = "--check" in args
 
-SQUADS = [
+# Squads = campo `name:` de cada presets/*.yaml (presets/custom/ fica de fora) — nunca lista à mão.
+# SQUAD_META só dá rótulo, subtítulo e ORDEM de exibição; squad nova sem meta entra no fim, com
+# rótulo = nome e subtítulo = 1ª frase da description do preset.
+SQUAD_META = [
     ("dev", "Dev", "Fullstack SaaS — da arquitetura ao deploy"),
     ("sites", "Sites", "Websites e landing pages — SEO, CRO, performance"),
-    ("social", "Social", "Social media — copy, design, foto, vídeo, publicação"),
+    ("social", "Social", "Estúdio comum — design, foto e vídeo sob brief de uma squad de plataforma; nunca aprova nem publica"),
+    ("instagram", "Instagram", "Instagram, Facebook e Threads — estratégia e gate, conteúdo e DM, publicação via Meta"),
+    ("tiktok", "TikTok", "TikTok orgânico — pauta e gate, roteiro nativo, pacote de upload e leitura de métricas"),
+    ("youtube", "YouTube", "YouTube — pauta e gate, roteiro, pacote (título, thumb, capítulos) e leitura do canal"),
+    ("linkedin", "LinkedIn", "LinkedIn orgânico — pauta B2B e gate, posts, documentos e artigos, pacote de publicação"),
     ("traffic", "Traffic", "Tráfego pago — Google, Meta, TikTok, BI e atribuição"),
     ("pm", "PM", "Gestão de projetos — sprints, dailies, portfólio"),
     ("sales", "Sales", "Propostas e apresentações — discovery, tese, números, copy, PDF, QA, fechamento"),
@@ -33,7 +49,47 @@ SQUADS = [
     ("finance", "Finance", "Gestão financeira — coleta, política, plano de caixa, conciliação, contas a pagar/receber, fiscal, relatório, QA"),
     ("legal", "Legal", "Jurídico do dia a dia — pesquisa, postura, arquitetura documental, minutas, registro e LGPD, conflitos, operações, QA"),
     ("seo", "SEO", "Auditoria e otimização de busca — técnico, conteúdo, schema, sitemap/i18n, CWV, GEO/AI search, SXO, clusters, local, backlinks, e-commerce, dados Google, drift, QA"),
+    ("security", "Security", "Segurança de aplicação — modelo de ameaças, appsec, código gerado por IA e apps com LLM, credenciais, privacidade no código, incidente, QA"),
 ]
+
+
+def load_squads():
+    """[(nome, rótulo, subtítulo)] das squads do pack, derivadas de presets/*.yaml."""
+    pdir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "presets")
+    found = {}
+    try:
+        names = sorted(os.listdir(pdir))
+    except OSError:
+        names = []
+    for fn in names:
+        if not fn.endswith(".yaml"):
+            continue
+        try:
+            text = open(os.path.join(pdir, fn), encoding="utf-8").read()
+        except OSError:
+            continue
+        m = re.search(r"^name:\s*[\"']?([a-z][a-z0-9]*)[\"']?\s*$", text, re.M)
+        if not m:
+            continue
+        d = re.search(r"^description:\s*(.+)$", text, re.M)
+        found[m.group(1)] = d.group(1).strip().strip("\"'") if d else ""
+    meta = {s: (label, sub) for s, label, sub in SQUAD_META}
+    if not found:  # fallback seguro: sem presets legíveis, usa a ordem/meta conhecida
+        return list(SQUAD_META)
+    order = [s for s, _, _ in SQUAD_META if s in found] + sorted(s for s in found if s not in meta)
+    out = []
+    for s in order:
+        label, sub = meta.get(s, (s.capitalize(), first_sentence_plain(found[s])))
+        out.append((s, label, sub))
+    return out
+
+
+def first_sentence_plain(text):
+    s = re.split(r"(?<=[.!?])\s", (text or "").strip())[0]
+    return s if len(s) <= 160 else s[:157] + "…"
+
+
+SQUADS = load_squads()
 
 # Resumo em PT por agente (linha principal do card). Agente ausente → 1ª frase da description.
 RESUMOS_PT = {
@@ -59,13 +115,12 @@ RESUMOS_PT = {
     "sites-devops": "Release de sites. Autoridade exclusiva de push, PRs e deploys Vercel/Netlify.",
     "sites-qa": "QA de sites: veredictos formais, acessibilidade, qualidade de copy, SEO e performance.",
     "sites-ux": "UX de sites: research, fluxos, wireframes, specs visuais e a11y antes do alpha implementar.",
-    "social-analyst": "Research de social: tendências, concorrência, hashtags e benchmarks — entrega dados, outros decidem.",
-    "social-content": "Criador de conteúdo: research de mercado via Apify + copy (legendas, roteiros, hooks, hashtags).",
-    "social-design": "Designer gráfico da squad: key visuals, carrosséis, templates e overlays via Google Stitch.",
-    "social-photo": "Fotos AI via Freepik: capas, carrosséis, heroes e fundos cinematográficos.",
-    "social-publisher": "Publica (via Meta) e analisa métricas — só depois da aprovação da VERA E confirmação do usuário.",
-    "social-strategist": "Estrategista e validadora editorial. Nunca cria — valida e direciona; aprovação obrigatória antes de publicar.",
-    "social-video": "Editor de vídeo: Reels, Stories, TikToks com ffmpeg + avatar AI e dublagem via HeyGen.",
+    "social-design": "Designer gráfico do estúdio: key visuals, carrosséis, templates e overlays via Google Stitch — sob brief de uma squad de plataforma.",
+    "social-photo": "Fotos AI via Freepik: capas, carrosséis, heroes e fundos cinematográficos — sob brief de uma squad de plataforma.",
+    "social-video": "Editor de vídeo do estúdio: Reels, Shorts, TikToks com ffmpeg + avatar AI e dublagem via HeyGen — sob brief, nunca publica.",
+    "instagram-strategist": "Estrategista e validadora editorial do Instagram. Nunca cria — valida e direciona; PASS obrigatório antes de publicar.",
+    "instagram-content": "Conteúdo do Instagram: pesquisa via Apify, copy (legendas, roteiros, ganchos), fluxos de DM e triagem de comentários.",
+    "instagram-publisher": "Publica no Instagram, Facebook e Threads via Meta e lê as métricas — só com PASS da VERA E confirmação do usuário; nunca impulsiona.",
     "brand-analyst": "Audita a marca como ela é hoje, mapeia concorrentes e territórios, sintetiza públicos — toda afirmação com fonte. Entrega evidência; outros decidem.",
     "brand-strategist": "Escreve a plataforma de marca e a postura do reposicionamento; gate da plataforma e da direção de identidade. Nunca escreve a peça.",
     "brand-architect": "Arquitetura de marca (marca-mãe, sub-marcas, marca pessoal, sistema de nomes) e autoridade exclusiva das stories do reposicionamento.",
@@ -111,6 +166,63 @@ def first_sentence(text):
     return s if len(s) <= 220 else s[:217] + "…"
 
 
+def clean_md(text):
+    """Tira ** * ` de ênfase markdown pra texto puro de modal, preserva o resto."""
+    text = re.sub(r"\*\*(.+?)\*\*", r"\1", text)
+    text = re.sub(r"(?<!\w)\*(.+?)\*(?!\w)", r"\1", text)
+    text = re.sub(r"`([^`]+)`", r"\1", text)
+    return " ".join(text.split())
+
+
+def load_agent_details(path):
+    """Lê o corpo do agente e extrai bio (1º parágrafo após o H1), matriz de autoridade e regras absolutas."""
+    out = {"bio": "", "matrix": [], "rules": []}
+    text = open(path).read()
+    m = re.match(r"^---\n(.*?)\n---\n(.*)", text, re.S)
+    if not m:
+        return out
+    body = m.group(2)
+    h1 = re.search(r"^# (.+)$", body, re.M)
+    if h1:
+        after = body[h1.end():]
+        para = re.match(r"\s*\n+([^\n].*?)(?=\n\s*\n|\n##)", after, re.S)
+        if para:
+            out["bio"] = clean_md(para.group(1))
+    mat = re.search(r"\*\*Matriz de autoridade:?\*\*\s*\n((?:\|.*\n?)+)", body)
+    if mat:
+        rows = [r for r in mat.group(1).strip().split("\n") if r.strip().startswith("|")]
+        rows = [r for r in rows if not re.match(r"^\|[\s:|-]+\|$", r)]  # tira separador ---
+        for r in rows[1:] if rows else []:  # rows[0] é o cabeçalho
+            cells = [clean_md(c.strip()) for c in r.strip("|").split("|")]
+            if len(cells) >= 2:
+                out["matrix"].append(cells[:3])
+    ra = re.search(r"##\s*Regras absolutas\s*\n((?:.*\n?)+?)(?=\n##|\Z)", body)
+    if ra:
+        bullets = re.findall(r"^[-*]\s+(.+)$", ra.group(1), re.M)
+        out["rules"] = [clean_md(b) for b in bullets[:8]]
+    return out
+
+
+def load_skill_details(path):
+    """Lê o SKILL.md e extrai versão, data de atualização e os títulos de seção (## ...)."""
+    out = {"version": "", "updated": "", "sections": []}
+    text = open(path).read()
+    m = re.match(r"^---\n(.*?)\n---", text, re.S)
+    if m:
+        vm = re.search(r'^version:\s*"?([\w.]+)"?', m.group(1), re.M)
+        um = re.search(r'^updated:\s*"?([\d-]+)"?', m.group(1), re.M)
+        out["version"] = vm.group(1) if vm else ""
+        out["updated"] = um.group(1) if um else ""
+    out["sections"] = [clean_md(t) for t in re.findall(r"^##\s+(.+)$", text, re.M)][:8]
+    return out
+
+
+def safe_json(obj):
+    """json.dumps não escapa '</' — texto livre com '</script' fecharia a tag cedo e quebraria
+    todo o JS depois. Escapar '</' pra '<\\/' é o padrão pra JSON embutido em HTML."""
+    return json.dumps(obj, ensure_ascii=False).replace("</", "<\\/")
+
+
 def load_agents():
     agents = []
     adir = os.path.join(ROOT, ".claude", "agents")
@@ -125,6 +237,7 @@ def load_agents():
         persona = (h1.group(1).strip() if h1 else name)
         aut = re.search(r"\*\*Autoridade[s]? exclusiva[s]?:?\*\*:?\s*(.+)", body)
         desc = fm_field(fm, "description")
+        details = load_agent_details(os.path.join(adir, f))
         agents.append({
             "name": name, "squad": name.split("-")[0], "persona": persona,
             "desc": desc, "resumo": RESUMOS_PT.get(name) or first_sentence(desc),
@@ -132,6 +245,7 @@ def load_agents():
             "hook": "block-git-push" in fm,
             "aut": re.sub(r"[`*]", "", aut.group(1)).strip()[:180] if aut else "",
             "mcp": len([t for t in fm_field(fm, "tools").split(",") if t.strip().startswith("mcp__")]),
+            **details,
         })
     return agents
 
@@ -150,7 +264,7 @@ def load_skills():
             dm = re.search(r"^description:\s*(.+?)(?=\n[a-zA-Z_-]+:|\Z)", m.group(1), re.S | re.M)
             if dm:
                 desc = " ".join(dm.group(1).split())
-        skills[d] = desc
+        skills[d] = {"desc": desc, **load_skill_details(p)}
     return skills
 
 
@@ -158,7 +272,7 @@ def load_skill_map(skills):
     """Última célula das linhas de agente nas tabelas §5 do README + skills novas curadas."""
     amap = {}
     for row in open(os.path.join(ROOT, "README.md")).read().splitlines():
-        m = re.match(r"^\|\s*`((?:dev|sites|social|traffic|pm|sales)-[a-z-]+)`\s*\|", row)
+        m = re.match(r"^\|\s*`((?:" + "|".join(s for s, _, _ in SQUADS) + r")-[a-z-]+)`\s*\|", row)
         if not m:
             continue
         last = row.rstrip("|").rsplit("|", 1)[-1]
@@ -200,12 +314,35 @@ def load_photos():
     return photos
 
 
+def is_custom_agent(name):
+    """Agente próprio do usuário (`origin: custom` no frontmatter) — fora da página do pack."""
+    try:
+        text = open(os.path.join(ROOT, ".claude", "agents", name + ".md"), encoding="utf-8").read(4096)
+    except OSError:
+        return False
+    m = re.match(r"^---\n(.*?)\n---", text, re.S)
+    return bool(m and re.search(r"^origin:\s*custom\s*$", m.group(1), re.M))
+
+
+def pack_skill_names():
+    """Skills DO PACK segundo o pack-manifest.json (None = sem manifest → todas)."""
+    try:
+        files = json.load(open(os.path.join(ROOT, "pack-manifest.json"), encoding="utf-8")).get("files", {})
+    except (OSError, ValueError):
+        return None
+    return {k.split("/")[2] for k in files if re.match(r"^\.claude/skills/[^/]+/SKILL\.md$", k)}
+
+
 def build():
     agents = load_agents()
     # Só squads oficiais (com preset). Agente de squad ainda sem preset — em construção noutra sessão — não entra na página.
+    # Agentes próprios do usuário (origin: custom) também não: a página mostra só o pack.
     _official = {s[0] for s in SQUADS}
-    agents = [a for a in agents if a['squad'] in _official]
+    agents = [a for a in agents if a['squad'] in _official and not is_custom_agent(a['name'])]
     skills = load_skills()
+    _pack_skills = pack_skill_names()
+    if _pack_skills is not None:
+        skills = {k: v for k, v in skills.items() if k in _pack_skills}
     amap = load_skill_map(skills)
     photos = load_photos()
     counts = {s: sum(1 for a in agents if a["squad"] == s) for s, _, _ in SQUADS}
@@ -242,13 +379,13 @@ def build():
         aut = (f'<div class="aut"><span>autoridade exclusiva</span>{html.escape(a["aut"])}</div>' if a["aut"] else "")
         q = html.escape((a["name"] + " " + persona + " " + a["desc"] + " " + a["resumo"] + " "
                          + " ".join(amap.get(a["name"], []))).lower(), quote=True)
-        return f'''<article class="agent" data-squad="{a["squad"]}" data-q="{q}">
+        return f'''<article class="agent" data-squad="{a["squad"]}" data-q="{q}" data-agent="{a["name"]}" tabindex="0" role="button" aria-label="Ver perfil completo de {html.escape(pname)}">
 <div class="agent-top">{photo}<div><h3>{html.escape(pname)}</h3>{f'<div class="role">{html.escape(ptitle)}</div>' if ptitle else ''}<code>{a["name"]}</code></div></div>
 <p class="resumo">{html.escape(a["resumo"])}</p>
-<details><summary>descrição completa</summary><p>{html.escape(a["desc"])}</p></details>
 {aut}
 {f'<div class="skills"><span class="skills-l">skills</span>{chips}</div>' if chips else ''}
 <footer>{"".join(meta)}</footer>
+<div class="vermais"><span>perfil completo</span></div>
 </article>'''
 
     sections = []
@@ -279,20 +416,44 @@ def build():
     filters = f'<button class="fbtn active" data-f="all">Todos · {len(agents)}</button>' + "".join(
         f'<button class="fbtn" data-f="{s}">{label} · {counts[s]}</button>' for s, label, _ in SQUADS)
 
-    skills_json = json.dumps(
-        {s: {"desc": skills[s], "agents": sorted(used_by.get(s, []))} for s in skills},
-        ensure_ascii=False)
+    squad_label = {s: label for s, label, _ in SQUADS}
+
+    def agent_js_entry(a):
+        persona = a["persona"]
+        pname, ptitle = (persona.split("—", 1) + [""])[:2] if "—" in persona else (persona, "")
+        pname, ptitle = pname.strip(), ptitle.strip() or persona
+        return {
+            "role": ptitle, "persona": pname, "squad": squad_label.get(a["squad"], a["squad"]),
+            "desc": a["desc"], "bio": a["bio"], "matrix": a["matrix"], "rules": a["rules"],
+            "skills": amap.get(a["name"], []),
+            "model": a["model"], "effort": a["effort"], "hook": a["hook"], "mcp": a["mcp"],
+        }
+
+    agents_json = safe_json({a["name"]: agent_js_entry(a) for a in agents})
+    skills_json = safe_json({
+        s: {"desc": skills[s]["desc"], "version": skills[s]["version"], "updated": skills[s]["updated"],
+            "sections": skills[s]["sections"], "agents": sorted(used_by.get(s, []))}
+        for s in skills
+    })
 
     tpl = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "templates",
                             "agents-page.html.tpl")).read()
     page = (tpl.replace("{{FILTERS}}", filters)
                .replace("{{SECTIONS}}", "".join(sections))
+               .replace("{{AGENTS_JSON}}", agents_json)
                .replace("{{SKILLS_JSON}}", skills_json)
                .replace("{{TOTALS_TABLE}}", totals_table)
                .replace("{{N_AGENTS}}", str(len(agents)))
                .replace("{{N_SQUADS}}", str(len(SQUADS)))
                .replace("{{N_SKILLS}}", str(len(skills) - 1))  # -1: team-os-creator é interna
                .replace("{{N_OPUS}}", str(opus_n)))
+    if CHECK:
+        current = open(OUT).read() if os.path.exists(OUT) else None
+        if current == page:
+            print(f"OK — {OUT} está em dia ({len(agents)} agentes · {len(skills)} skills)")
+            sys.exit(0)
+        print(f"DESATUALIZADO — {OUT} difere do que seria gerado; rode: python3 {os.path.relpath(__file__, ROOT)}", file=sys.stderr)
+        sys.exit(1)
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     open(OUT, "w").write(page)
     print(f"OK → {OUT} ({len(page)//1024} KB · {len(agents)} agentes · {len(photos)} fotos · {len(skills)} skills)")

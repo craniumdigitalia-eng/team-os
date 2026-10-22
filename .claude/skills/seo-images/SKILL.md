@@ -1,12 +1,8 @@
 ---
 name: seo-images
-description: >
-  Image optimization analysis for SEO and performance. Checks alt text, file
-  sizes, formats, responsive images, lazy loading, CLS prevention, image SERP
-  rankings (via DataForSEO), and image file optimization (WebP/AVIF conversion,
-  IPTC/XMP metadata injection). Use when user says "image optimization",
-  "alt text", "image SEO", "image size", "image audit", "optimize images",
-  "image metadata", "image SERP", "convert to webp", or "image file optimize".
+description: "Análise e otimização de imagens para SEO e performance — alt text, peso, formatos, imagens responsivas, lazy loading, prevenção de CLS, ranking em SERP de imagens (DataForSEO) e otimização de arquivo (WebP/AVIF, metadados IPTC/XMP). Use ao pedir 'image optimization', 'alt text', 'image SEO', 'image audit' ou 'convert to webp'."
+version: "2.3.2"
+updated: "2026-10-20"
 user-invocable: true
 argument-hint: "[url]"
 license: MIT
@@ -17,6 +13,8 @@ metadata:
 ---
 
 # Image Optimization Analysis
+
+**Quando usar esta vs. `social-freepik-generation`:** esta *audita e otimiza* imagens já publicadas (alt, peso, formato, lazy loading, metadados). Para *gerar* imagens AI para posts e campanhas, use `social-freepik-generation` (ou `seo-image-gen` para assets de SEO).
 
 ## Checks
 
@@ -106,7 +104,7 @@ Third-party reporting and Wikipedia describe a Rust-based JPEG XL decoder as shi
 
 #### Detected lazy-loader methods (`lazy_method` field)
 
-`"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run parse_html.py` classifies each image's lazy-loading mechanism via the
+`"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run parse_html.py` classifies each image's lazy-loading mechanism via the
 `lazy_method` field on every image entry. Five values:
 
 | `lazy_method` | Signal detected | Common stack |
@@ -321,13 +319,13 @@ https://support.google.com/merchants/answer/14743464
 
 ```bash
 # Audit a directory for the IPTC label (counts: missing, ai, captured, etc.)
-"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run iptc_ai_label.py audit ./images/ --json
+"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run iptc_ai_label.py audit ./images/ --json
 
 # Audit a single image
-"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run iptc_ai_label.py audit ./hero.webp --json
+"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run iptc_ai_label.py audit ./hero.webp --json
 
 # Inject the AI label into an image
-"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run iptc_ai_label.py inject ./ai-hero.webp \
+"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run iptc_ai_label.py inject ./ai-hero.webp \
     --source-type trainedAlgorithmicMedia
 
 # Other vocabulary values:

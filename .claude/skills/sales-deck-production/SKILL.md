@@ -1,8 +1,8 @@
 ---
 name: sales-deck-production
-description: Produção do artefato final de propostas e apresentações — HTML com print CSS (uma seção por página, quebras controladas, fontes embutidas) exportado para PDF em navegador headless, componentes de página (capa, índice, aberturas, tabela de investimento, compromisso conjunto, contracapa), variante deck, e checagem obrigatória do PDF gerado (contagem de páginas, overflow, fontes, peso). Use ao montar, exportar, corrigir ou auditar o PDF/deck de qualquer proposta.
-version: "1.0"
-updated: "2026-09-07"
+description: "Produção do artefato final de propostas e apresentações — HTML com print CSS (uma seção por página, quebras controladas, fontes embutidas) exportado para PDF em navegador headless, componentes de página, variante deck e checagem obrigatória do PDF (páginas, overflow, fontes, peso). Use ao montar, exportar, corrigir ou auditar o PDF/deck de qualquer proposta."
+version: "1.1"
+updated: "2026-10-20"
 ---
 
 # Sales Deck Production — HTML → PDF que abre, cabe e imprime
@@ -68,7 +68,10 @@ Texto que não cabe **não é problema de design para resolver cortando frase**:
 
 ## 6. Deck (apresentação)
 
-Mesma mecânica com `@page` 16:9 e uma `.page` por slide. Diferenças: **uma asserção por slide**, corpo é a evidência; tipografia maior (mínimo 18 pt para corpo); número de slides = estrutura aprovada. Exportar PDF para envio; manter o HTML para apresentar (navegador em tela cheia, `F11`). Para decks navegáveis com controles, a skill `slides` do catálogo dá a estrutura; a marca continua vindo do design system do projeto.
+Mesma mecânica com `@page` 16:9 e uma `.page` por slide. Diferenças: **uma asserção por slide**, corpo é a evidência; tipografia maior (mínimo 18 pt para corpo); número de slides = estrutura aprovada. Exportar PDF para envio; manter o HTML para apresentar (navegador em tela cheia, `F11`). Referências da variante deck (a marca continua vindo do design system do projeto):
+- `references/deck-slide-strategies.md` — estruturas de deck por contexto (proposta, demonstração, caso, captação, QBR) e a ordem dos slides
+- `references/deck-layout-patterns.md` — layouts por objetivo do slide (capa, métricas, linha do tempo, comparativo, investimento) com CSS em mm
+- `references/deck-navigation.md` — navegação na tela (setas, espaço, clique, barra de progresso, `#N` na URL) sem afetar o PDF; gráficos em SVG inline, nunca de CDN
 
 ## 7. Versão navegável do planejamento interno
 

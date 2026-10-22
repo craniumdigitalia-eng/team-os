@@ -10,7 +10,7 @@ O prompt de todo agente gerado deve impor o protocolo de leitura L0/L1/L2:
 
 1. **L0 (bootstrap):** `INDEX.md` + o `DIGEST.md` da **sua área** (`agents/<área>/DIGEST.md`) + stories ativas (`stories/active/*.md`). Nada além disso ao iniciar.
 2. **L1 (busca):** para achar contexto além do L0, buscar pelos summaries:
-   `bash "$CLAUDE_PROJECT_DIR/.claude/skills/team-os/scripts/sm-find.sh" "<termo>"` — saída `path / kind / status / summary`.
+   `bash "${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/team-os/scripts/sm-find.sh" "<termo>"` — saída `path / kind / status / summary`.
 3. **L2 (nota inteira):** só quando o `summary` confirma relevância — **máximo 3 notas por tarefa**.
 4. ⛔ Nunca ler pastas inteiras nem `_archive/`.
 

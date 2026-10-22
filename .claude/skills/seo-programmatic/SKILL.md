@@ -1,11 +1,8 @@
 ---
 name: seo-programmatic
-description: >
-  Programmatic SEO planning and analysis for pages generated at scale from data
-  sources. Covers template engines, URL patterns, internal linking automation,
-  thin content safeguards, and index bloat prevention. Use when user says
-  "programmatic SEO", "pages at scale", "dynamic pages", "template pages",
-  "generated pages", or "data-driven SEO".
+description: "Planejamento e análise de SEO programático para páginas geradas em escala a partir de dados — template engines, padrões de URL, links internos automatizados, salvaguardas contra thin content e prevenção de index bloat. Use ao pedir 'programmatic SEO', 'pages at scale', 'dynamic pages', 'template pages' ou 'data-driven SEO'."
+version: "2.3.2"
+updated: "2026-10-20"
 user-invocable: true
 argument-hint: "[url or plan]"
 license: MIT
@@ -116,7 +113,7 @@ Unique content % = (words unique to this page) / (total words on page) × 100
 
 Measure against all other pages in the programmatic set. Shared headers, footers, and navigation are excluded from the calculation. Template boilerplate text IS included.
 
-**Metadata is scored separately.** This calculation covers body copy only, so a set that passes it can still carry one generated title/description shape on every URL. Run `"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run metadata_template.py --pairs-file <file> --json` (heuristic, deterministic string comparison) over the whole set and treat a `site_risk` of `high` as a gate failure regardless of body uniqueness.
+**Metadata is scored separately.** This calculation covers body copy only, so a set that passes it can still carry one generated title/description shape on every URL. Run `"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run metadata_template.py --pairs-file <file> --json` (heuristic, deterministic string comparison) over the whole set and treat a `site_risk` of `high` as a gate failure regardless of body uniqueness.
 
 ## Canonical Strategy
 

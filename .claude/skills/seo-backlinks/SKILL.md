@@ -1,6 +1,8 @@
 ---
 name: seo-backlinks
-description: "Backlink profile analysis: referring domains, anchor text distribution, toxic link detection, competitor gap analysis. Works with free APIs (Moz, Bing Webmaster, Common Crawl) and DataForSEO extension. Use when user says backlinks, link profile, referring domains, anchor text, toxic links, link gap, link building, disavow, or backlink audit."
+description: "Análise do perfil de backlinks — referring domains, distribuição de âncoras, links tóxicos e gap contra concorrentes, com APIs gratuitas (Moz, Bing Webmaster, Common Crawl) e DataForSEO. Use ao pedir backlinks, link profile, referring domains, anchor text, toxic links, link building, disavow ou backlink audit."
+version: "2.4.0"
+updated: "2026-10-20"
 user-invocable: true
 argument-hint: "<url>"
 license: MIT
@@ -18,13 +20,13 @@ metadata:
 Before analysis, detect available data sources:
 
 1. **DataForSEO MCP** (premium): Check if `dataforseo_backlinks_summary` tool is available
-2. **Moz API** (free signup): `"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run backlinks_auth.py --check moz --json`
-3. **Bing Webmaster** (free signup): `"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run backlinks_auth.py --check bing --json`
-4. **Keywords Everywhere** (free signup, single-metric): `"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run backlinks_auth.py --check keywordseverywhere --json`
+2. **Moz API** (free signup): `"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run backlinks_auth.py --check moz --json`
+3. **Bing Webmaster** (free signup): `"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run backlinks_auth.py --check bing --json`
+4. **Keywords Everywhere** (free signup, single-metric): `"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run backlinks_auth.py --check keywordseverywhere --json`
 5. **Common Crawl** (always available): Domain-level graph with PageRank
 6. **Verification Crawler** (always available): Checks if known backlinks still exist
 
-Run `"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run backlinks_auth.py --check --json` to detect all sources at once.
+Run `"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run backlinks_auth.py --check --json` to detect all sources at once.
 
 If no sources are configured beyond the always-available tier:
 - Still produce a report using Common Crawl domain metrics
@@ -49,11 +51,11 @@ Produce all 7 sections below. Each section lists data sources in preference orde
 
 **DataForSEO:** `dataforseo_backlinks_summary` → total backlinks, referring domains, domain rank, follow ratio, trend.
 
-**Moz API:** `"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run moz_api.py metrics <url> --json` → Domain Authority, Page Authority, Spam Score, linking root domains, external links.
+**Moz API:** `"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run moz_api.py metrics <url> --json` → Domain Authority, Page Authority, Spam Score, linking root domains, external links.
 
-**Keywords Everywhere:** `"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run keywordseverywhere_api.py rank <domain> --json` → 0-10 domain rank only (no link counts). Use as a fallback when Moz isn't configured; do not use in place of Moz when both are available.
+**Keywords Everywhere:** `"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run keywordseverywhere_api.py rank <domain> --json` → 0-10 domain rank only (no link counts). Use as a fallback when Moz isn't configured; do not use in place of Moz when both are available.
 
-**Common Crawl:** `"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run commoncrawl_graph.py <domain> --json` → PageRank, harmonic centrality, and low-confidence rank/presence data.
+**Common Crawl:** `"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run commoncrawl_graph.py <domain> --json` → PageRank, harmonic centrality, and low-confidence rank/presence data.
 
 **Scoring:**
 
@@ -68,9 +70,9 @@ Produce all 7 sections below. Each section lists data sources in preference orde
 
 **DataForSEO:** `dataforseo_backlinks_anchors`
 
-**Moz API:** `"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run moz_api.py anchors <url> --json`
+**Moz API:** `"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run moz_api.py anchors <url> --json`
 
-**Bing Webmaster:** `"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run bing_webmaster.py links <url> --json` (extract anchor text from link details)
+**Bing Webmaster:** `"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run bing_webmaster.py links <url> --json` (extract anchor text from link details)
 
 **Healthy distribution benchmarks:**
 
@@ -89,9 +91,9 @@ Flag if exact-match anchors exceed 15% as a review heuristic; it may indicate un
 
 **DataForSEO:** `dataforseo_backlinks_referring_domains`
 
-**Moz API:** `"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run moz_api.py domains <url> --json` → domains with DA scores
+**Moz API:** `"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run moz_api.py domains <url> --json` → domains with DA scores
 
-**Common Crawl:** `"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run commoncrawl_graph.py <domain> --json` → domain-level rank/presence data, no verified referring-domain counts
+**Common Crawl:** `"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run commoncrawl_graph.py <domain> --json` → domain-level rank/presence data, no verified referring-domain counts
 
 Analyze:
 - **TLD distribution**: .edu, .gov, .org = high authority. Excessive .xyz, .info = low quality
@@ -103,9 +105,9 @@ Analyze:
 
 **DataForSEO:** `dataforseo_backlinks_bulk_spam_score` + toxic patterns from reference
 
-**Moz API:** Raw vendor spam_score from `"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run moz_api.py metrics <url> --json` (source-label the value; apply thresholds only if verified against current Moz docs)
+**Moz API:** Raw vendor spam_score from `"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run moz_api.py metrics <url> --json` (source-label the value; apply thresholds only if verified against current Moz docs)
 
-**Verification Crawler:** `"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run verify_backlinks.py --target <url> --links <file> --json` (verify suspicious links still exist)
+**Verification Crawler:** `"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run verify_backlinks.py --target <url> --links <file> --json` (verify suspicious links still exist)
 
 **High-risk indicators (flag immediately):**
 - Links from known PBN (Private Blog Network) domains
@@ -127,7 +129,7 @@ Load `../seo/references/backlink-quality.md` for the full 30 toxic patterns and 
 
 **DataForSEO:** `dataforseo_backlinks_backlinks` with target type "page"
 
-**Moz API:** `"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run moz_api.py pages <domain> --json`
+**Moz API:** `"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run moz_api.py pages <domain> --json`
 
 Find:
 - Which pages attract the most backlinks
@@ -139,11 +141,11 @@ Find:
 
 **DataForSEO:** `dataforseo_backlinks_referring_domains` for both domains, then compare
 
-**Bing Webmaster:** `"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run bing_webmaster.py compare <url1> <url2> --json`
+**Bing Webmaster:** `"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run bing_webmaster.py compare <url1> <url2> --json`
 only when both properties are registered and accessible to the same Bing API
 account. For arbitrary competitors, use DataForSEO, Moz, or Common Crawl.
 
-**Moz API:** Compare DA/PA between domains via `"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run moz_api.py metrics <url> --json` for each
+**Moz API:** Compare DA/PA between domains via `"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run moz_api.py metrics <url> --json` for each
 
 Output:
 - Domains linking to competitor but NOT to target = link building opportunities
@@ -155,7 +157,7 @@ Output:
 
 **DataForSEO only:** `dataforseo_backlinks_backlinks` with date filters for 30/60/90 day changes
 
-**Verification Crawler:** For known links, verify current status with `"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run verify_backlinks.py --target <url> --links <file> --json`
+**Verification Crawler:** For known links, verify current status with `"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run verify_backlinks.py --target <url> --links <file> --json`
 
 **Note:** Free sources cannot track new/lost links over time. If this section is requested without DataForSEO, inform the user: "Link velocity tracking requires the DataForSEO extension. Free sources provide point-in-time snapshots only."
 
@@ -206,7 +208,7 @@ This rule has been stated in this skill before and was violated anyway, so it is
 now checkable. **Before writing any backlink output, run the validator:**
 
 ```bash
-"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run validate_backlink_report.py --report <report>.json --json
+"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run validate_backlink_report.py --report <report>.json --json
 ```
 
 Pass the sources you actually collected (`cc_data`, `moz_data`, `bing_data`,
@@ -240,6 +242,41 @@ it passes.
 ### Medium Priority (ongoing improvement)
 ### Link Building Opportunities (top 10)
 
+## Conquistar links e menções
+
+Esta seção é sobre **ganhar** links, não só medi-los. Divisão de papéis: o ANUBIS (seo-backlinks) audita, monta a lista-alvo e recomenda; **quem faz contato é o usuário ou a squad brand** — nenhum agente envia e-mail, mensagem ou pitch em nome da empresa. Rascunhos de abordagem podem ser entregues para o usuário aprovar e enviar.
+
+**Antes: link é mesmo o gargalo?** Compare os domínios de referência da *página-alvo* (não do domínio inteiro) com as 3 a 5 páginas que ficam acima dela. Se elas têm números parecidos e ainda vencem, o problema é conteúdo, intenção ou frescor — mande para seo-content/seo-sxo, não para link building. Aponte links internos das páginas mais fortes para a página-alvo antes de buscar links de fora.
+
+**1. Ativos linkáveis (ter algo que mereça link)**
+- **Dados próprios** — pesquisa, levantamento, benchmark do setor com metodologia aberta.
+- **Ferramentas** — calculadora, simulador, gerador, checklist interativo.
+- **Guias de referência** — glossário do setor, guia completo, modelos e templates que outros citam.
+Coloque o ativo perto da página-alvo e ligue um ao outro com link interno; link para um estudo não ajuda a página de preço se a autoridade não for repassada.
+
+**2. Táticas, da mais barata para a mais cara**
+| Tática | Esforço | Observação |
+|---|---|---|
+| Menção sem link → pedir o link | baixo | sites que já citam a marca; maior taxa de sucesso |
+| Links quebrados e URLs antigas | baixo | links apontando para 404 ou endereço antigo — redirecionar e pedir atualização |
+| Parcerias (parceiros, integrações, fornecedores, clientes) | baixo | páginas de parceiro, cases, "feito com" |
+| Páginas de recursos | médio | listas curadas de ferramentas/guias do nicho onde o ativo cabe |
+| Listas "melhores X" do setor | médio | pedir avaliação honesta, sem pagamento por link |
+| Digital PR | alto | dado próprio + pauta para jornalista; teto mais alto |
+| Diretórios de qualidade | baixo | só os do setor ou regionais com curadoria e tráfego real — nunca fazenda de diretórios; local → seo-local |
+
+Qualifique cada alvo antes de recomendar: **relevante** (o público dele precisaria do produto?), **real** (tráfego orgânico não em queda, padrão editorial, links de saída não dominados por âncoras comerciais), **alcançável** (pessoa dona da página) e **útil** (o link iria para uma página que precisa dele).
+
+**3. Ponte com seo-geo (menção vale mesmo sem link).** As páginas de terceiros que as IAs citam nas respostas da categoria — listas "melhores X", comparativos, avaliações, fóruns — entram no **topo** da lista-alvo, mesmo que não deem link seguido. Peça ao NUT (seo-geo) o levantamento de fontes citadas no painel de prompts e cruze com o perfil de links.
+
+**4. Proibido**
+- Comprar link que passa autoridade, PBN (rede privada de blogs), inserção paga em artigo antigo, ferramenta de link automático.
+- Troca de links em massa ou página de parceiro criada só para cruzar links.
+- Âncora exata planejada em guest post, release ou advertorial.
+Placement pago é aceitável **só** com `rel="sponsored"` ou `rel="nofollow"` e divulgação — vale por tráfego e citação por IA, não por ranking. Âncora: deixe o outro site escolher (marca, URL, genérica).
+
+**5. Entrega e medição.** O relatório lista, por página-alvo: diagnóstico (link é o gargalo?), ativos existentes e a construir, 3 a 4 táticas com o porquê, lista-alvo qualificada (página, contato, ângulo, se é citada por IA) e riscos do perfil atual. Meça mensalmente novos domínios de referência **por página-alvo**, posição nas consultas-alvo (efeito leva semanas a meses) e menções em páginas citadas por IA; números de busca vêm da SESHAT (seo-google).
+
 ## Error Handling
 
 | Error | Cause | Resolution |
@@ -248,7 +285,7 @@ it passes.
 | Moz rate limit | Free tier: 1 req/10s | Wait 10 seconds, retry. Built into script. |
 | Bing site not verified | Site not verified in Bing | Verify at https://www.bing.com/webmasters |
 | CC download timeout | Large graph file, slow connection | Use `--timeout 180` flag |
-| DataForSEO unavailable | Extension not installed | Run `./extensions/dataforseo/install.sh` |
+| DataForSEO unavailable | MCP server not configured | Configure the DataForSEO MCP server with `DATAFORSEO_USERNAME` / `DATAFORSEO_PASSWORD` (see `seo-dataforseo`) |
 | No backlink data returned | Domain too new or very small | Note: small sites may have <10 backlinks |
 
 **Fallback cascade:**
@@ -301,3 +338,7 @@ After completing any backlink analysis command, always offer:
 Load on demand (do NOT load at startup):
 - `skills/seo/references/backlink-quality.md` -- Detailed toxic link patterns and scoring methodology (shared reference, load when analyzing toxic links or spam scores)
 - `skills/seo/references/free-backlink-sources.md` -- Source comparison, confidence weighting, setup guides (shared reference, load when configuring free backlink APIs)
+
+---
+
+Seção "Conquistar links e menções" adaptada de coreyhaines31/marketingskills → skill `link-building` (MIT) — 2026-10-20.

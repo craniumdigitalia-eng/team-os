@@ -2,16 +2,29 @@
 # scan-ct-projects.sh — mapeia projetos no root do Centro de Treinamento
 # e reporta, por projeto: team-os instalada, contagem de agentes, smart-memory e DRIFT vs CT.
 # Usage: scan-ct-projects.sh [CT_ROOT]
+# Raiz dos projetos, em ordem de precedência:
+#   1. argumento [CT_ROOT]
+#   2. env CT_ROOT
+#   3. arquivo .team-os-root na raiz do CT (1 linha com o caminho; `~` é expandido;
+#      gitignored — cada máquina tem o seu, nunca versionar)
+#   4. fallback: a pasta pai do git root do CT
 # Output: CT_ROOT, depois uma linha por projeto encontrado.
 
-CT_ROOT="${1:-}"
+CT_ROOT="${1:-${CT_ROOT:-}}"
 
-# Git root do projeto atual = fonte da verdade (CT)
+# Git root do projeto atual = fonte da verdade (CT). Sem git (pack baixado em .zip):
+# a raiz do CT é 4 pastas acima deste script.
 GIT_ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
+if [ -z "$GIT_ROOT" ] || [ ! -d "$GIT_ROOT/.claude/skills/team-os-creator" ]; then
+  _here="$(cd "$(dirname "$0")" && pwd)"
+  [ -d "$_here/../../../../.claude/skills/team-os-creator" ] && GIT_ROOT="$(cd "$_here/../../../.." && pwd)"
+fi
 SOURCE_AGENTS=""
 SOURCE_SKILLS=""
 [ -n "$GIT_ROOT" ] && [ -d "$GIT_ROOT/.claude/agents" ] && SOURCE_AGENTS="$GIT_ROOT/.claude/agents"
 [ -n "$GIT_ROOT" ] && [ -d "$GIT_ROOT/.claude/skills" ] && SOURCE_SKILLS="$GIT_ROOT/.claude/skills"
+
+PROPAGATE_SYNC="$(cd "$(dirname "$0")" && pwd)/propagate-sync.py"
 
 # Hash de diretório de skill (nomes relativos + conteúdo agregado; ignora
 # artefatos macOS Icon\r e .DS_Store). Incluir os NOMES no hash garante que
@@ -25,6 +38,12 @@ hash_dir() {
     | awk '{print $1}'
 }
 
+# .team-os-root na raiz do CT (por máquina, gitignored)
+if [ -z "$CT_ROOT" ] && [ -n "$GIT_ROOT" ] && [ -f "$GIT_ROOT/.team-os-root" ]; then
+  CT_ROOT="$(sed -n '1p' "$GIT_ROOT/.team-os-root" | sed 's/^[[:space:]]*//; s/[[:space:]]*$//')"
+  case "$CT_ROOT" in "~"|"~/"*) CT_ROOT="$HOME${CT_ROOT#\~}" ;; esac
+  [ -d "$CT_ROOT" ] || { echo "ERRO: .team-os-root aponta para pasta inexistente: $CT_ROOT" >&2; exit 1; }
+fi
 # Auto-detecta root: sobe um nível acima do git root do projeto atual
 if [ -z "$CT_ROOT" ]; then
   if [ -n "$GIT_ROOT" ]; then
@@ -46,17 +65,54 @@ hash_file() {
 }
 
 echo "CT_ROOT=$CT_ROOT"
-[ -n "$SOURCE_AGENTS" ] && echo "SOURCE_AGENTS=$(find "$SOURCE_AGENTS" -maxdepth 1 -name '*.md' -type f | wc -l | tr -d ' ')"
-# nº de skills e squads do CT (o dashboard imprime "N agentes · N skills · N squads")
-[ -n "$SOURCE_SKILLS" ] && echo "SOURCE_SKILLS_COUNT=$(find "$SOURCE_SKILLS" -maxdepth 1 -mindepth 1 -type d | wc -l | tr -d ' ')"
-[ -n "$SOURCE_AGENTS" ] && echo "SOURCE_SQUADS=$(find "$SOURCE_AGENTS" -maxdepth 1 -name '*.md' -type f -exec basename {} .md \; 2>/dev/null \
-  | sed 's/-.*//' | sort -u | wc -l | tr -d ' ')"
+# Contagens DO PACK (o dashboard imprime "N agentes · N skills · N squads"): agentes próprios
+# do usuário (`origin: custom`) e skills fora do pack-manifest.json contam à parte.
+PACK_COUNTS=""
+if [ -n "$GIT_ROOT" ] && command -v python3 >/dev/null 2>&1; then
+  PACK_COUNTS="$(python3 - "$GIT_ROOT" <<'PYEOF' 2>/dev/null
+import json, os, re, sys
+root = sys.argv[1]
+adir, sdir = os.path.join(root, ".claude", "agents"), os.path.join(root, ".claude", "skills")
+pack, custom = [], 0
+for n in sorted(os.listdir(adir)) if os.path.isdir(adir) else []:
+    if not n.endswith(".md"):
+        continue
+    head = open(os.path.join(adir, n), encoding="utf-8", errors="replace").read(4096)
+    m = re.match(r"^---\n(.*?)\n---", head, re.S)
+    if m and re.search(r"^origin:\s*custom\s*$", m.group(1), re.M):
+        custom += 1
+    else:
+        pack.append(n[:-3])
+try:
+    files = json.load(open(os.path.join(root, "pack-manifest.json"), encoding="utf-8")).get("files", {})
+    pack_sk = {k.split("/")[2] for k in files if k.startswith(".claude/skills/")}
+except (OSError, ValueError):
+    pack_sk = None
+dirs = [d for d in os.listdir(sdir) if os.path.isdir(os.path.join(sdir, d))] if os.path.isdir(sdir) else []
+sk = sum(1 for d in dirs if pack_sk is None or d in pack_sk)
+print(len(pack), sk, len({a.split("-")[0] for a in pack}), custom, len(dirs) - sk)
+PYEOF
+)"
+fi
+if [ -n "$PACK_COUNTS" ]; then
+  set -- $PACK_COUNTS
+  [ -n "$SOURCE_AGENTS" ] && echo "SOURCE_AGENTS=$1"
+  [ -n "$SOURCE_SKILLS" ] && echo "SOURCE_SKILLS_COUNT=$2"
+  [ -n "$SOURCE_AGENTS" ] && echo "SOURCE_SQUADS=$3"
+  echo "SOURCE_CUSTOM_AGENTS=$4"
+  echo "SOURCE_CUSTOM_SKILLS=$5"
+else
+  [ -n "$SOURCE_AGENTS" ] && echo "SOURCE_AGENTS=$(find "$SOURCE_AGENTS" -maxdepth 1 -name '*.md' -type f | wc -l | tr -d ' ')"
+  [ -n "$SOURCE_SKILLS" ] && echo "SOURCE_SKILLS_COUNT=$(find "$SOURCE_SKILLS" -maxdepth 1 -mindepth 1 -type d | wc -l | tr -d ' ')"
+  [ -n "$SOURCE_AGENTS" ] && echo "SOURCE_SQUADS=$(find "$SOURCE_AGENTS" -maxdepth 1 -name '*.md' -type f -exec basename {} .md \; 2>/dev/null \
+    | sed 's/-.*//' | sort -u | wc -l | tr -d ' ')"
+fi
 echo "---"
 
 # Candidatos: as pastas irmãs do CT. Uma pasta SEM .claude/ e SEM .git próprios que CONTÉM
-# subpastas com .claude/ é um CONTÊINER (ex.: "Scalify" com "Comercial", "Site", "Marketing"…):
+# subpastas com .claude/ é um CONTÊINER (ex.: "<Negócio>" com "Comercial", "Site", "Marketing"…):
 # seus filhos diretos entram como projetos "Contêiner/Filho" — inclusive os vazios, para
-# aparecerem como "não instalado" no dashboard. Sala de Controle nunca é contêiner.
+# aparecerem como "não instalado" no dashboard. Pasta de Sala de Controle (antiga) nunca é contêiner.
 CANDIDATES="$(mktemp "${TMPDIR:-/tmp}/scan-ct.XXXXXX")" || exit 1
 for d in "$CT_ROOT"/*/; do
   [ -d "$d" ] || continue
@@ -113,13 +169,15 @@ while IFS=$'\t' read -r dir name; do
   # Smart-memory
   { [ -d "$dir/docs/smart-memory" ] || [ -f "$dir/docs/smart-memory/INDEX.md" ]; } && has_smart_memory=1
 
-  # Sala de Controle (recurso Maestri): pasta cujo nome diz "sala de controle"/"control room",
-  # ou que já tem a skill opt-in maestri-os. Não é squad — o dashboard trata à parte.
-  has_maestri_os=0; is_control_room=0
-  [ -d "$dir/.claude/skills/maestri-os" ] && has_maestri_os=1
-  lname=$(printf '%s' "$name" | tr '[:upper:]' '[:lower:]')
-  case "$lname" in *"sala de controle"*|*"sala-de-controle"*|*"control room"*|*"control-room"*) is_control_room=1 ;; esac
-  [ $has_maestri_os -eq 1 ] && is_control_room=1
+  # Pasta de Sala de Controle ANTIGA: a Sala agora mora no CT. Fora do CT e sem agentes, com a
+  # skill sala-de-controle ou maestri-os (versões anteriores do pack), ou com nome de Sala
+  # ("sala de controle"/"control room"). O dashboard avisa e sugere migrate-sala-to-ct.sh.
+  is_legacy_cr=0
+  if [ "$is_current" -eq 0 ] && [ "$has_agents" -eq 0 ]; then
+    { [ -d "$dir/.claude/skills/sala-de-controle" ] || [ -d "$dir/.claude/skills/maestri-os" ]; } && is_legacy_cr=1
+    lname=$(printf '%s' "$name" | tr '[:upper:]' '[:lower:]')
+    case "$lname" in *"sala de controle"*|*"sala-de-controle"*|*"control room"*|*"control-room"*) is_legacy_cr=1 ;; esac
+  fi
 
   # Drift vs CT (só para projetos que não são o CT e têm agentes)
   if [ "$is_current" -eq 0 ] && [ "$has_agents" -eq 1 ] && [ -n "$SOURCE_AGENTS" ]; then
@@ -150,25 +208,40 @@ while IFS=$'\t' read -r dir name; do
   fi
 
   # Drift de SKILLS vs CT (mesma lógica: só compara skills que o destino já tem;
-  # team-os-creator nunca conta — é exclusiva do CT)
+  # team-os-creator e sala-de-controle nunca contam — são exclusivas do CT; maestri-os saiu do pack)
   skills_outdated=0
   if [ "$is_current" -eq 0 ] && [ "$has_skills" -eq 1 ] && [ -n "$SOURCE_SKILLS" ]; then
     for sp in "$dir/.claude/skills/"*/; do
       [ -d "$sp" ] || continue
       sn=$(basename "$sp")
-      [ "$sn" = "team-os-creator" ] && continue
+      case "$sn" in team-os-creator|sala-de-controle|maestri-os) continue ;; esac
       src="$SOURCE_SKILLS/$sn"
       [ -d "$src" ] || continue   # skill extra do destino — preservada, não é drift
       [ "$(hash_dir "$sp")" = "$(hash_dir "$src")" ] || skills_outdated=$((skills_outdated + 1))
     done
   fi
 
+  # Projeto com .team-os/installed.json (instalado/propagado com a proteção de edições): o que o
+  # usuário editou lá NÃO é "desatualizado". Editado e o CT não mudou → conta como em dia;
+  # editado E o CT mudou → DRIFT_CONFLICT / SKILLS_CONFLICT (o *propagate pergunta, um a um).
+  drift_conflict=0; skills_conflict=0
+  if [ "$is_current" -eq 0 ] && [ -f "$dir/.team-os/installed.json" ] && [ -n "$GIT_ROOT" ] \
+     && [ -f "$PROPAGATE_SYNC" ] && command -v python3 >/dev/null 2>&1; then
+    dline="$(python3 "$PROPAGATE_SYNC" drift --source "$GIT_ROOT" --target "$dir" 2>/dev/null)"
+    if [ -n "$dline" ]; then
+      dget() { printf '%s\n' "$dline" | tr '\t' '\n' | grep -m1 "^$1=" | cut -d= -f2; }
+      [ "$has_agents" -eq 1 ] && { drift_ok=$(dget DRIFT_OK); drift_outdated=$(dget DRIFT_OUTDATED); drift_conflict=$(dget DRIFT_CONFLICT); }
+      [ "$has_skills" -eq 1 ] && { skills_outdated=$(dget SKILLS_OUTDATED); skills_conflict=$(dget SKILLS_CONFLICT); }
+    fi
+  fi
+
   # Formato TSV (TAB-delimitado): nomes reais de pasta contêm "|" (ex.: "João | Externo"),
   # então pipe como delimitador quebrava o parse do dashboard.
-  printf 'PROJECT=%s\tPATH=%s\tIS_CURRENT=%s\tHAS_AGENTS=%s\tAGENT_COUNT=%s\tAGENT_SQUADS=%s\tHAS_SKILLS=%s\tSKILL_COUNT=%s\tHAS_HOOKS=%s\tHAS_TEAM_OS=%s\tHAS_SMART_MEMORY=%s\tDRIFT_OK=%s\tDRIFT_OUTDATED=%s\tDRIFT_EXTRA=%s\tDRIFT_MISSING=%s\tSKILLS_OUTDATED=%s\tHAS_MAESTRI_OS=%s\tIS_CONTROL_ROOM=%s\n' \
+  printf 'PROJECT=%s\tPATH=%s\tIS_CURRENT=%s\tHAS_AGENTS=%s\tAGENT_COUNT=%s\tAGENT_SQUADS=%s\tHAS_SKILLS=%s\tSKILL_COUNT=%s\tHAS_HOOKS=%s\tHAS_TEAM_OS=%s\tHAS_SMART_MEMORY=%s\tDRIFT_OK=%s\tDRIFT_OUTDATED=%s\tDRIFT_EXTRA=%s\tDRIFT_MISSING=%s\tSKILLS_OUTDATED=%s\tIS_LEGACY_CONTROL_ROOM=%s\tDRIFT_CONFLICT=%s\tSKILLS_CONFLICT=%s\n' \
     "$name" "$dir" "$is_current" "$has_agents" "$agent_count" "$agent_squads" \
     "$has_skills" "$skill_count" "$([ -d "$dir/.claude/hooks" ] && echo 1 || echo 0)" \
     "$has_team_os" "$has_smart_memory" "$drift_ok" "$drift_outdated" "$drift_extra" \
-    "$drift_missing" "$skills_outdated" "$has_maestri_os" "$is_control_room"
+    "$drift_missing" "$skills_outdated" "$is_legacy_cr" \
+    "$drift_conflict" "$skills_conflict"
 done < "$CANDIDATES"
 rm -f "$CANDIDATES"

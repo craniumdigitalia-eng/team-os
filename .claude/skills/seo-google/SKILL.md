@@ -1,12 +1,8 @@
 ---
 name: seo-google
-description: >
-  Google SEO APIs: Search Console (Search Analytics, URL Inspection, Sitemaps),
-  PageSpeed Insights v5, CrUX field data with 25-week history, Indexing API v3,
-  and GA4 organic traffic. Provides real Google field data for Core Web Vitals,
-  indexation status, search performance, and organic traffic trends. Use when
-  user says "search console", "GSC", "PageSpeed", "CrUX", "field data",
-  "indexing API", "GA4 organic", "URL inspection", or "real CWV data".
+description: "APIs Google de SEO — Search Console (Search Analytics, URL Inspection, Sitemaps), PageSpeed Insights v5, CrUX com 25 semanas de histórico, Indexing API v3 e tráfego orgânico do GA4; dados de campo reais de Core Web Vitals e indexação. Use ao pedir 'search console', 'GSC', 'PageSpeed', 'CrUX', 'field data', 'indexing API' ou 'GA4 organic'."
+version: "2.4.0"
+updated: "2026-10-20"
 user-invocable: true
 argument-hint: "[command] [url|property]"
 license: MIT
@@ -17,6 +13,8 @@ metadata:
 ---
 
 # Google SEO APIs
+
+**Quando usar esta vs. `traffic-ga4-mcp`:** esta cobre as APIs Google de SEO (Search Console, PageSpeed, CrUX, Indexing, GA4 orgânico). Para relatórios GA4 de campanhas pagas, validação de UTMs e conversões de ads, use `traffic-ga4-mcp`.
 
 Direct access to Google's own SEO data. Bridges the gap between crawl-based
 analysis (existing claude-seo skills) and Google's real-time field data: actual
@@ -29,7 +27,7 @@ service account -- run `/seo google setup` for step-by-step instructions.
 
 Before executing any command, check credentials:
 ```bash
-"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run google_auth.py --check --json
+"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run google_auth.py --check --json
 ```
 
 Config file: `~/.config/claude-seo/google-api.json`
@@ -89,7 +87,7 @@ Always communicate the detected tier before running commands.
 
 Combined Lighthouse lab data + CrUX field data.
 
-**Script:** `"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run pagespeed_check.py <url> --json`
+**Script:** `"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run pagespeed_check.py <url> --json`
 **Reference:** `references/pagespeed-crux-api.md`
 **Default:** Both mobile + desktop strategies, all Lighthouse categories.
 
@@ -100,13 +98,13 @@ Chrome user metrics). CrUX tries URL-level first, falls back to origin-level.
 
 CrUX field data only (no Lighthouse run). Faster.
 
-**Script:** `"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run pagespeed_check.py <url> --crux-only --json`
+**Script:** `"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run pagespeed_check.py <url> --crux-only --json`
 
 ### `/seo google crux-history <url>`
 
 25-week CrUX History trends. Shows whether CWV metrics are improving, stable, or degrading.
 
-**Script:** `"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run crux_history.py <url> --json`
+**Script:** `"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run crux_history.py <url> --json`
 **Reference:** `references/pagespeed-crux-api.md`
 
 Output includes per-metric trend direction, percentage change, and weekly p75 values.
@@ -119,7 +117,7 @@ Output includes per-metric trend direction, percentage change, and weekly p75 va
 
 Search Analytics: clicks, impressions, CTR, position for last 28 days.
 
-**Script:** `"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run gsc_query.py --property <property> --json`
+**Script:** `"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run gsc_query.py --property <property> --json`
 **Reference:** `references/search-console-api.md`
 **Default:** 28 days, dimensions=query,page, type=web, limit=1000.
 
@@ -128,6 +126,8 @@ The `totals` block comes from a separate dimensionless aggregate query because
 query-level rows can omit anonymized low-volume traffic. Treat totals as
 site-wide only when `totals_complete` is true. `--limit` caps total returned
 dimension rows, not the size of every pagination request.
+
+**Empurrar rankings:** para transformar essa saída em lista de candidatos (faixas distância de ataque 8–20, CTR fraco 1–5, perto do topo 4–7), disciplina de atribuição e checklist de página nova, siga `references/rankings-push.md`. SESHAT gera a lista com `#id`; MAAT dá o veredicto.
 
 > **AI surfaces in GSC (2026):**
 > - **Generative AI performance report** (launched 2026-06-03), a dedicated view of **AI Overviews + AI Mode** visibility. **Impressions only** (no clicks/CTR/position/query); dimensions Pages/Countries/Devices/Dates (Pacific Time); 1,000-row limit; newest data preliminary; a separate Discover gen-AI report also exists. Rolling out to a subset of properties.
@@ -145,7 +145,7 @@ dimension rows, not the size of every pagination request.
 
 URL Inspection: real indexation status from Google.
 
-**Script:** `"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run gsc_inspect.py <url> --json`
+**Script:** `"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run gsc_inspect.py <url> --json`
 
 Returns: verdict (PASS/FAIL), coverage state, robots.txt status, indexing state,
 page fetch state, canonical selection, mobile usability, rich results.
@@ -154,7 +154,7 @@ page fetch state, canonical selection, mobile usability, rich results.
 
 Batch inspection from a file (one URL per line). Rate limited to 2,000/day per site.
 
-**Script:** `"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run gsc_inspect.py --batch <file> --json`
+**Script:** `"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run gsc_inspect.py --batch <file> --json`
 
 ### `/seo google sitemaps <property>`
 
@@ -162,7 +162,7 @@ List submitted sitemaps with status, errors, warnings. Sitemap contents report
 submitted counts only; URL Inspection API is the indexation truth for whether
 specific URLs are indexed.
 
-**Script:** `"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run gsc_query.py sitemaps --property <property> --json`
+**Script:** `"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run gsc_query.py sitemaps --property <property> --json`
 
 ---
 
@@ -172,7 +172,7 @@ specific URLs are indexed.
 
 Notify Google of a URL update.
 
-**Script:** `"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run indexing_notify.py <url> --json`
+**Script:** `"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run indexing_notify.py <url> --json`
 **Reference:** `references/indexing-api.md`
 
 The Indexing API is officially for JobPosting and BroadcastEvent/VideoObject pages.
@@ -182,7 +182,7 @@ Always inform the user of this restriction. Daily quota: 200 publish requests.
 
 Batch submit URLs from a file. Tracks quota usage.
 
-**Script:** `"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run indexing_notify.py --batch <file> --json`
+**Script:** `"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run indexing_notify.py --batch <file> --json`
 
 ---
 
@@ -192,7 +192,7 @@ Batch submit URLs from a file. Tracks quota usage.
 
 Organic traffic report: daily sessions, users, pageviews, bounce rate, engagement.
 
-**Script:** `"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run ga4_report.py --property <id> --json`
+**Script:** `"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run ga4_report.py --property <id> --json`
 **Reference:** `references/ga4-data-api.md`
 **Default:** 28 days, filtered to Organic Search channel group.
 
@@ -202,7 +202,7 @@ Organic traffic report: daily sessions, users, pageviews, bounce rate, engagemen
 
 Top organic landing pages ranked by sessions.
 
-**Script:** `"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run ga4_report.py --property <id> --report top-pages --json`
+**Script:** `"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run ga4_report.py --property <id> --report top-pages --json`
 
 ---
 
@@ -214,7 +214,7 @@ Some third-party studies report a 0.737 correlation between YouTube mentions and
 
 Search YouTube for videos. Returns title, channel, views, likes, duration.
 
-**Script:** `"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run youtube_search.py search "<query>" --json`
+**Script:** `"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run youtube_search.py search "<query>" --json`
 **Reference:** `references/youtube-api.md`
 **Quota:** 100 units per search (10,000 units/day free).
 
@@ -222,7 +222,7 @@ Search YouTube for videos. Returns title, channel, views, likes, duration.
 
 Detailed video info + tags + top 10 comments.
 
-**Script:** `"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run youtube_search.py video <video_id> --json`
+**Script:** `"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run youtube_search.py video <video_id> --json`
 **Quota:** 2 units (video details + comments).
 
 ---
@@ -235,7 +235,7 @@ Google NLP entity/sentiment output for internal content-quality checks. Do not t
 
 Full NLP analysis: entities, sentiment, content classification.
 
-**Script:** `"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run nlp_analyze.py --url <url> --json` or `--text "..."`
+**Script:** `"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run nlp_analyze.py --url <url> --json` or `--text "..."`
 **Reference:** `references/nlp-api.md`
 **Free tier:** 5,000 units/month. Requires billing enabled on GCP project.
 
@@ -243,7 +243,7 @@ Full NLP analysis: entities, sentiment, content classification.
 
 Entity extraction only (faster, less quota).
 
-**Script:** `"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run nlp_analyze.py --url <url> --features entities --json`
+**Script:** `"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run nlp_analyze.py --url <url> --features entities --json`
 
 ---
 
@@ -255,7 +255,7 @@ Gold-standard keyword volume data. Requires Google Ads account.
 
 Generate keyword ideas from seed terms.
 
-**Script:** `"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run keyword_planner.py ideas "<seed>" --json`
+**Script:** `"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run keyword_planner.py ideas "<seed>" --json`
 **Reference:** `references/keyword-planner-api.md`
 **Requires:** Ads developer token + customer ID in config (Tier 3).
 
@@ -263,7 +263,7 @@ Generate keyword ideas from seed terms.
 
 Search volume for specific keywords (comma-separated).
 
-**Script:** `"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run keyword_planner.py volume "<kw1>,<kw2>" --json`
+**Script:** `"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run keyword_planner.py volume "<kw1>,<kw2>" --json`
 
 ---
 
@@ -296,7 +296,7 @@ After any analysis command, offer to generate a PDF/HTML report.
 
 Generate a professional PDF report with charts and analytics.
 
-**Script:** `"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run google_report.py --type <type> --data <json> --domain <domain> --format pdf`
+**Script:** `"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run google_report.py --type <type> --data <json> --domain <domain> --format pdf`
 
 | Type | Input | Output |
 |------|-------|--------|
@@ -307,8 +307,8 @@ Generate a professional PDF report with charts and analytics.
 
 **Workflow:**
 1. Run data collection commands (pagespeed, gsc, inspect-batch, etc.)
-2. Save JSON output to file: `"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run pagespeed_check.py <url> --json > data.json`
-3. Generate report: `"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run google_report.py --type cwv-audit --data data.json --domain <domain>`
+2. Save JSON output to file: `"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run pagespeed_check.py <url> --json > data.json`
+3. Generate report: `"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run google_report.py --type cwv-audit --data data.json --domain <domain>`
 
 **Convention:** After completing analysis, suggest: "Generate a report? Use `/seo google report <type>`"
 

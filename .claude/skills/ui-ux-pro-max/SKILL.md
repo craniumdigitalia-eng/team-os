@@ -1,12 +1,14 @@
 ---
 name: ui-ux-pro-max
-description: UI/UX design intelligence para web, mobile e desktop — banco pesquisável de estilos, paletas, pares de fonte, tipos de produto, regras de UX, presets de movimento e guias por stack. Use ao desenhar, construir, revisar ou corrigir UI/UX (landing page, dashboard, SaaS, app) ou ao escolher estilo, cor e tipografia.
-version: "2.13.0"
-updated: "2026-09-20"
+description: "UI/UX design intelligence para web, mobile e desktop — banco pesquisável de estilos, paletas, pares de fonte, tipos de produto, regras de UX, presets de movimento e guias por stack. Use ao desenhar, construir, revisar ou corrigir UI/UX (landing page, dashboard, SaaS, app) ou ao escolher estilo, cor e tipografia."
+version: "2.15.0"
+updated: "2026-10-20"
 source: "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill"
 ---
 
 # UI/UX Pro Max - Design Intelligence
+
+**Quando usar esta vs. `web-design-guidelines`:** esta ajuda a *decidir e construir* (estilo, paleta, tipografia, regras de UX por tipo de produto). Para *revisar* código UI já escrito contra as Vercel Web Interface Guidelines e listar violações file:line, use `web-design-guidelines`.
 
 Searchable local UI/UX guidance: 79 searchable styles (50 active), 192 product palettes and exact reasoning profiles, 74 font pairings, 119 UX guidelines, 105 curated icons, 17 GSAP presets, 25 chart types, and 22 technology stacks.
 
@@ -42,10 +44,10 @@ For the full rule list per category (all 119 UX guidelines with rationale), read
 The search script lives inside this skill's own directory, not the project directory. Always invoke it by its full path — do not assume a particular working directory:
 
 ```bash
-python3 "$CLAUDE_PROJECT_DIR/.claude/skills/ui-ux-pro-max/scripts/search.py" "<query>" --domain <domain>
+python3 "${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/ui-ux-pro-max/scripts/search.py" "<query>" --domain <domain>
 ```
 
-If `python` is not found, try `python3`, then `py -3`. Requires Python 3.x, no external dependencies (see README for install instructions if Python is missing).
+Se `python3` não existir, tente `python` e depois `py -3`. Precisa só de Python 3.x, sem dependências externas; se o Python não estiver instalado, peça ao usuário para instalá-lo (não instale nada por conta própria).
 
 ## Workflow
 
@@ -78,27 +80,30 @@ Extract from the user request:
 Use `--design-system` when the task needs a coherent product-wide visual direction:
 
 ```bash
-python3 "$CLAUDE_PROJECT_DIR/.claude/skills/ui-ux-pro-max/scripts/search.py" "<product_type> <industry> <keywords>" --design-system [-p "Project Name"]
+python3 "${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/ui-ux-pro-max/scripts/search.py" "<product_type> <industry> <keywords>" --design-system [-p "Project Name"]
 ```
 
 This aggregates product/style/color/landing/typography matches, applies reasoning rules from `ui-reasoning.csv`, and returns pattern, style, colors, typography, effects, and anti-patterns to avoid.
 
 **Example:**
 ```bash
-python3 "$CLAUDE_PROJECT_DIR/.claude/skills/ui-ux-pro-max/scripts/search.py" "beauty spa wellness service" --design-system -p "Serenity Spa"
+python3 "${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/ui-ux-pro-max/scripts/search.py" "beauty spa wellness service" --design-system -p "Serenity Spa"
 ```
 
 ### Step 2b: Persist Design System (Master + Overrides Pattern)
 
-To save the design system for retrieval across sessions, add `--persist` **and always pass `--output-dir` pointed at the project root** — without it, files are written relative to whatever directory the tool happens to run from:
+Para guardar o design system entre sessões, use `--persist` **sempre com `--output-dir` apontando para a área de UX da squad na smart-memory** (`docs/smart-memory/agents/<squad>/ux/`, ex.: `sites` ou `dev`). Sem `--output-dir` o script grava `design-system/` no diretório atual (em geral a raiz do projeto), fora da smart-memory — não faça isso. O script cria a pasta `design-system/<project-slug>/` **dentro** do `--output-dir`:
 
 ```bash
-python3 "$CLAUDE_PROJECT_DIR/.claude/skills/ui-ux-pro-max/scripts/search.py" "<query>" --design-system --persist -p "Project Name" --output-dir "<project-root>"
+python3 "${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/ui-ux-pro-max/scripts/search.py" "<query>" --design-system --persist -p "Project Name" \
+  --output-dir "${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/docs/smart-memory/agents/<squad>/ux"
 ```
 
-This creates:
-- `design-system/<project-slug>/MASTER.md` — Global Source of Truth
-- `design-system/<project-slug>/pages/` — Folder for page-specific overrides
+Isso cria (caminhos relativos a `docs/smart-memory/agents/<squad>/ux/`):
+- `design-system/<project-slug>/MASTER.md` — fonte da verdade global do design system
+- `design-system/<project-slug>/pages/` — overrides por página
+
+Depois de gravar, registre o caminho do MASTER.md no DIGEST.md da área `ux` da squad. Se o projeto já tem um `design-system/` antigo na raiz (gerado por versão anterior), leia-o e proponha ao usuário movê-lo para a smart-memory — não apague.
 
 With a page-specific override, add `--page "dashboard"` to also create `design-system/<project-slug>/pages/dashboard.md`. If Master already exists, a new page file is created without changing Master; an existing page file is skipped unless `--force` is explicitly authorized.
 
@@ -107,8 +112,8 @@ If `design-system/<project-slug>/MASTER.md` already exists, `--persist` **skips 
 Read an existing `MASTER.md` before deciding whether `--force` is justified. Never use `--force` without explicit user authorization.
 
 **Retrieval when building a specific page:**
-1. Read `design-system/<project-slug>/MASTER.md`
-2. Check if `design-system/<project-slug>/pages/<page-name>.md` exists — if so, its rules override Master
+1. Read `docs/smart-memory/agents/<squad>/ux/design-system/<project-slug>/MASTER.md`
+2. Check if `.../ux/design-system/<project-slug>/pages/<page-name>.md` exists — if so, its rules override Master
 3. Otherwise use Master rules exclusively
 
 ### Step 2c: Design Dials (optional)
@@ -116,7 +121,7 @@ Read an existing `MASTER.md` before deciding whether `--force` is justified. Nev
 Three optional 1-10 sliders that tune `--design-system` output without changing your query. Add any combination of them to the same command:
 
 ```bash
-python3 "$CLAUDE_PROJECT_DIR/.claude/skills/ui-ux-pro-max/scripts/search.py" "<query>" --design-system --variance <1-10> --motion <1-10> --density <1-10>
+python3 "${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/ui-ux-pro-max/scripts/search.py" "<query>" --design-system --variance <1-10> --motion <1-10> --density <1-10>
 ```
 
 | Dial | Low (1-3) | Mid (4-7) | High (8-10) |
@@ -131,13 +136,13 @@ python3 "$CLAUDE_PROJECT_DIR/.claude/skills/ui-ux-pro-max/scripts/search.py" "<q
 
 **Example:**
 ```bash
-python3 "$CLAUDE_PROJECT_DIR/.claude/skills/ui-ux-pro-max/scripts/search.py" "internal analytics dashboard" --design-system --variance 8 --motion 7 --density 8 -p "Ops Console"
+python3 "${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/ui-ux-pro-max/scripts/search.py" "internal analytics dashboard" --design-system --variance 8 --motion 7 --density 8 -p "Ops Console"
 ```
 
 ### Step 3: Supplement with Detailed Searches (as needed)
 
 ```bash
-python3 "$CLAUDE_PROJECT_DIR/.claude/skills/ui-ux-pro-max/scripts/search.py" "<keyword>" --domain <domain> [-n <max_results>]
+python3 "${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/ui-ux-pro-max/scripts/search.py" "<keyword>" --domain <domain> [-n <max_results>]
 ```
 
 | Need | Domain | Example |
@@ -160,7 +165,7 @@ Domain is auto-detected from the query if `--domain` is omitted — but auto-det
 ### Step 4: Stack Guidelines
 
 ```bash
-python3 "$CLAUDE_PROJECT_DIR/.claude/skills/ui-ux-pro-max/scripts/search.py" "<keyword>" --stack <stack>
+python3 "${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/ui-ux-pro-max/scripts/search.py" "<keyword>" --stack <stack>
 ```
 
 **Available stacks:** `react`, `nextjs`, `vue`, `svelte`, `astro`, `nuxtjs`, `nuxt-ui`, `angular`, `laravel`, `swiftui`, `react-native`, `flutter`, `jetpack-compose`, `html-tailwind`, `shadcn`, `threejs`, `javafx`, `wpf`, `winui`, `avalonia`, `uno`, `uwp`. Use the stack detected in Step 1.
@@ -180,13 +185,13 @@ Do not fabricate output. Instead:
 
 ```bash
 # Step 2: design system
-python3 "$CLAUDE_PROJECT_DIR/.claude/skills/ui-ux-pro-max/scripts/search.py" "AI search tool modern minimal" --design-system -p "AI Search"
+python3 "${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/ui-ux-pro-max/scripts/search.py" "AI search tool modern minimal" --design-system -p "AI Search"
 
 # Step 3: supplement
-python3 "$CLAUDE_PROJECT_DIR/.claude/skills/ui-ux-pro-max/scripts/search.py" "keyboard focus modal" --domain ux
+python3 "${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/ui-ux-pro-max/scripts/search.py" "keyboard focus modal" --domain ux
 
 # Step 4: stack guidelines
-python3 "$CLAUDE_PROJECT_DIR/.claude/skills/ui-ux-pro-max/scripts/search.py" "suspense streaming bundle" --stack nextjs
+python3 "${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/ui-ux-pro-max/scripts/search.py" "suspense streaming bundle" --stack nextjs
 ```
 
 Then synthesize the design system + detailed searches and implement.

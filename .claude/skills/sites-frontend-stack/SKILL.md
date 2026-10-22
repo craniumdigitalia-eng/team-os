@@ -1,8 +1,8 @@
 ---
 name: sites-frontend-stack
-description: Stack frontend para websites — Next.js App Router OU Astro (Content Collections, ilhas), Tailwind v4 (@theme), shadcn/ui e Motion. Use ao iniciar projeto de site em qualquer uma das duas stacks, criar componentes/seções, definir tokens de design ou implementar animações.
-version: "1.0"
-updated: "2026-09-20"
+description: "Stack frontend para websites — Next.js App Router OU Astro (Content Collections, ilhas), Tailwind v4 (@theme), shadcn/ui e Motion. Use ao iniciar projeto de site em qualquer uma das duas stacks, criar componentes/seções, definir tokens de design ou implementar animações."
+version: "1.1"
+updated: "2026-10-20"
 ---
 
 # Sites Frontend Stack — Next.js e Astro + Tailwind v4 + shadcn/ui
@@ -94,7 +94,7 @@ import { Badge } from '@/components/ui/badge'
 
 export function ProductCard({ title, price, badge }: ProductCardProps) {
   return (
-    <Card className="hover:shadow-lg transition-shadow">
+    <Card className="transition-colors hover:border-foreground/30">  {/* feedback sutil; elevação só se o sistema visual usar */}
       <CardHeader>
         <Badge variant="secondary">{badge}</Badge>
         <CardTitle>{title}</CardTitle>
@@ -323,7 +323,10 @@ Os tokens vivem **uma vez só** — em `app/globals.css` (Next.js) ou `src/style
   --color-border: oklch(0.92 0.01 250);
 
   /* Tipografia e raio */
-  --font-sans: 'Inter', system-ui, sans-serif;
+  /* Fonte vem do plano de tokens do projeto (sistema visual / ui-ux-pro-max), carregada via
+     next/font ou @fontsource e exposta como --font-texto. Nunca fixar 'Inter' por padrão:
+     Inter em tudo é um dos sinais mais fortes de "cara de IA". */
+  --font-sans: var(--font-texto), system-ui, sans-serif;
   --radius-lg: 0.5rem;
   --radius-md: calc(0.5rem - 2px);
   --radius-sm: calc(0.5rem - 4px);

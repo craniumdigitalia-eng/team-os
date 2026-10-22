@@ -1,8 +1,8 @@
 ---
 name: dev-error-handling
-description: Padrões de resilência e error handling para software complexo — retry, circuit breaker, timeouts, error boundaries, logging estruturado.
-version: "1.1"
-updated: "2026-04-21"
+description: "Padrões de resiliência e error handling para software complexo — retry, circuit breaker, timeouts, error boundaries, logging estruturado e observabilidade (métricas RED, traces OpenTelemetry, alertas por sintoma)."
+version: "1.2"
+updated: "2026-10-20"
 ---
 
 # Error Handling & Resilience — Software Complexo
@@ -222,6 +222,36 @@ async function getUserWithPreferences(userId: string, requestId: string) {
 }
 ```
 
+## Observabilidade
+
+Código que não se observa não se opera: o primeiro bug relatado vira arqueologia em vez de consulta. Instrumente junto com a feature, como se escreve teste — e comece por 2–4 perguntas que quem estiver de plantão vai fazer ("quantos pagamentos falharam na última hora e por quê?").
+
+**Logs estruturados com correlação.** JSON com campos fixos (`level`, `msg`, `requestId`, `traceId`, `route`, `durationMs`, `errCode`), nunca string concatenada. O `requestId`/`traceId` nasce na entrada e atravessa filas, jobs e chamadas a outros serviços (header `traceparent`), para seguir uma requisição de ponta a ponta. Nada de senha, token ou dado pessoal em claro.
+
+**Métricas RED** em todo endpoint e toda dependência externa:
+
+| Sinal | O que medir | Forma |
+|---|---|---|
+| **R**ate | requisições por segundo | contador |
+| **E**rrors | proporção de falhas (5xx, timeout, exceção) | contador por `status_class` |
+| **D**uration | latência | histograma — leia p50/p95/p99, nunca a média |
+
+Rótulos só de conjuntos pequenos e fixos (`route="/api/tasks/:id"`, `status_class="5xx"`, `provider="stripe"`). **Nunca** `userId`, e-mail, URL completa ou texto de erro como rótulo — cada combinação vira uma série e a conta explode; isso vai para log e trace. Para recursos (fila, pool, host): utilização, saturação e erros.
+
+**Traces com OpenTelemetry (básico).** SDK do OpenTelemetry com auto-instrumentação de HTTP e banco; um span por operação relevante (chamada externa, query, job), com atributos de baixo risco (`route`, `db.operation`, `provider`) e o erro registrado no span. O exportador (OTLP) aponta para o backend escolhido — o código não depende do fornecedor. Métricas pelo mesmo SDK quando possível.
+
+**Alertas por sintoma do usuário, não por causa.**
+
+| Alerta (acorda alguém) | Painel (não acorda) |
+|---|---|
+| taxa de erro > 1% por 5 min | CPU em 85% |
+| p99 > 2 s | um pod reiniciou |
+| fila parada há > 10 min | disco em 70% |
+
+Todo alerta: acionável (se a resposta é "ignora, se resolve sozinho", apague), com limiar e janela justificados por SLO ou histórico, com runbook de 3 linhas (o que significa, primeira consulta, a quem escalar) e disparado uma vez em staging para provar que chega. Duas severidades só: **urgente** (usuário afetado agora) e **ticket** (degradação, resolver na semana).
+
+**Prova de que funciona:** provoque uma falha em staging e encontre a causa só pela telemetria, sem abrir o código. Se não deu, falta instrumentação. A depuração em si segue `/dev-debugging`.
+
 ## Regras absolutas
 
 - Nunca `catch (e) {}` vazio — sempre logar ou relançar com contexto
@@ -230,3 +260,7 @@ async function getUserWithPreferences(userId: string, requestId: string) {
 - Retry apenas em erros transitórios (5xx, network) — nunca em 4xx
 - **`requestId` em todos os logs e respostas de erro** — rastreabilidade end-to-end
 - Erros devem ter contexto suficiente para debug sem reprodução
+
+---
+
+Seção Observabilidade adaptada de addyosmani/agent-skills → observability-and-instrumentation (MIT) — 2026-10-20; texto próprio em pt-BR.

@@ -44,13 +44,13 @@ Each Write/Edit call contains ONE section (<=2,000 words per call)
 **Initialize research run (persist to disk):**
 ```bash
 # Create run manifest and artifact files using citation_manager CLI
-python scripts/citation_manager.py init-run --out-dir [folder] --query "[question]" --mode [mode]
+python3 "${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/deep-research/scripts/citation_manager.py" init-run --out-dir [folder] --query "[question]" --mode [mode]
 # Creates: run_manifest.json, sources.jsonl, evidence.jsonl, claims.jsonl
 ```
 
 **Register each source as you encounter it:**
 ```bash
-python scripts/citation_manager.py register-source \
+python3 "${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/deep-research/scripts/citation_manager.py" register-source \
   --json '{"raw_url": "...", "title": "...", "source_type": "academic", "year": "2024"}' \
   --dir [folder]
 # Returns stable source_id (sha256-based, survives renumbering and continuation)
@@ -58,7 +58,7 @@ python scripts/citation_manager.py register-source \
 
 **Assign display numbers after all sources registered:**
 ```bash
-python scripts/citation_manager.py assign-display-numbers --dir [folder]
+python3 "${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/deep-research/scripts/citation_manager.py" assign-display-numbers --dir [folder]
 # Maps stable source_ids to [1], [2], [3]... for rendering
 ```
 

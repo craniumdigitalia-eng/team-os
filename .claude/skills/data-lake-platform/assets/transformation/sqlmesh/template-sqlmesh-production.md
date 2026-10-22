@@ -891,7 +891,6 @@ Before deploying to production:
 - **SQLMesh Security**: [template-sqlmesh-security.md](template-sqlmesh-security.md)
 - **SQLMesh Model Patterns**: [template-sqlmesh-model.md](template-sqlmesh-model.md)
 - **SQLMesh Testing**: [template-sqlmesh-testing.md](template-sqlmesh-testing.md)
-- **DevOps Patterns**: [../../ops-devops-platform/SKILL.md](../../../../ops-devops-platform/SKILL.md)
 
 ---
 

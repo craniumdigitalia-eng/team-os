@@ -71,31 +71,20 @@ Use the returned year for all date-filtered queries and recency checks. Do NOT a
 
 **CRITICAL: Use correct tool and parameters to avoid errors**
 
-**Primary: search-cli (multi-provider, always use first)**
-- Unified CLI aggregating Brave, Serper, Exa, Jina, and Firecrawl
-- Auto-detects best provider per query type (academic, news, general, people)
-- JSON output for structured processing: `search "query" --json`
-- Modes: general, news, academic, scholar, patents, people, images, extract, scrape
-- Example: `search "quantum computing 2025" -m academic --json -c 15`
-- For page content extraction: `search "URL" -m extract --json`
-- For scraping: `search "URL" -m scrape --json`
-- Run via Bash tool: `search "query" --json -c 10`
+**Primary: WebSearch + WebFetch (built in, no setup)**
+- `WebSearch` to find sources — `query` (required), optional `allowed_domains` / `blocked_domains` (useful for official sources, e.g. `allowed_domains: ["gov.br"]`)
+- `WebFetch` to read a specific page in depth
+- Cluttered page (menus, ads, sidebars)? Use the `/dev-defuddle` skill to extract clean markdown before quoting
 
-**Fallback: WebSearch (if search-cli fails or is unavailable)**
-- Built-in Claude web search, no setup required
-- Parameters: `query` (required), optional `allowed_domains`, `blocked_domains`
-- Use when: search-cli returns errors, rate-limited, or for domain-restricted queries
-
-**Optional: Exa MCP (if configured, for semantic/neural search)**
-- Tool name: `mcp__Exa__exa_search`
-- Use for semantic exploration alongside search-cli keyword results
-
+**Optional: search-cli (only if installed)**
+- Check first with Bash: `command -v search` — if it prints nothing, skip it entirely
+- When present: `search "query" --json -c 10` (modes via `-m`: news, academic, extract, scrape…)
 
 **NEVER mix parameter styles** - this causes "Invalid tool parameters" errors.
 
-**Step 2: Spawn parallel deep-dive agents**
+**Step 2: Spawn parallel deep-dive agents (deep / ultradeep only)**
 
-Use Task tool with general-purpose agents (3-5 agents) for:
+In quick mode, do not spawn sub-agents. In standard mode, only if the question has truly independent fronts. In deep/ultradeep, use the Agent tool with general-purpose agents (3-5) for:
 - Academic paper analysis (PDFs, detailed extraction)
 - Documentation deep dives (technical specs, API docs)
 - Repository analysis (code examples, implementations)
@@ -110,34 +99,22 @@ This prevents synthesis fatigue when merging results from 3-5 agents.
 **Evidence persistence (v3.0):** After each retrieval batch, persist evidence immediately:
 ```bash
 # Register the source first (returns stable source_id)
-python scripts/citation_manager.py register-source --json '{"raw_url": "...", "title": "..."}' --dir [folder]
+python3 "${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/deep-research/scripts/citation_manager.py" register-source --json '{"raw_url": "...", "title": "..."}' --dir [folder]
 
 # Then persist each evidence span from that source
-python scripts/evidence_store.py add --json '{"source_id": "...", "quote": "exact text", "evidence_type": "direct_quote", "locator": "page 5"}' --dir [folder]
+python3 "${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/deep-research/scripts/evidence_store.py" add --json '{"source_id": "...", "quote": "exact text", "evidence_type": "direct_quote", "locator": "page 5"}' --dir [folder]
 ```
 Evidence must not live only in model context — it must be persisted to `evidence.jsonl` before synthesis begins. This ensures continuation agents and claim-support verification can access the full evidence trail.
 
-**Example parallel execution (using search-cli via Bash):**
-```
-[Single message with multiple Bash tool calls]
-- Bash: search "quantum computing 2026 state of the art" --json -c 10
-- Bash: search "quantum computing limitations challenges" --json -c 10
-- Bash: search "quantum computing commercial applications 2026" -m news --json -c 10
-- Bash: search "quantum computing vs classical comparison" --json -c 10
-- Bash: search "quantum error correction research" -m academic --json -c 10
-- Task(subagent_type="general-purpose", description="Analyze quantum computing papers", prompt="Deep dive into quantum computing academic papers from [CURRENT_YEAR], extract key findings and methodologies")
-- Task(subagent_type="general-purpose", description="Industry analysis", prompt="Analyze quantum computing industry reports and market data, identify commercial applications")
-- Task(subagent_type="general-purpose", description="Technical challenges", prompt="Extract technical limitations and challenges from quantum computing research")
-```
-
-**Example parallel execution (using Exa MCP - if available):**
+**Example parallel execution (deep mode):**
 ```
 [Single message with multiple tool calls]
-- mcp__Exa__exa_search(query="quantum computing state of the art", type="neural", num_results=10, start_published_date="[use current year from Step 0]")
-- mcp__Exa__exa_search(query="quantum computing limitations", type="keyword", num_results=10)
-- mcp__Exa__exa_search(query="quantum computing commercial", type="auto", num_results=10, start_published_date="[use current year from Step 0]")
-- mcp__Exa__exa_search(query="quantum error correction", type="neural", num_results=10, include_domains=["arxiv.org"])
-- Task(subagent_type="general-purpose", description="Academic analysis", prompt="Analyze quantum computing academic papers")
+- WebSearch(query="quantum computing 2026 state of the art")
+- WebSearch(query="quantum computing limitations challenges")
+- WebSearch(query="quantum computing commercial applications 2026")
+- WebSearch(query="quantum error correction research", allowed_domains=["arxiv.org", "nature.com"])
+- Agent(subagent_type="general-purpose", description="Analyze quantum computing papers", prompt="Deep dive into quantum computing academic papers from [CURRENT_YEAR]; return structured evidence (JSON lines as above)")
+- Agent(subagent_type="general-purpose", description="Industry analysis", prompt="Analyze quantum computing industry reports and market data; return structured evidence")
 ```
 
 **Step 3: Collect and organize results**
@@ -173,18 +150,17 @@ As results arrive:
 - Geographic diversity (not just US sources)
 
 **Credibility tracking:**
-- Score each source 0-100 using source_evaluator.py
+- Score each source 0-100 with `python3 "${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/deep-research/scripts/source_evaluator.py" <url> [<url> ...] [--date YYYY-MM-DD]` (prints score, recommendation and reason; official suffixes such as .gov, .gov.br, .jus.br, .leg.br get top domain score)
 - Flag low-credibility sources (<40) for additional verification
 - Prioritize high-credibility sources (>80) for core claims
 
 **Techniques:**
-- Use search-cli for all searches (primary tool, multi-provider)
-- Fall back to WebSearch if search-cli fails or is rate-limited
-- Use WebFetch for deep dives into specific sources (secondary)
-- Use Exa search (via WebSearch with type="neural") for semantic exploration
+- Use WebSearch for all searches (primary)
+- Use WebFetch for deep dives into specific sources; `/dev-defuddle` to clean noisy pages
+- Use search-cli only if `command -v search` finds it
 - Use Grep/Read for local documentation
 - Execute code for computational analysis (when needed)
-- Use Task tool to spawn parallel retrieval agents (3-5 agents)
+- Deep/ultradeep only: use the Agent tool to spawn parallel retrieval agents (3-5 agents)
 
 **Output:** Organized information repository with source tracking, credibility scores, and coverage map
 
@@ -397,7 +373,7 @@ Rather than linear thinking, branch into multiple reasoning paths:
 
 ### Parallel Agent Deployment
 
-Use Task tool to spawn sub-agents for:
+Deep/ultradeep only — use the Agent tool to spawn sub-agents for:
 - Parallel source retrieval
 - Independent verification paths
 - Competing hypothesis evaluation

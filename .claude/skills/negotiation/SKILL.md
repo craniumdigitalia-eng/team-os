@@ -1,294 +1,246 @@
 ---
 name: negotiation
-description: 'Prepare and execute negotiations using tactical empathy, calibrated questions, and the Ackerman method. Use when the user mentions "salary negotiation", "contract terms", "handling objections", "mirroring and labeling", "difficult conversation", "deal terms", "BATNA", "anchoring", "how do I ask for a raise", "get a better deal", or "they wont budge on price". Also trigger when preparing for a vendor negotiation, resolving a pricing dispute, or navigating a high-stakes conversation where both sides need to feel heard. Covers accusation audits, Black Swan discovery, and the "Thats Right" technique. For persuasion in product and marketing, see influence-psychology.'
+description: "Preparar e conduzir negociações com empatia tática, perguntas calibradas e método Ackerman (Chris Voss). Use em negociação salarial, termos de contrato, objeções, conversa difícil, BATNA, ancoragem, pedir aumento, negociar com fornecedor ou disputa de preço. Cobre accusation audit, Black Swans e a técnica 'That's Right'."
+version: "1.6.0"
+updated: "2026-10-20"
+source: "https://github.com/wondelai/skills"
 license: MIT
 metadata:
   author: wondelai
   version: "1.5.0"
 ---
 
-# Negotiation
+# Negociação
 
-Tactical empathy-based negotiation framework from FBI hostage negotiator Chris Voss. Understand the emotional drivers behind decisions and use proven techniques to build rapport, uncover hidden information, and reach better outcomes.
+Método de negociação baseado em empatia tática, adaptado da experiência de Chris Voss como negociador de reféns do FBI. O foco é entender o que move a decisão do outro lado (medo, pressão, autonomia) e usar técnicas de escuta para construir confiança, descobrir informação escondida e chegar a acordos melhores.
 
-## Core Principle
+## Regras do pack (leia antes de qualquer número)
 
-**People want to be understood and feel safe.** The most effective path to "yes" runs through empathy, active listening, and emotional intelligence -- not logic, arguments, or compromise. Treat every negotiation as a discovery process: your assumptions are hypotheses to test, and the other side's needs (respect, security, autonomy) matter more than their stated positions. Never split the difference -- no deal is better than a bad deal.
+- **A skill prepara, não decide.** Ela gera roteiro, perguntas calibradas, accusation audit e cenários. Quem decide até onde ceder é a postura aprovada.
+- **Piso, alvo e qualquer número vêm só de fonte aprovada:** a postura de negociação de **ATHENA** (`sales-strategist`) ou a postura jurídica de **PRUDENTIA** (`legal-strategist`), e os valores calculados por **LIBRA** (`sales-finance`). Sem postura aprovada, o roteiro sai com os números em aberto (`[piso: pendente ATHENA/LIBRA]`), nunca com valor inventado.
+- **`sales-closer` (PEITHO) e `finance-billing` (TEJO) nunca concedem valor.** Desconto, prazo, parcelamento ou bônus fora da postura voltam para ATHENA/LIBRA antes de serem ditos ao cliente.
+- Concessão registrada: cada movimento (de quanto para quanto, em troca de quê) vai para a smart-memory da área que conduz a negociação.
 
-## Scoring
+## Princípio central
 
-**Goal: 10/10.** Score 1 point per satisfied Quick Diagnostic row (6 rows), plus up to 4 points for execution quality: emotions labeled out loud (+1), "That's right" earned not "You're right" (+1), no "Why?" / no splitting the difference / no chasing "yes" (+1), at least one Black Swan surfaced (+1). Bands: **9-10** = audit delivered, calibrated questions and BATNA prepared, "That's right" achieved, Black Swans hunted; **5-6** = some prep but arguing the position or chasing "yes"; **<=3** = no audit, no BATNA, splitting the difference. Always state the current score and the specific gaps to reach 10/10.
+**As pessoas querem se sentir entendidas e seguras.** O caminho mais curto para o "sim" passa por empatia, escuta ativa e inteligência emocional, e não por argumento, lógica ou meio-termo. Trate toda negociação como descoberta: suas suposições são hipóteses a testar, e as necessidades do outro lado (respeito, segurança, autonomia) pesam mais do que a posição declarada. Não divida a diferença por reflexo: às vezes nenhum acordo é melhor que um acordo ruim.
 
-## Framework
+## Pontuação
 
-### 1. Tactical Empathy
+**Meta: 10/10.** Some 1 ponto por linha atendida do Diagnóstico rápido (6 linhas) e até 4 pontos pela execução: emoções nomeadas em voz alta (+1); "é isso mesmo" conquistado, e não um "você tem razão" (+1); sem "por quê?", sem dividir a diferença, sem caçar o "sim" (+1); pelo menos um Black Swan descoberto (+1). Faixas: **9–10** = audit feito, perguntas calibradas e BATNA prontos, "é isso mesmo" obtido, Black Swans investigados; **5–6** = alguma preparação, mas discutindo posição ou caçando o "sim"; **≤3** = sem audit, sem BATNA, dividindo a diferença. Sempre informe a nota atual e o que falta para 10/10.
 
-**Core concept:** Consciously imagine yourself in the counterpart's situation, then vocalize their perspective to create trust and openness.
+## Método
 
-**Why it works:** When people feel understood, brain chemistry shifts toward trust and cooperation, short-circuiting defensive reactions. Empathy is not agreement -- you can understand their position while advocating your own.
+A referência completa, com as 21 técnicas, está em [references/techniques.md](references/techniques.md). Cada seção abaixo aponta a parte certa na hora certa. Abra agora a seção 5 (pedido de desculpas e pausa), que não tem resumo aqui.
 
-**Key insights:**
-- Before responding, ask: "What is their world like right now?"
-- Articulate their situation, pressures, and fears before stating your position
-- Empathy must be genuine, not performed -- people detect fakeness instantly
-- Unconditional positive regard: respect them as a person regardless of disagreement
-- Emotions are contagious -- stay calm and positive; slow pace enables clear thinking
+### 1. Empatia tática
 
-**Product applications:**
+**Ideia:** colocar-se de propósito no lugar da contraparte e dizer em voz alta a perspectiva dela, para abrir espaço de confiança.
 
-| Context | Application | Example |
-|---------|-------------|---------|
-| **Customer support** | Acknowledge frustration before solving | "I understand this outage is affecting your team's deadline" |
-| **Sales calls** | Voice the prospect's pressures | "It sounds like you're under pressure to show results this quarter" |
-| **Pricing conversations** | Acknowledge budget constraints upfront | "I know adding another tool to the stack feels risky right now" |
+**Por que funciona:** quem se sente entendido baixa a guarda e coopera. Empatia não é concordância: dá para entender a posição do outro e continuar defendendo a sua.
 
-**Copy patterns:**
-- "I understand you're dealing with..."
-- "It seems like this is creating pressure for your team..."
-- "Before we talk about next steps, I want to make sure I understand where you're coming from..."
+**Pontos-chave:**
+- Antes de responder, pergunte-se: "como está o mundo dessa pessoa agora?"
+- Descreva a situação, as pressões e os medos dela antes de apresentar a sua posição
+- Empatia encenada é percebida na hora; precisa ser genuína
+- Respeito incondicional pela pessoa, mesmo discordando
+- Emoção contagia: fique calmo, desacelere
 
-See [references/techniques.md](references/techniques.md) for the full 21-technique reference -- each section below points to the part you need at the moment you need it. Open it now for The Power of Apology and Pause, which has no section here.
+| Contexto | Aplicação | Exemplo |
+|---|---|---|
+| **Suporte** | Reconhecer a frustração antes de resolver | "Entendo que essa instabilidade está atrasando a entrega do seu time" |
+| **Venda** | Dar voz à pressão do cliente | "Parece que você está sendo cobrado por resultado neste trimestre" |
+| **Preço** | Reconhecer a restrição de orçamento logo de início | "Sei que colocar mais uma ferramenta agora parece arriscado" |
 
-### 2. Mirroring
+### 2. Espelhamento
 
-**Core concept:** Repeat the last 1-3 critical words your counterpart said, with a curious, upward-inflecting tone, then go silent.
+**Ideia:** repetir as últimas 1–3 palavras importantes que a contraparte disse, em tom curioso (subindo no final), e ficar em silêncio.
 
-**Why it works:** Mirroring signals deep listening, creating familiarity and rapport. It prompts elaboration without direct questions, revealing more than the counterpart intended to share.
+**Por que funciona:** mostra escuta real e faz a pessoa elaborar sem você precisar perguntar, revelando mais do que ela pretendia.
 
-**Key insights:**
-- Repeat the key or emotion-laden words back as a gentle question
-- Wait silently (4+ seconds) for them to expand
-- Works in person, on the phone, and in written communication
-- The simplest technique, but often the most effective for information gathering
+**Pontos-chave:**
+- Repita as palavras-chave ou carregadas de emoção como uma pergunta suave
+- Espere em silêncio (4 segundos ou mais)
+- Funciona ao vivo, por telefone e por escrito
 
-**Product applications:**
+| Contexto | Aplicação | Exemplo |
+|---|---|---|
+| **Discovery** | Espelhar a preocupação para ouvir mais | Cliente: "O prazo está apertado." Você: "Apertado?" |
+| **Entrevista com usuário** | Aprofundar a dor | Usuário: "É frustrante." Você: "Frustrante?" |
+| **Objeção** | Achar a causa real | "Não cabe no orçamento?" |
 
-| Context | Application | Example |
-|---------|-------------|---------|
-| **Discovery calls** | Mirror key concerns to get elaboration | Client: "The timeline is tight." You: "The timeline is tight?" |
-| **User interviews** | Encourage deeper explanation of pain | User: "It's just frustrating." You: "Frustrating?" |
-| **Objection handling** | Reflect to find the root cause | "Doesn't fit your budget?" |
+### 3. Rotulagem
 
-**Copy patterns:**
-- "[Key phrase they used]?" (with question mark)
-- "You mentioned [their exact words]..."
-- "When you say [mirror], what does that look like?"
+**Ideia:** nomear a emoção ou a perspectiva do outro com frases neutras: "parece que...", "dá a impressão de que...".
 
-### 3. Labeling
+**Por que funciona:** nomear uma emoção negativa reduz a força dela; nomear uma positiva a reforça. O tom tentativo deixa a pessoa corrigir você, e a correção também é informação.
 
-**Core concept:** Identify and verbalize the counterpart's emotions or perspective using neutral phrases: "It seems like...", "It sounds like...", "It looks like..."
+**Pontos-chave:**
+- Use a forma impessoal ("parece que..."), nunca "eu acho que você..."
+- Depois do rótulo, silêncio
+- Rótulo errado ainda rende: a correção revela o que importa
 
-**Why it works:** Naming emotions validates them -- labeling negative emotions diffuses their power, labeling positive emotions reinforces them. The tentative phrasing gives room to correct you, which deepens the conversation either way.
+| Contexto | Aplicação | Exemplo |
+|---|---|---|
+| **Reclamação** | Nomear a frustração antes de resolver | "Parece que você se sentiu deixado de lado pelo nosso tempo de resposta" |
+| **Objeção de venda** | Nomear o receio por trás | "Parece que existe um receio com o risco da implantação" |
+| **Cancelamento** | Achar o motivo real | "Dá a impressão de que algo mudou desde a contratação" |
 
-**Key insights:**
-- Always use third-person phrasing ("It seems like..."), never "I think you..."
-- After labeling, be silent -- let them respond
-- A wrong label still pays: their correction is valuable information
-- Watch for emotional shifts that signal you've hit the mark
+### 4. Perguntas calibradas
 
-**Product applications:**
+**Ideia:** perguntas abertas com "como" e "o que", que conduzem a conversa enquanto dão ao outro a sensação de controle.
 
-| Context | Application | Example |
-|---------|-------------|---------|
-| **Customer complaints** | Name the frustration before solving | "It sounds like you feel let down by our response time" |
-| **Sales objections** | Label the underlying concern | "It seems like there's a concern about implementation risk" |
-| **Churn prevention** | Identify the real reason for leaving | "It sounds like something changed since you first signed up" |
+**Por que funciona:** colocam o outro lado para resolver o problema com você, e evitam a defensiva que o "por quê?" provoca.
 
-**Copy patterns:**
-- "It seems like..."
-- "It sounds like you're feeling..."
-- "If I'm reading this right, it feels like..."
+**Pontos-chave:**
+- Comece com "como" ou "o que"; evite "por quê" (soa como acusação)
+- "Como eu faria isso?" é a forma mais forte de recusar sem dizer não
+- Tom colaborativo de verdade, nunca irônico
+- Exceção ao "por quê": quando a resposta defende algo a seu favor ("por que vocês escolheriam a gente?")
+- Todo "sim" pede um "como" em seguida, para garantir a execução
 
-### 4. Calibrated Questions
+| Contexto | Aplicação | Exemplo |
+|---|---|---|
+| **Preço** | Recusar sem dizer não | "Como eu consigo fazer isso por esse valor?" |
+| **Escopo crescendo** | Fazer o outro dono da restrição | "O que acontece com o prazo se incluirmos isso?" |
+| **Decisão** | Descobrir quem mais decide | "Como o seu time costuma decidir algo assim?" |
 
-**Core concept:** Open-ended "How...?" and "What...?" questions that shape the conversation while giving the counterpart the illusion of control.
+Para perguntas orientadas ao "não" ("seria absurdo se...?") e o rótulo errado de propósito, veja a seção 8 de techniques.md quando o outro lado estiver retraído ou enrolando.
 
-**Why it works:** Calibrated questions engage the counterpart's problem-solving mind, making them feel in charge while you steer. They force the other side to consider your position without you stating it, and avoid the defensiveness "Why?" creates.
+### 5. Accusation audit
 
-**Key insights:**
-- Start with "How" or "What" -- avoid "Why" (sounds accusatory)
-- "How am I supposed to do that?" is the most powerful pushback without saying no
-- Keep the tone genuinely collaborative, never sarcastic
-- Exception for "Why": only when you want them to defend something favorable to you ("Why would you ever choose our company?")
-- Follow every "yes" with "How...?" to secure implementation commitment
+**Ideia:** antes de negociar, listar e dizer primeiro tudo de negativo que a contraparte pode pensar sobre você.
 
-**Product applications:**
+**Por que funciona:** dizer antes do outro tira a força da crítica; muitas vezes a pessoa até tranquiliza você. No mínimo, a objeção é neutralizada cedo.
 
-| Context | Application | Example |
-|---------|-------------|---------|
-| **Price negotiation** | Push back without refusing | "How am I supposed to do that at that price point?" |
-| **Scope creep** | Make them own the constraint | "What happens to the timeline if we add this?" |
-| **Stakeholder alignment** | Uncover hidden decision-makers | "How does your team typically make decisions like this?" |
+**Pontos-chave:**
+- Liste todo o negativo possível antes da reunião
+- Fale cedo, não depois de a objeção aparecer
+- Exagere um pouco de propósito: a lista deve soar pior do que o que o outro de fato pensa
+- Rende mais quando você tem menos poder na mesa
 
-**Copy patterns:**
-- "How am I supposed to do that?"
-- "What's the biggest challenge you're facing?"
-- "What would it take to make this happen?"
+| Contexto | Aplicação | Exemplo |
+|---|---|---|
+| **Reajuste de preço** | Antecipar a irritação | "Você deve estar pensando que a gente não valoriza quem está com a gente há tempo..." |
+| **Prospecção fria** | Reconhecer a interrupção | "Sei que você está ocupado e que mais um contato de venda é a última coisa que você quer..." |
+| **Falha de serviço** | Assumir a falha por inteiro | "Você deve estar irritado, e com razão..." |
 
-For No-oriented questions ("Would it be unreasonable to...?") and tactical mislabeling to draw out a corrective "No", see techniques.md section 8 when a counterpart is guarded or stalling.
+### 6. "É isso mesmo"
 
-### 5. Accusation Audit
+**Ideia:** resumir a posição do outro (fatos, emoções e preocupações) com tanta precisão que ele responde "é isso mesmo".
 
-**Core concept:** Before negotiating, list and preemptively verbalize every negative thing the counterpart might think or say about you.
+**Por que funciona:** "é isso mesmo" indica que a pessoa se sente entendida e passa de adversária a colaboradora. É diferente de "você tem razão", que costuma significar "pode parar de falar".
 
-**Why it works:** Naming fears and criticisms before the other side does removes their power -- it often triggers reassurance ("Oh, I don't think that...") and at minimum neutralizes objections. Addressing the elephants first demonstrates self-awareness and builds trust.
+**Pontos-chave:**
+- Se ouviu "você tem razão", continue trabalhando: ainda não conectou
+- Inclua o subtexto emocional no resumo, não só os fatos
+- Deixe a pessoa dizer "não" primeiro para se sentir segura
+- Confirme o acordo três vezes, de três formas diferentes (regra de três)
 
-**Key insights:**
-- Brainstorm every negative they might think before the meeting
-- Deliver the audit early in the conversation, not after objections surface
-- Overshoot on purpose -- the list should sound slightly worse than what they actually think
-- Particularly powerful when you're the party with less leverage
+| Contexto | Aplicação | Exemplo |
+|---|---|---|
+| **Fechamento** | Resumir a necessidade antes de propor | "Então: vocês precisam de X, o receio é Y e Z é o que inviabiliza..." |
+| **Retenção** | Mostrar que entendeu o motivo da saída | "Deixa eu ver se entendi: o produto não entregou o que prometemos..." |
+| **Termos** | Confirmar antes de fechar | "Só para confirmar: vocês precisam de X, até tal data, com tal restrição..." |
 
-**Product applications:**
+Para os três tipos de "sim" (falso, de confirmação, de compromisso) e a sequência da regra de três, veja as seções 10–11 de techniques.md na hora de fechar.
 
-| Context | Application | Example |
-|---------|-------------|---------|
-| **Price increase announcement** | Preempt anger before explaining | "You're probably thinking we don't value your loyalty..." |
-| **Sales cold outreach** | Acknowledge the intrusion | "I know you're busy and the last thing you want is another sales pitch..." |
-| **Service failure recovery** | Own the failure fully | "You're probably furious, and you have every right to be..." |
+### 7. Barganha Ackerman
 
-**Copy patterns:**
-- "You probably think..."
-- "I know this might seem like..."
-- "You might be wondering why you should even listen to..."
+**Ideia:** um método sistemático para negociar valor: ofertas calculadas em incrementos decrescentes (65% → 85% → 95% → 100% do alvo), com número final quebrado e um bônus não monetário no fim.
 
-### 6. "That's Right"
+**Por que funciona:** incrementos cada vez menores sinalizam que você está chegando no limite; número quebrado (R$ 47.235 em vez de R$ 47.000) parece calculado e final; o bônus não monetário no fim mostra generosidade no limite e torna difícil pedir mais.
 
-**Core concept:** Summarize the counterpart's position -- facts, emotions, and concerns -- so accurately that they respond with "That's right." This is the breakthrough moment in any negotiation.
+> **Atenção: Ackerman é método de COMPRADOR.** As porcentagens partem de baixo e sobem até o alvo, que é o teto de quem paga. **Do lado vendedor** (nosso `sales-strategist` e nosso `sales-closer`), a lógica se inverte: ancore **acima** do alvo e conceda em **incrementos decrescentes** até, no máximo, o **piso** da postura aprovada. Os valores de âncora, degraus e piso são definidos por ATHENA/LIBRA (ou PRUDENTIA, em termos jurídicos), nunca por porcentagem inventada aqui.
 
-**Why it works:** "That's right" signals the person feels completely understood, shifting their mindset from adversarial to collaborative. It is fundamentally different from "You're right," which usually means they're dismissing you.
+**Pontos-chave (lado comprador):**
+- Defina o alvo primeiro; abra em 65% e suba em incrementos decrescentes: 85% → 95% → 100%
+- Número quebrado na oferta final
+- Inclua um bônus não monetário na última oferta ("...e incluímos X")
+- Nunca conceda sem receber algo em troca (vale para os dois lados)
 
-**Key insights:**
-- "That's right" is the two most powerful words in negotiation; if you get "You're right," keep working -- you haven't connected yet
-- Include emotional subtext in your summary, not just facts
-- Let them say "No" first to feel safe, then work toward "That's right"
-- Use the Rule of Three: confirm agreement three times in three different ways
+| Contexto | Aplicação | Exemplo |
+|---|---|---|
+| **Contratação (lado de quem paga o salário)** | Contraofertas estruturadas da empresa | Alvo R$ 12.000/mês: abrir em R$ 7.800, subir para R$ 10.200, R$ 11.400, final R$ 11.985 + um dia de folga extra por trimestre |
+| **Compra de fornecedor (lado comprador)** | Redução de preço metódica | Alvo R$ 50.000: abrir em R$ 32.500, subir para R$ 42.500, R$ 47.500, final R$ 49.850 + prazo de pagamento estendido |
+| **Lado vendedor / candidato pedindo salário** | Lógica invertida | Âncora acima do alvo e concessões decrescentes até o piso aprovado; números só da postura e de LIBRA |
 
-**Product applications:**
+**Frases-modelo:**
+- "Pela nossa análise, conseguimos chegar a R$ [número quebrado]..."
+- "Esticamos o máximo que dava: R$ [número quebrado], e incluímos [bônus não monetário]."
 
-| Context | Application | Example |
-|---------|-------------|---------|
-| **Sales closing** | Summarize their needs before proposing | "So your team needs X, you're worried about Y, and Z is the deal-breaker..." |
-| **Customer retention** | Show you understand why they're leaving | "Let me make sure I have this: the product isn't delivering on the promise we made..." |
-| **Negotiation closure** | Confirm understanding before terms | "Let me make sure I understand: you need [X], by [date], and [constraint]..." |
-
-**Copy patterns:**
-- "Let me make sure I understand..."
-- "If I'm hearing you correctly..."
-- "It sounds like [complete summary of their position including emotions]..."
-
-For the three types of Yes (counterfeit, confirmation, commitment) and the Rule of Three confirmation sequence, see techniques.md sections 10-11 when closing or locking in a commitment.
-
-### 7. Ackerman Bargaining
-
-**Core concept:** A systematic monetary negotiation method: calculated offers in decreasing increments (65% -> 85% -> 95% -> 100% of target) with precise non-round numbers and a non-monetary bonus at the end.
-
-**Why it works:** Decreasing increments signal you're approaching your limit, and precise numbers ($47,235 vs $47,000) feel calculated and final. The closing non-monetary gift signals generosity at the limit, making it psychologically harder to ask for more.
-
-**Key insights:**
-- Set your target price first, then open at 65% and raise in decreasing increments: 85% -> 95% -> 100%
-- Use precise, non-round numbers on the final offer ($10,230 not $10,000)
-- Attach a non-monetary bonus to the final offer ("...and I'll include X")
-- Never make a concession without getting something in return
-
-**Product applications:**
-
-| Context | Application | Example |
-|---------|-------------|---------|
-| **Salary negotiation** | Structure counter-offers systematically | Target $120K: open at $78K, move to $102K, $114K, final $120,350 + extra PTO |
-| **Vendor pricing** | Methodical price reduction | Target $50K: start $32.5K, move to $42.5K, $47.5K, final $49,850 + extended payment terms |
-| **SaaS enterprise deals** | Multi-year pricing negotiations | Decreasing discount increments across contract years |
-
-**Copy patterns:**
-- "Based on our analysis, we can offer $[precise number]..."
-- "We've stretched as far as we can -- $[precise number], and we'll include [non-monetary bonus]"
-- "I've gone back to my team and the absolute best we can do is $[precise number]"
-
-For setting the opening anchor, soft range-anchoring, and framing loss aversion, see techniques.md section 14 before you name the first number.
+Para âncora inicial, âncora suave por faixa e enquadramento por aversão à perda, veja a seção 14 de techniques.md antes de dizer o primeiro número.
 
 ### 8. Black Swans
 
-**Core concept:** Hidden, game-changing pieces of information that transform a negotiation once discovered. Every negotiation has approximately three lurking.
+**Ideia:** informações escondidas que mudam o jogo quando aparecem. Parta do princípio de que toda negociação tem algumas.
 
-**Why it works:** Negotiations stall or fail when critical information stays hidden. Black Swans -- the unknown unknowns -- explain seemingly irrational behavior, and discovering even one can turn a stalemate into a breakthrough.
+**Por que funciona:** negociações travam quando informação crítica fica oculta. Um Black Swan explica comportamentos que pareciam irracionais e pode destravar um impasse.
 
-**Key insights:**
-- Three types: secret constraints (boss capped the budget), hidden motivations (this deal saves their job), unknown context (a competitor just moved)
-- Watch for anomalies -- odd reactions, hesitations, inconsistencies -- and listen in unguarded moments before and after meetings
-- If they seem irrational, diagnose: ill-informed, constrained, or hiding something?
-- Use all three leverage types -- positive (what they want), negative (what they fear), normative (their own stated values) -- to surface hidden information
+**Pontos-chave:**
+- Três tipos: restrição secreta (o chefe limitou o orçamento), motivação oculta (o acordo salva o emprego de alguém), contexto desconhecido (um concorrente acabou de se mexer)
+- Observe anomalias (reação estranha, hesitação, incoerência) e ouça os momentos sem guarda, antes e depois da reunião
+- Se o outro parece irracional, diagnostique: está mal informado, restrito ou escondendo algo?
+- Use os três tipos de alavanca (positiva, negativa, normativa) para trazer a informação à tona
 
-**Product applications:**
+| Contexto | Aplicação | Exemplo |
+|---|---|---|
+| **Venda corporativa** | Descobrir restrição de orçamento ou prazo | "O que acontece aí dentro se isso não se resolver até o terceiro trimestre?" |
+| **Cancelamento** | Achar o motivo real | "Parece que algo mudou. O que aconteceu?" |
+| **Contratação** | Descobrir a prioridade real do candidato | "O que faria você se arrepender de não aceitar esta proposta?" |
 
-| Context | Application | Example |
-|---------|-------------|---------|
-| **Enterprise sales** | Discover hidden budget or timeline constraints | "What happens internally if this doesn't get resolved by Q3?" |
-| **Churn analysis** | Uncover the real cancellation reason | "It seems like something changed -- what happened?" |
-| **Hiring negotiations** | Discover the candidate's true priorities | "What would make you regret not taking this offer?" |
+Para as alavancas, a leitura de pronomes (quem realmente decide) e o silêncio dinâmico, veja as seções 16, 20 e 21 de techniques.md quando a negociação travar ou houver suspeita de decisor oculto.
 
-**Copy patterns:**
-- "What's the biggest thing I'm missing here?"
-- "Help me understand -- what's really driving this?"
-- "What would change everything about this situation?"
+## Situações comuns
 
-For applying the three leverage types, reading pronoun shifts that reveal who really decides, and using dynamic silence to draw out hidden information, see techniques.md sections 16, 20, and 21 when a negotiation stalls or you suspect a hidden decision-maker.
+- **"Isso não é justo":** pare na hora: "quero ser justo. Fiz algo injusto? Vamos conversar sobre isso."
+- **Âncora extrema do outro lado:** não contraproponha; pergunte "como vocês chegaram nesse valor?"
+- **Pararam de responder:** envie "vocês desistiram de [projeto]?", que provoca um "não" e reabre a conversa
+- **Comportamento irracional:** diagnostique com perguntas calibradas: mal informado, restrito ou escondendo algo?
 
-## Handling Common Situations
+## Estilos de contraparte
 
-- **They say "That's not fair":** Stop immediately: "I want to be fair. Have I done something unfair? Let's discuss it."
-- **They anchor with an extreme number:** Don't counter; ask "How did you arrive at that figure?"
-- **They stop responding:** Send "Have you given up on [the project]?" -- triggers a "No" response
-- **They seem irrational:** Diagnose with calibrated questions: ill-informed, constrained, or hiding something?
+| Estilo | Sinais | Como se adaptar |
+|---|---|---|
+| **Analítico** | Metódico, orientado a dados, detesta surpresa | Fatos, paciência, sem pressa |
+| **Acomodador** | Amigável, focado na relação, evita conflito | Construa relação, mas feche os detalhes |
+| **Assertivo** | Direto, com pressa, quer ganhar | Seja objetivo, firme e reconheça os pontos dele |
 
-## Counterpart Styles
+Bons negociadores usam os três estilos conforme a situação.
 
-| Style | Signs | Adapt by... |
-|-------|-------|-------------|
-| **Analyst** | Methodical, data-driven, hates surprises | Use facts, be patient, don't rush |
-| **Accommodator** | Friendly, relationship-focused, avoids conflict | Build rapport, but pin down specifics |
-| **Assertive** | Direct, time-conscious, wants to win | Be efficient, stand firm, acknowledge their points |
+## Voz e entrega
 
-**Insight:** Great negotiators borrow from all three styles as needed.
+- **Voz padrão:** positiva, calorosa, leve (sorrindo)
+- **Momentos críticos:** voz de "locutor de rádio da madrugada": lenta, calma, entonação descendo no fim da frase
+- **Depois de uma frase importante:** pausa de 4 segundos ou mais
+- **Observe o não verbal:** incoerência entre palavra, tom e corpo é sinal de hesitação
 
-## Voice and Delivery
+Veja as seções 4 e 19 de techniques.md para a mecânica da voz e os sinais de linguagem corporal.
 
-- **Default voice**: Positive, warm, light-hearted (with a smile)
-- **Critical moments**: Late-Night DJ Voice -- slow, calm, downward inflection
-- **After key statements**: Pause 4+ seconds (tactical silence)
-- **Watch their nonverbals**: 7% words, 38% tone, 55% body language
+## Erros comuns
 
-See techniques.md sections 4 and 19 when you need the full Late-Night DJ Voice mechanics and the cues to read in their body language.
+| Erro | Por que falha | Correção |
+|---|---|---|
+| **Dividir a diferença** | Resultado morno que ninguém quer | Segure a posição; às vezes não fechar é melhor |
+| **Forçar o "sim"** | Deixa o outro na defensiva e gera "sim" falso | Busque o "é isso mesmo"; deixe dizer "não" antes |
+| **Argumentar a posição** | Gera resistência e fecha a escuta | Perguntas calibradas e rótulos para o outro falar |
+| **Pular o accusation audit** | Objeção não tratada volta depois | Liste o negativo e trate cedo |
+| **Contrapor uma âncora extrema na hora** | Valida a âncora como ponto de partida | Espelhe, rotule, pergunte "como chegaram nesse valor?" |
+| **Usar "por quê?"** | Soa acusatório | Troque por "o que" e "como" |
+| **Tratar "você tem razão" como vitória** | Significa "pode parar" | Continue até o "é isso mesmo" |
+| **Conceder valor fora da postura** | Quebra a política de preço do pack | Volte a ATHENA/LIBRA antes de falar qualquer número novo |
 
-## Common Mistakes
+## Diagnóstico rápido
 
-| Mistake | Why It Fails | Fix |
-|---------|-------------|------|
-| **Splitting the difference** | Lukewarm outcomes nobody is happy with | Hold firm; no deal is better than a bad deal |
-| **Pushing for "yes"** | Makes people defensive; produces counterfeit agreement | Pursue "That's right"; let them say "No" first |
-| **Arguing your position** | Triggers resistance and shuts down listening | Use calibrated questions and labels to let them talk |
-| **Skipping the accusation audit** | Unaddressed objections fester and derail later | List every negative they might think; address early |
-| **Countering an extreme anchor immediately** | Validates their anchor as the starting point | Mirror, label, ask "How did you arrive at that?" |
-| **Using "Why?"** | Sounds accusatory and triggers defensiveness | Replace with "What" and "How" questions |
-| **Treating "You're right" as success** | It means they want you to go away | Keep working toward "That's right" |
+| Pergunta | Se não | Ação |
+|---|---|---|
+| Preparei o accusation audit? | A objeção vai pegar você de surpresa | Liste o negativo e trate cedo |
+| Tenho 3–5 perguntas calibradas prontas? | Vou acabar discutindo | Escreva perguntas com "como" e "o que" sobre as necessidades do outro |
+| Sei qual é minha BATNA e o piso aprovado? | Vou aceitar acordo ruim sob pressão | Pegue a postura de ATHENA/PRUDENTIA e os números de LIBRA antes de negociar |
+| Estou buscando o "é isso mesmo"? | Vou caçar "sim" falso | Resuma a posição do outro até ele confirmar de verdade |
+| Considerei o estilo da contraparte? | Abordagem única vai errar | Analítico, acomodador ou assertivo? |
+| Estou caçando Black Swans? | Vou perder a informação que muda o jogo | Curiosidade, anomalias, perguntas sobre o inesperado |
 
-## Quick Diagnostic
+## Base
 
-| Question | If No | Action |
-|----------|-------|--------|
-| Have I prepared an accusation audit? | Objections will blindside you | List every negative they might think; address early |
-| Do I have 3-5 calibrated questions ready? | You'll default to arguing | Draft "How" and "What" questions targeting their needs |
-| Have I identified my BATNA? | You'll accept a bad deal under pressure | Define your walk-away point before negotiating |
-| Am I aiming for "That's right"? | You'll chase counterfeit "yes" | Summarize their position until they affirm genuinely |
-| Have I considered their negotiation style? | One-size-fits-all will misfire | Assess if they're Analyst, Accommodator, or Assertive |
-| Am I hunting for Black Swans? | You'll miss game-changing information | Stay curious; watch for anomalies; ask about the unexpected |
-
-## Further Reading
-
-Based on Chris Voss's experience as an FBI hostage negotiator:
-
-- [*"Never Split the Difference: Negotiating As If Your Life Depended On It"*](https://www.amazon.com/Never-Split-Difference-Negotiating-Depended/dp/0062407805?tag=wondelai00-20) by Chris Voss with Tahl Raz
-- [*"The Full Fee Agent: How to Stack the Odds in Your Favor as a Real Estate Professional"*](https://www.amazon.com/Full-Fee-Agent-Stack-Professional/dp/1544534655?tag=wondelai00-20) by Chris Voss and Steve Shull (the same principles applied to real estate and professional services)
-
-## About the Author
-
-**Chris Voss** is a former FBI lead international kidnapping negotiator who worked over 150 hostage situations in a 24-year career, and the founder of the Black Swan Group, which trains businesses in tactical negotiation. He has taught at Harvard Law School, Georgetown, and MIT Sloan; *Never Split the Difference* is one of the most widely recommended business books in the world.
+Método baseado no livro *Never Split the Difference*, de Chris Voss e Tahl Raz. Conteúdo original da skill: wondelai/skills (MIT), traduzido e adaptado ao pack.

@@ -1,0 +1,25 @@
+name: linkedin
+description: LinkedIn organic squad (3 agentes). Estratégia B2B e gate (perfil pessoal × página da empresa), conteúdo (posts, documento/carrossel PDF, artigos, newsletter, comentários estratégicos) e pacote de publicação + métricas exportadas. v1 sem MCP — quem publica é o usuário. Peças visuais vêm do estúdio social; anúncios LinkedIn são da squad traffic.
+project_archetypes: [linkedin, b2b-content, personal-brand, content-marketing]
+agents:
+  - name: linkedin-strategist
+    archetype: strategist
+    persona: STRATA
+    role_title: Estrategista do LinkedIn
+    description: "STRATA, Strategist and gate for the LinkedIn squad. Defines B2B audience, thesis, pillars, personal profile vs company page voice, cadence and formats; approves or returns every piece before publishing. Never writes the post."
+    color: purple
+    skills: [linkedin-strategy, linkedin-publishing, social-editorial-validation, social-copywriting]
+  - name: linkedin-content
+    archetype: implementer
+    persona: QUILL
+    role_title: Conteúdo do LinkedIn
+    description: "QUILL, Content writer for the LinkedIn squad. Writes posts, PDF document/carousel scripts, articles, newsletters, polls and strategic comments from STRATA's brief. Never approves or publishes."
+    color: yellow
+    skills: [social-copywriting, linkedin-strategy, social-carousel-design, social-format-specs, copy-humanize]
+  - name: linkedin-publisher
+    archetype: implementer
+    persona: RELAY
+    role_title: Publicação e Métricas do LinkedIn
+    description: "RELAY, Publisher and metrics for the LinkedIn squad. Builds the publishing package after STRATA's PASS, keeps the calendar and reads exported metrics. v1 without MCP: the user publishes after confirming. Never connection automation, mass DM or automated engagement."
+    color: green
+    skills: [linkedin-publishing, social-format-specs, social-analytics]

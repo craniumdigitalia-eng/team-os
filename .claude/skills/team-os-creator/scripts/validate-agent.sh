@@ -1,35 +1,64 @@
 #!/usr/bin/env bash
-# validate-agent.sh — *audit v2, archetype-driven
+# validate-agent.sh — *audit v3, archetype-driven
 #
-# Usage: ./validate-agent.sh [<name>]
+# Usage: ./validate-agent.sh [<name>] | ./validate-agent.sh --skills
 #   sem args  → valida todos os agentes de .claude/agents/ + checks globais
 #   <name>    → valida só .claude/agents/<name>.md (sem checks globais)
+#   --skills  → lint de TODAS as .claude/skills/*/SKILL.md (frontmatter, name = pasta,
+#               description de 1 linha ≤ 400 chars, version/updated com aspas).
+#               sala-de-controle: só WARN (nunca erro).
+#               ERRO (em todas, inclusive as warn-only): qualquer arquivo da pasta da skill
+#               com $CLAUDE_PROJECT_DIR / ${CLAUDE_PROJECT_DIR} sem fallback `:-` — a variável
+#               só existe em hooks; no Bash do Claude Code use
+#               "${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}".
+#               Exceções: caminho de hook ($CLAUDE_PROJECT_DIR/.claude/hooks/...), linha com o
+#               marcador `hook-example`, test-hooks.sh e este script; pastas .venv/node_modules/
+#               ms-playwright ficam fora da varredura.
 #
 # Fontes da verdade:
-#   - presets/*.yaml ............ archetype + squad + persona de cada agente
+#   - presets/*.yaml ............ archetype + squad + persona de cada agente DO PACK
+#   - presets/custom/*.yaml ..... agentes PRÓPRIOS do usuário (`origin: custom` no frontmatter;
+#                                 squad = prefixo do nome). Passam pelas MESMAS checagens, mas
+#                                 são contados à parte ("N do pack + M próprios"). A pasta
+#                                 presets/custom/ nunca é tocada pelo *update.
+#   - pack-manifest.json ........ (se existir) define quais skills são do pack nas contagens
 #   - reference/native-teams-protocol.md ... bloco NTP canônico (hash byte-idêntico)
 #   - reference/archetypes.md ... defaults documentados (este script implementa as regras)
+#   - reference/mcp-servers.md .. servidores MCP aceitos em tools: (identificadores `mcp__<id>`)
 #
 # Regras por ARCHETYPE (não por nome hardcoded):
 #   model  : architect/reviewer/strategist → opus; demais → inherit
 #   effort : architect/reviewer/strategist/hardening/data → high;
 #            researcher/ux → medium; implementer/devops → omitido
 #            EXCEÇÕES canônicas: dev-bi, dev-data-performance, pm-coach → medium
-#   permissionMode: obrigatório (qualquer valor do enum; recomendado acceptEdits) em
-#            qualquer agente com Write/Edit em tools — exceto reviewer/strategist,
-#            onde é opcional; bypassPermissions proibido em reviewer/strategist;
-#            valor sempre no enum
+#   permissionMode: OBRIGATÓRIO em todo archetype (valor do enum);
+#            reviewer/strategist = acceptEdits (bypassPermissions proibido neles)
 #   color  : enum red/blue/green/yellow/purple/orange/pink/cyan; blue proibido em
 #            teammates; reviewer (QA) deve ser red; repetição na squad = warning
+#            (só quando a squad tem ≤ 8 agentes — só existem 8 cores)
 #   hook   : block-git-push.sh obrigatório em todo agente com Bash cujo archetype
 #            NÃO é devops; proibido em archetype devops
-#   tools  : reviewer/strategist e implementer devem ter Write E Edit
+#   hooks: : estrutura válida (evento conhecido → lista com matcher/hooks[].command)
+#            e cada command referenciado existe em .claude/hooks/
+#   tools  : reviewer/strategist e implementer devem ter Write E Edit;
+#            mcp__<server>[__<tool>]: <server> precisa estar em reference/mcp-servers.md
+#            (ERRO); forma longa mcp__<server>__<tool> = WARN (prefira a curta)
 #   NTP    : bloco "## Native Teams Protocol" byte-idêntico ao canônico (hash md5,
 #            após remover linhas em branco iniciais/finais)
+#   área   : linha `**Área na smart-memory:** \`docs/smart-memory/agents/<squad>/<área>/\``
+#            obrigatória, com <squad> = prefixo do agente (logo após o H1 — posição = warning)
+#   paths  : ERRO se o body cita docs/smart-memory/agents/<área>/ sem squad,
+#            docs/smart-memory/pm/, ou stories/<x> com x fora de
+#            {backlog,active,in-review,done,BACKLOG.md}
+#   skills : todo /token citado no body (com ou sem hífen) e todo skill `x` precisam
+#            existir em .claude/skills/ — exceto slash commands built-in do Claude Code
+#   cpd    : ERRO se o body (fora do frontmatter) usa $CLAUDE_PROJECT_DIR sem fallback `:-`
+#            (o `command:` de hook no frontmatter fica como está — lá o harness define a variável)
+#   global : ERRO se `skills: [...]` de um agente em presets/*.yaml (ou custom/) cita skill
+#            sem pasta em .claude/skills/<nome>/ (project_archetypes e descrições são ignorados)
 #
 # Extração de PERSONA (padrão documentado): a persona de um agente é o texto do
 # primeiro H1 antes de " — " (em dash), ex.: "# Nova — Frontend Developer" → "Nova".
-# O glossário de personas é construído a partir dos H1 de todos os agentes.
 # Checks de persona são WARNING (nunca erro):
 #   - persona citada no formato "Nome (agent-name)" divergente do H1 atual do agente
 #   - persona de OUTRA squad citada no body
@@ -47,26 +76,39 @@ SKILLS_DIR=".claude/skills"
 HOOKS_DIR=".claude/hooks"
 PRESETS_DIR="$SKILLS_DIR/team-os-creator/presets"
 NTP_FILE="$SKILLS_DIR/team-os-creator/reference/native-teams-protocol.md"
+MCP_FILE="$SKILLS_DIR/team-os-creator/reference/mcp-servers.md"
 
+# Squads do pack: derivadas do `name:` de cada presets/*.yaml (logo abaixo, ao carregar os presets).
+# Esta lista é só o fallback seguro — usada se nenhum preset do pack for lido.
+KNOWN_SQUADS_FALLBACK="dev sites social instagram tiktok youtube linkedin traffic pm sales brand finance legal seo security"
+KNOWN_SQUADS=""
 COLOR_ENUM="red blue green yellow purple orange pink cyan"
+COLOR_LIMIT=7  # 8 cores do enum menos blue (reservada ao lead): acima disso repetição é inevitável
 PERMISSION_ENUM="default acceptEdits auto dontAsk bypassPermissions plan"
 EFFORT_ENUM="low medium high xhigh max"
+HOOK_EVENTS="PreToolUse PostToolUse PermissionRequest Notification UserPromptSubmit Stop SubagentStop SubagentStart PreCompact SessionStart SessionEnd TaskCreated TaskCompleted TeammateIdle ConfigChange"
+STORY_DIRS="backlog active in-review done BACKLOG.md"
 # Exceções canônicas de effort (documentadas em reference/archetypes.md)
 EFFORT_EXCEPTIONS_MEDIUM="dev-bi dev-data-performance pm-coach"
 # Placeholders instrucionais que NÃO são citação de skill
-SKILL_PLACEHOLDERS="nome-da-skill nome-skill skill-name nome-da-sua-skill sua-skill"
-# Slash commands built-in do Claude Code com hífen (não são skills)
-BUILTIN_SLASH="install-slack-app terminal-setup release-notes pr-comments add-dir output-style statusline-setup skill-doctor"
+SKILL_PLACEHOLDERS="nome-da-skill nome-skill skill-name nome-da-sua-skill sua-skill skill"
+# Slash commands built-in do Claude Code (não são skills). /design NÃO é built-in.
+BUILTIN_SLASH="help clear compact model config init review rename resume loop cost doctor status memory permissions mcp agents hooks login logout bug vim effort plan tasks context export exit quit btw usage stats fast theme ide diff files insights rewind branch sandbox teammates upgrade version keybindings privacy-settings release-notes pr-comments add-dir output-style statusline-setup skill-doctor terminal-setup install-slack-app"
+# Palavras que aparecem como "/x" mas são caminho de sistema, não skill
+PATH_WORDS="tmp dev etc usr bin var opt private src app docs public lib home root proc sbin mnt"
+# Skills onde o lint de --skills só avisa (sem version/updated por design)
+SKILLS_WARN_ONLY="sala-de-controle"
 
 TMPDIR_V="$(mktemp -d "${TMPDIR:-/tmp}/validate-agent.XXXXXX")" || exit 1
 trap 'rm -rf "$TMPDIR_V"' EXIT
-MAP_FILE="$TMPDIR_V/preset-map.txt"     # agent|squad|archetype|persona_preset
+MAP_FILE="$TMPDIR_V/preset-map.txt"     # agent|squad|archetype|persona_preset|origin(pack/custom)
 GLOSS_FILE="$TMPDIR_V/persona-map.txt"  # agent|squad|persona_h1
 COLOR_FILE="$TMPDIR_V/colors.txt"       # squad|color|agent
 
 PROBLEMS=0
 WARNED=0
 CHECKED=0
+CHECKED_CUSTOM=0
 GLOBAL_ERRORS=0
 
 hash_text() {  # hash de stdin (md5 -q no macOS, md5sum como fallback)
@@ -83,6 +125,92 @@ in_list() {  # in_list "item" "a b c"
   return 1
 }
 
+# Linhas (de stdin, já no formato "N:texto" ou "arq:N:texto") com $CLAUDE_PROJECT_DIR ou
+# ${CLAUDE_PROJECT_DIR} SEM fallback `:-`. Ignora caminho de hook e o marcador `hook-example`.
+cpd_no_fallback() {
+  grep -v 'hook-example' \
+    | sed -E 's#\$\{?CLAUDE_PROJECT_DIR\}?/\.claude/hooks/#<hook>/#g' \
+    | grep -E '\$(\{CLAUDE_PROJECT_DIR\}|CLAUDE_PROJECT_DIR([^A-Za-z0-9_]|$))'
+}
+
+# ═════════════════════════════════════════════════════════════════════════════
+# Modo --skills: lint de .claude/skills/*/SKILL.md
+# ═════════════════════════════════════════════════════════════════════════════
+lint_skills() {
+  local d sname sfile fm errs warns warn_only line desc dlen ver upd n_err n_warn n_ok
+  n_err=0; n_warn=0; n_ok=0
+  for d in "$SKILLS_DIR"/*/; do
+    [ -d "$d" ] || continue
+    sname="$(basename "$d")"
+    sfile="${d}SKILL.md"
+    errs=(); warns=()
+    warn_only=0
+    in_list "$sname" "$SKILLS_WARN_ONLY" && warn_only=1
+
+    if [ ! -f "$sfile" ]; then
+      errs+=("sem SKILL.md")
+    else
+      head -1 "$sfile" | grep -q '^---$' || errs+=("sem frontmatter '---' na 1ª linha")
+      fm="$(awk '/^---$/{c++; next} c==1' "$sfile")"
+      [ "$(grep -c '^---$' "$sfile")" -ge 2 ] || errs+=("frontmatter não fechado (falta o 2º '---')")
+
+      line="$(printf '%s\n' "$fm" | grep -m1 -E '^name:' | sed -E 's/^name:[[:space:]]*//; s/[[:space:]]*$//; s/^"(.*)"$/\1/; s/^'"'"'(.*)'"'"'$/\1/')"
+      [ "$line" = "$sname" ] || errs+=("name:'$line' ≠ pasta '$sname'")
+
+      desc="$(printf '%s\n' "$fm" | grep -m1 -E '^description:' | sed -E 's/^description:[[:space:]]*//; s/[[:space:]]*$//')"
+      if [ -z "$desc" ]; then
+        errs+=("description: ausente ou vazia")
+      else
+        case "$desc" in '>'*|'|'*) errs+=("description: bloco multi-linha (>/|) — deve ser uma linha") ;; esac
+        # valor entre aspas não conta as aspas
+        dlen="$(printf '%s' "$desc" | sed -E 's/^"(.*)"$/\1/' | LC_ALL=C.UTF-8 wc -m 2>/dev/null | tr -d ' ')"
+        # CI sem locale UTF-8: wc -m conta bytes — usar python3 se disponível
+        if command -v python3 >/dev/null 2>&1; then dlen="$(printf '%s' "$desc" | sed -E 's/^"(.*)"$/\1/' | python3 -c 'import sys; print(len(sys.stdin.read()))')"; fi
+        [ "$dlen" -gt 400 ] && errs+=("description com $dlen chars (> 400)")
+      fi
+
+      ver="$(printf '%s\n' "$fm" | grep -m1 -E '^version:' | sed -E 's/^version:[[:space:]]*//; s/[[:space:]]*$//')"
+      upd="$(printf '%s\n' "$fm" | grep -m1 -E '^updated:' | sed -E 's/^updated:[[:space:]]*//; s/[[:space:]]*$//')"
+      if [ -z "$ver" ]; then errs+=("version: ausente (use version: \"1.0\")")
+      else case "$ver" in '"'*'"'|"'"*"'") ;; *) errs+=("version: $ver sem aspas (YAML lê 1.10 como 1.1)") ;; esac; fi
+      if [ -z "$upd" ]; then errs+=("updated: ausente (use updated: \"YYYY-MM-DD\")")
+      else case "$upd" in '"'*'"'|"'"*"'") ;; *) errs+=("updated: $upd sem aspas (YAML converte para date)") ;; esac; fi
+    fi
+
+    if [ $warn_only -eq 1 ] && [ ${#errs[@]} -gt 0 ]; then
+      warns=("${warns[@]+"${warns[@]}"}" "${errs[@]}"); errs=()
+    fi
+
+    # $CLAUDE_PROJECT_DIR sem fallback em qualquer arquivo da skill (ERRO mesmo nas warn-only)
+    local cpd_hits cpd_n
+    cpd_hits="$(grep -rnI --exclude-dir=.venv --exclude-dir=venv --exclude-dir=node_modules --exclude-dir=ms-playwright --exclude-dir=__pycache__ 'CLAUDE_PROJECT_DIR' "$d" 2>/dev/null \
+      | grep -vE '/team-os-creator/scripts/(test-hooks|validate-agent)\.sh:' | cpd_no_fallback)"
+    if [ -n "$cpd_hits" ]; then
+      cpd_n="$(printf '%s\n' "$cpd_hits" | wc -l | tr -d ' ')"
+      errs+=("$cpd_n linha(s) com \$CLAUDE_PROJECT_DIR sem fallback (só existe em hooks) — use \"\${CLAUDE_PROJECT_DIR:-\$(git rev-parse --show-toplevel 2>/dev/null || pwd)}\": $(printf '%s\n' "$cpd_hits" | head -3 | cut -d: -f1,2 | sed "s#^$d##" | tr '\n' ' ')")
+    fi
+    if [ ${#errs[@]} -eq 0 ] && [ ${#warns[@]} -eq 0 ]; then
+      echo "✅ $sname"; n_ok=$((n_ok + 1))
+    elif [ ${#errs[@]} -eq 0 ]; then
+      echo "⚠️  $sname:"; for line in "${warns[@]}"; do echo "    ⚠ $line"; done; n_warn=$((n_warn + 1))
+    else
+      echo "❌ $sname:"; for line in "${errs[@]}"; do echo "    • $line"; done
+      for line in "${warns[@]+"${warns[@]}"}"; do echo "    ⚠ $line"; done; n_err=$((n_err + 1))
+    fi
+  done
+  echo ""
+  if [ $n_err -eq 0 ]; then
+    echo "✅ skills: $n_ok ok · $n_warn com warning · 0 com erro."
+    return 0
+  fi
+  echo "❌ skills: $n_err com erro · $n_warn com warning · $n_ok ok."
+  return 1
+}
+
+if [ "${1:-}" = "--skills" ]; then
+  lint_skills; exit $?
+fi
+
 # ── Pré-requisito: bloco NTP canônico ────────────────────────────────────────
 if [ ! -f "$NTP_FILE" ]; then
   echo "⛔ Fonte canônica do NTP ausente: $NTP_FILE" >&2
@@ -90,24 +218,47 @@ if [ ! -f "$NTP_FILE" ]; then
 fi
 NTP_HASH="$(awk '/<!-- NTP-START -->/{f=1;next} /<!-- NTP-END -->/{f=0} f' "$NTP_FILE" | trim_blank_edges | hash_text)"
 
+# ── Servidores MCP aceitos (identificadores `mcp__<id>` do reference) ────────
+MCP_ACCEPTED=""
+if [ -f "$MCP_FILE" ]; then
+  MCP_ACCEPTED="$(grep -oE '`mcp__[A-Za-z0-9_-]+`' "$MCP_FILE" | tr -d '`' | sort -u | tr '\n' ' ')"
+fi
+
 # ── Carregar presets → mapa agent|squad|archetype|persona ────────────────────
 if [ ! -d "$PRESETS_DIR" ]; then
   echo "⛔ Diretório de presets ausente: $PRESETS_DIR" >&2
   exit 1
 fi
 : > "$MAP_FILE"
-for preset in "$PRESETS_DIR"/*.yaml; do
-  [ -f "$preset" ] || continue
-  awk -v squad="$(awk -F': *' '/^name:/{print $2; exit}' "$preset")" '
-    /^  - name:/      { if (a != "") print a "|" squad "|" arch "|" pers;
-                        a=$3; arch=""; pers="" }
+# pack: squad = name: do preset · custom: squad = prefixo do nome do agente
+load_preset() {  # load_preset <arquivo.yaml> <pack|custom>
+  awk -v squad="$(awk -F': *' '/^name:/{print $2; exit}' "$1")" -v origin="$2" '
+    function emit() { if (a != "") { s = squad; if (origin == "custom") { s = a; sub(/-.*/, "", s) }
+                                     print a "|" s "|" arch "|" pers "|" origin } }
+    /^  - name:/      { emit(); a=$3; gsub(/["\047]/, "", a); arch=""; pers="" }
     /^    archetype:/ { arch=$2 }
     /^    persona:/   { pers=$2 }
-    END               { if (a != "") print a "|" squad "|" arch "|" pers }
-  ' "$preset" >> "$MAP_FILE"
+    END               { emit() }
+  ' "$1" >> "$MAP_FILE"
+}
+for preset in "$PRESETS_DIR"/*.yaml; do
+  [ -f "$preset" ] || continue
+  load_preset "$preset" pack
+  sq="$(awk -F': *' '/^name:/{print $2; exit}' "$preset" | tr -d "\"' \r")"
+  [ -n "$sq" ] && { in_list "$sq" "$KNOWN_SQUADS" || KNOWN_SQUADS="${KNOWN_SQUADS:+$KNOWN_SQUADS }$sq"; }
+done
+[ -n "$KNOWN_SQUADS" ] || KNOWN_SQUADS="$KNOWN_SQUADS_FALLBACK"
+SQUAD_ALT="$(printf '%s' "$KNOWN_SQUADS" | tr ' ' '|')"   # alternância para regex (dev|sites|…)
+for preset in "$PRESETS_DIR"/custom/*.yaml; do
+  [ -f "$preset" ] || continue
+  load_preset "$preset" custom
+done
+# squads próprias também são squads conhecidas (paths docs/smart-memory/agents/<squad>/)
+for sq in $(awk -F'|' '$5=="custom"{print $2}' "$MAP_FILE" | sort -u); do
+  in_list "$sq" "$KNOWN_SQUADS" || KNOWN_SQUADS="$KNOWN_SQUADS $sq"
 done
 
-preset_field() {  # preset_field <agent> <n>  (2=squad 3=archetype 4=persona)
+preset_field() {  # preset_field <agent> <n>  (2=squad 3=archetype 4=persona 5=origin)
   grep -m1 "^$1|" "$MAP_FILE" | cut -d'|' -f"$2"
 }
 
@@ -121,10 +272,22 @@ for f in "$AGENTS_DIR"/*.md; do
   [ -n "$p" ] && echo "$a|${s:-?}|$p" >> "$GLOSS_FILE"
 done
 
-# ── Contagem de skills instaladas ────────────────────────────────────────────
+# ── Contagem de skills DO PACK ──────────────────────────────────────────────
+# Com pack-manifest.json: só as skills cujo SKILL.md está no manifest (skills próprias
+# do usuário não entram na conta "N skills" do README/CLAUDE.md). Sem manifest: todas.
 SKILLS_COUNT=0
+SKILLS_CUSTOM=0
+PACK_SKILLS=""
+if [ -f pack-manifest.json ] && command -v python3 >/dev/null 2>&1; then
+  PACK_SKILLS="$(python3 -c 'import json,re; m=json.load(open("pack-manifest.json")).get("files",{}); print(" ".join(sorted({k.split("/")[2] for k in m if re.match(r"^\.claude/skills/[^/]+/SKILL\.md$", k)})))' 2>/dev/null)"
+fi
 for d in "$SKILLS_DIR"/*/; do
-  [ -f "${d}SKILL.md" ] && SKILLS_COUNT=$((SKILLS_COUNT + 1))
+  [ -f "${d}SKILL.md" ] || continue
+  if [ -z "$PACK_SKILLS" ] || in_list "$(basename "$d")" "$PACK_SKILLS"; then
+    SKILLS_COUNT=$((SKILLS_COUNT + 1))
+  else
+    SKILLS_CUSTOM=$((SKILLS_CUSTOM + 1))
+  fi
 done
 
 # ═════════════════════════════════════════════════════════════════════════════
@@ -132,6 +295,7 @@ validate() {
   local file="$1"
   local name; name="$(basename "$file" .md)"
   local errors=() warnings=()
+  local PREFIX="${name%%-*}"
 
   # ── Frontmatter ──
   if ! head -1 "$file" | grep -q '^---$'; then
@@ -152,12 +316,26 @@ validate() {
   COLOR="$(fm_get color)"
   TOOLS="$(fm_get tools)"
 
-  # ── Archetype (fonte: presets) ──
-  local SQUAD ARCH
+  # ── Archetype (fonte: presets do pack ou presets/custom/) ──
+  local SQUAD ARCH ORIGIN FM_ORIGIN
   SQUAD="$(preset_field "$name" 2)"
   ARCH="$(preset_field "$name" 3)"
+  ORIGIN="$(preset_field "$name" 5)"
+  FM_ORIGIN="$(fm_get origin)"
   if [ -z "$ARCH" ]; then
-    errors+=("agente órfão de preset — sem entrada (com archetype:) em presets/*.yaml")
+    if [ "$FM_ORIGIN" = "custom" ]; then
+      errors+=("agente próprio (origin: custom) sem registro — adicione-o (com archetype:) em presets/custom/custom.yaml")
+    else
+      errors+=("agente órfão de preset — sem entrada (com archetype:) em presets/*.yaml (agente próprio: origin: custom + presets/custom/*.yaml)")
+    fi
+  fi
+  if [ "$ORIGIN" = "custom" ] || [ "$FM_ORIGIN" = "custom" ]; then
+    CHECKED_CUSTOM=$((CHECKED_CUSTOM + 1))
+  fi
+  if [ "$ORIGIN" = "custom" ] && [ "$FM_ORIGIN" != "custom" ]; then
+    warnings+=("registrado em presets/custom/ mas o frontmatter não tem 'origin: custom'")
+  elif [ "$ORIGIN" = "pack" ] && [ "$FM_ORIGIN" = "custom" ]; then
+    warnings+=("tem 'origin: custom' mas o nome é de um agente do pack (presets/*.yaml) — renomeie o seu agente")
   fi
 
   # ── Checks v1 mantidos ──
@@ -180,6 +358,21 @@ validate() {
   printf '%s' "$TOOLS" | grep -qE '(^|[, ])Bash([, ]|$)'  && HAS_BASH=1
   printf '%s' "$TOOLS" | grep -qE '(^|[, ])Write([, ]|$)' && HAS_WRITE=1
   printf '%s' "$TOOLS" | grep -qE '(^|[, ])Edit([, ]|$)'  && HAS_EDIT=1
+
+  # ── Tools MCP: servidor precisa estar em reference/mcp-servers.md ──
+  local mtok mserver
+  for mtok in $(printf '%s\n' "$TOOLS" | grep -oE 'mcp__[A-Za-z0-9_-]+' | sort -u); do
+    mserver="$(printf '%s' "$mtok" | sed -E 's/^mcp__//; s/__.*$//')"
+    if [ ! -f "$MCP_FILE" ]; then
+      errors+=("tools: $mtok — reference/mcp-servers.md ausente (tabela de servidores aceitos)")
+      break
+    fi
+    if ! in_list "mcp__$mserver" "$MCP_ACCEPTED"; then
+      errors+=("tools: servidor MCP '$mserver' ($mtok) não está em reference/mcp-servers.md — adicione o servidor à tabela antes")
+    elif printf '%s' "$mtok" | grep -qE '^mcp__[A-Za-z0-9_-]+__'; then
+      warnings+=("tools: $mtok usa a forma longa — prefira mcp__$mserver (libera todas as tools do servidor; nomes de tool mudam entre versões)")
+    fi
+  done
 
   if [ -n "$ARCH" ]; then
     # ── model por archetype ──
@@ -210,18 +403,18 @@ validate() {
       [ -n "$EFFORT" ] && errors+=("effort: deve ser omitido (archetype $ARCH segue o default do modelo)")
     fi
 
-    # ── permissionMode ──
-    if [ -n "$PMODE" ] && ! in_list "$PMODE" "$PERMISSION_ENUM"; then
+    # ── permissionMode: obrigatório em todo archetype ──
+    if [ -z "$PMODE" ]; then
+      errors+=("permissionMode: ausente — obrigatório em todo archetype (reviewer/strategist: acceptEdits; demais: recomendado acceptEdits)")
+    elif ! in_list "$PMODE" "$PERMISSION_ENUM"; then
       errors+=("permissionMode: '$PMODE' fora do enum ($PERMISSION_ENUM)")
+    else
+      case "$ARCH" in
+        reviewer|strategist)
+          [ "$PMODE" = "bypassPermissions" ] && errors+=("permissionMode: bypassPermissions é PROIBIDO em reviewer/strategist")
+          [ "$PMODE" != "acceptEdits" ] && [ "$PMODE" != "bypassPermissions" ] && errors+=("permissionMode: '$PMODE' — archetype $ARCH exige 'acceptEdits'") ;;
+      esac
     fi
-    case "$ARCH" in
-      reviewer|strategist)
-        [ "$PMODE" = "bypassPermissions" ] && errors+=("permissionMode: bypassPermissions é PROIBIDO em reviewer/strategist") ;;
-      *)
-        if [ $HAS_WRITE -eq 1 ] || [ $HAS_EDIT -eq 1 ]; then
-          [ -z "$PMODE" ] && errors+=("permissionMode: obrigatório (tem Write/Edit em tools; recomendado 'acceptEdits')")
-        fi ;;
-    esac
 
     # ── color ──
     if [ -z "$COLOR" ]; then
@@ -250,6 +443,26 @@ validate() {
     esac
   fi
 
+  # ── hooks: estrutura (evento → [- matcher + hooks: [- type: command + command]]) ──
+  if printf '%s\n' "$FM" | grep -qE '^hooks:'; then
+    local HBLOCK hev n_matcher n_type n_cmd
+    # bloco = linhas após "hooks:" até a próxima chave de topo (coluna 0)
+    HBLOCK="$(printf '%s\n' "$FM" | awk '/^hooks:/{f=1; next} f && /^[A-Za-z]/{exit} f')"
+    if ! printf '%s\n' "$HBLOCK" | grep -qE '^  [A-Za-z]+:'; then
+      errors+=("hooks: declarado mas sem evento (esperado ex.: '  PreToolUse:')")
+    fi
+    for hev in $(printf '%s\n' "$HBLOCK" | grep -oE '^  [A-Za-z]+:' | tr -d ' :' | sort -u); do
+      in_list "$hev" "$HOOK_EVENTS" || errors+=("hooks: evento desconhecido '$hev' (válidos: $HOOK_EVENTS)")
+    done
+    n_matcher="$(printf '%s\n' "$HBLOCK" | grep -cE '^    - matcher:')"
+    n_type="$(printf '%s\n' "$HBLOCK" | grep -cE '^        - type: command')"
+    n_cmd="$(printf '%s\n' "$HBLOCK" | grep -cE '^          command:')"
+    [ "$n_matcher" -eq 0 ] && errors+=("hooks: nenhum '- matcher:' (cada evento é uma lista de {matcher, hooks})")
+    printf '%s\n' "$HBLOCK" | grep -qE '^      hooks:' || errors+=("hooks: falta a lista 'hooks:' dentro do matcher")
+    [ "$n_type" -eq 0 ] && errors+=("hooks: nenhum '- type: command' na lista hooks")
+    [ "$n_type" -ne "$n_cmd" ] && errors+=("hooks: $n_type '- type: command' vs $n_cmd 'command:' — cada type precisa do seu command")
+  fi
+
   # ── Hooks referenciados existem fisicamente ──
   local hook_ref
   for hook_ref in $(printf '%s\n' "$FM" | grep -oE '\.claude/hooks/[A-Za-z0-9._-]+\.sh' | sort -u); do
@@ -263,12 +476,51 @@ validate() {
     [ "$agent_ntp_hash" != "$NTP_HASH" ] && errors+=("bloco NTP divergente do canônico (reference/native-teams-protocol.md) — rode *migrate")
   fi
 
-  # ── Skills citadas no body existem ──
+  # ── $CLAUDE_PROJECT_DIR sem fallback no body (o command: de hook no frontmatter é isento) ──
+  local cpd_lines
+  cpd_lines="$(awk '/^---$/{c++; next} c>=2{print NR ":" $0}' "$file" | cpd_no_fallback | cut -d: -f1 | tr '\n' ' ')"
+  [ -n "$cpd_lines" ] && errors+=("\$CLAUDE_PROJECT_DIR sem fallback no body (linhas: ${cpd_lines% }) — fora de hooks a variável não existe; use \"\${CLAUDE_PROJECT_DIR:-\$(git rev-parse --show-toplevel 2>/dev/null || pwd)}\"")
+
+  # ── Área na smart-memory: linha obrigatória, squad = prefixo, logo após o H1 ──
+  local AREA_LINE AREA_PATH AREA_SQUAD
+  AREA_LINE="$(printf '%s\n' "$BODY" | grep -m1 '^\*\*Área na smart-memory:\*\*')"
+  if [ -z "$AREA_LINE" ]; then
+    errors+=("falta a linha '**Área na smart-memory:** \`docs/smart-memory/agents/$PREFIX/<área>/\`' (logo após o H1)")
+  else
+    AREA_PATH="$(printf '%s' "$AREA_LINE" | sed -n 's|^\*\*Área na smart-memory:\*\* `docs/smart-memory/agents/\([a-z][a-z0-9-]*/[a-z][a-z0-9-]*\)/`$|\1|p')"
+    if [ -z "$AREA_PATH" ]; then
+      errors+=("linha 'Área na smart-memory' fora do formato exato: **Área na smart-memory:** \`docs/smart-memory/agents/<squad>/<área>/\`")
+    else
+      AREA_SQUAD="${AREA_PATH%%/*}"
+      [ "$AREA_SQUAD" != "$PREFIX" ] && errors+=("Área na smart-memory aponta para squad '$AREA_SQUAD' mas o agente é da squad '$PREFIX'")
+    fi
+    # posição: entre as 3 linhas seguintes ao H1 (warning)
+    if ! printf '%s\n' "$BODY" | awk '/^# /{f=1; n=0; next} f{n++; if($0 ~ /^\*\*Área na smart-memory:\*\*/){print "ok"; exit} if(n>=3) exit}' | grep -q ok; then
+      warnings+=("linha 'Área na smart-memory' não está logo após o H1 (até 3 linhas depois)")
+    fi
+  fi
+
+  # ── Paths de smart-memory citados no body: sempre com squad; stories só nas 4 pastas ──
+  local seg
+  for seg in $(printf '%s\n' "$BODY" | grep -oE 'docs/smart-memory/agents/[a-z][a-z0-9-]*/' | sed 's|docs/smart-memory/agents/||; s|/$||' | sort -u); do
+    in_list "$seg" "$KNOWN_SQUADS" || errors+=("cita docs/smart-memory/agents/$seg/ sem squad — use docs/smart-memory/agents/$PREFIX/$seg/")
+  done
+  printf '%s\n' "$BODY" | grep -q 'docs/smart-memory/pm/' && errors+=("cita docs/smart-memory/pm/ — o layout antigo virou docs/smart-memory/agents/pm/")
+  for seg in $(printf '%s\n' "$BODY" | grep -oE '(^|[^A-Za-z0-9_./-])stories/[A-Za-z0-9_.{<-]+' | sed 's|.*stories/||' | sort -u); do
+    case "$seg" in '{'*|'<'*) continue ;; esac   # placeholders: stories/{backlog,…}, stories/<status>/
+    in_list "$seg" "$STORY_DIRS" || errors+=("cita stories/$seg — stories vivem só em stories/{backlog,active,in-review,done}/<id>-<slug>.md (+ stories/BACKLOG.md)")
+  done
+
+  # ── Skills citadas no body existem (com ou sem hífen; skill \`x\` também) ──
   local token skill
-  for token in $(printf '%s\n' "$BODY" | grep -oE '(^|[[:space:]`(])/[a-z][a-z0-9]*(-[a-z0-9]+)+' | sed 's|^[^/]*/||' | sort -u); do
+  for token in $( {
+      printf '%s\n' "$BODY" | grep -oE '(^|[[:space:]`(])/[a-z][a-z0-9-]+([^]a-z0-9/._-]|$)' | sed -E 's|^[^/]*/||; s/[^a-z0-9-]$//'
+      printf '%s\n' "$BODY" | grep -oE 'skill `[a-z][a-z0-9-]+`' | sed 's/^skill `//; s/`$//'
+    } | sort -u); do
     skill="$token"
     in_list "$skill" "$SKILL_PLACEHOLDERS" && continue
     in_list "$skill" "$BUILTIN_SLASH" && continue
+    in_list "$skill" "$PATH_WORDS" && continue
     [ -d "$SKILLS_DIR/$skill" ] && [ -f "$SKILLS_DIR/$skill/SKILL.md" ] || errors+=("skill citada no body não existe: /$skill (esperado $SKILLS_DIR/$skill/SKILL.md)")
   done
 
@@ -292,7 +544,7 @@ validate() {
       warnings+=("cita persona '$cited_persona' para $cited_agent, mas o H1 atual dele é '$current_persona'")
     fi
   done <<EOF_CITES
-$(printf '%s\n' "$BODY" | grep -oE '[A-Z][A-Za-z+]+ \((dev|sites|social|traffic|pm|sales|brand|finance|legal|seo)-[a-z][a-z-]+\)' | sort -u)
+$(printf '%s\n' "$BODY" | grep -oE "[A-Z][A-Za-z+]+ \\(($SQUAD_ALT)-[a-z][a-z-]+\\)" | sort -u)
 EOF_CITES
   # (b) persona de OUTRA squad citada no body
   if [ -n "$SQUAD" ]; then
@@ -301,6 +553,8 @@ EOF_CITES
       [ -n "$gl_persona" ] || continue
       [ "$gl_squad" = "$SQUAD" ] && continue
       [ ${#gl_persona} -ge 3 ] || continue
+      # persona de agente próprio do usuário não gera aviso em agente do pack
+      [ "$ORIGIN" != "custom" ] && [ "$(preset_field "$gl_agent" 5)" = "custom" ] && continue
       if printf '%s\n' "$BODY" | grep -qE "(^|[^A-Za-z])${gl_persona}([^A-Za-z]|$)"; then
         warnings+=("cita persona '$gl_persona' ($gl_agent, squad $gl_squad) — fora do glossário da squad $SQUAD")
       fi
@@ -353,32 +607,59 @@ else
   echo "── Checks globais ──"
 
   # entrada de preset sem arquivo de agente = ERRO
-  while IFS='|' read -r p_agent p_squad p_arch p_persona; do
+  while IFS='|' read -r p_agent p_squad p_arch p_persona p_origin; do
     [ -n "$p_agent" ] || continue
     if [ ! -f "$AGENTS_DIR/$p_agent.md" ]; then
+      [ "$p_origin" = "custom" ] && p_squad="custom/$p_squad"
       echo "❌ preset $p_squad declara '$p_agent' mas $AGENTS_DIR/$p_agent.md não existe"
       GLOBAL_ERRORS=$((GLOBAL_ERRORS + 1))
     fi
   done < "$MAP_FILE"
 
-  # repetição de cor na mesma squad = WARNING
+  # skills: [...] de cada agente nos presets precisa existir como .claude/skills/<nome>/ = ERRO
+  # (só a chave `skills:` dentro de um agente — project_archetypes e descrições ficam de fora)
+  for preset in "$PRESETS_DIR"/*.yaml "$PRESETS_DIR"/custom/*.yaml; do
+    [ -f "$preset" ] || continue
+    while IFS='|' read -r ps_agent ps_skill; do
+      [ -n "$ps_skill" ] || continue
+      if [ ! -d "$SKILLS_DIR/$ps_skill" ]; then
+        echo "❌ preset ${preset#$PRESETS_DIR/}: agente '$ps_agent' cita skill '$ps_skill' em skills: mas $SKILLS_DIR/$ps_skill/ não existe"
+        GLOBAL_ERRORS=$((GLOBAL_ERRORS + 1))
+      fi
+    done <<EOF_PSKILLS
+$(awk '
+  /^  - name:/ { a=$3; gsub(/["\047]/, "", a); next }
+  /^[^ ]/      { a="" }
+  a != "" && /^    skills:[[:space:]]*\[/ {
+    l=$0; sub(/^[^\[]*\[/, "", l); sub(/\].*$/, "", l)
+    n=split(l, arr, ","); for (i=1; i<=n; i++) { x=arr[i]; gsub(/[[:space:]"\047]/, "", x); if (x != "") print a "|" x }
+  }' "$preset")
+EOF_PSKILLS
+  done
+
+  # repetição de cor na mesma squad = WARNING — só quando a squad tem ≤ 8 agentes
+  # (8 cores disponíveis; acima disso a repetição é inevitável)
   DUPS="$(cut -d'|' -f1,2 "$COLOR_FILE" | sort | uniq -d)"
+  DUPS_REPORTED=0
   if [ -n "$DUPS" ]; then
     while IFS='|' read -r d_squad d_color; do
       [ -n "$d_squad" ] || continue
+      SQUAD_SIZE="$(grep -c "^$d_squad|" "$COLOR_FILE")"
+      [ "$SQUAD_SIZE" -gt "$COLOR_LIMIT" ] && continue
       AGENTS_W_COLOR="$(grep "^$d_squad|$d_color|" "$COLOR_FILE" | cut -d'|' -f3 | tr '\n' ' ')"
-      echo "⚠️  squad $d_squad: cor '$d_color' repetida em: $AGENTS_W_COLOR"
-      WARNED=$((WARNED + 1))
+      echo "⚠️  squad $d_squad ($SQUAD_SIZE agentes): cor '$d_color' repetida em: $AGENTS_W_COLOR"
+      WARNED=$((WARNED + 1)); DUPS_REPORTED=1
     done <<EOF_DUPS
 $DUPS
 EOF_DUPS
   fi
 
-  # contagens: arquivos reais vs linha "N agentes e N skills" (CLAUDE.md e README.md) = WARNING
-  AGENTS_COUNT=$(ls "$AGENTS_DIR"/*.md 2>/dev/null | wc -l | tr -d ' ')
-  PRESET_COUNT=$(wc -l < "$MAP_FILE" | tr -d ' ')
+  # contagens DO PACK: arquivos reais vs linha "N agentes e N skills" (CLAUDE.md e README.md) = WARNING
+  # (agentes próprios — origin: custom — ficam fora da conta do pack)
+  AGENTS_COUNT=$((CHECKED - CHECKED_CUSTOM))
+  PRESET_COUNT=$(awk -F'|' '$5=="pack"' "$MAP_FILE" | wc -l | tr -d ' ')
   if [ "$AGENTS_COUNT" != "$PRESET_COUNT" ]; then
-    echo "⚠️  $AGENTS_COUNT arquivo(s) em $AGENTS_DIR vs $PRESET_COUNT entrada(s) nos presets"
+    echo "⚠️  $AGENTS_COUNT agente(s) do pack em $AGENTS_DIR vs $PRESET_COUNT entrada(s) nos presets do pack"
     WARNED=$((WARNED + 1))
   fi
   for doc in CLAUDE.md README.md; do
@@ -388,27 +669,28 @@ EOF_DUPS
     DOC_AGENTS="$(printf '%s' "$DOC_LINE" | awk '{print $1}')"
     DOC_SKILLS="$(printf '%s' "$DOC_LINE" | awk '{print $4}')"
     if [ "$DOC_AGENTS" != "$AGENTS_COUNT" ]; then
-      echo "⚠️  $doc diz '$DOC_AGENTS agentes' mas $AGENTS_DIR tem $AGENTS_COUNT arquivos"
+      echo "⚠️  $doc diz '$DOC_AGENTS agentes' mas $AGENTS_DIR tem $AGENTS_COUNT agentes do pack"
       WARNED=$((WARNED + 1))
     fi
     if [ "$DOC_SKILLS" != "$SKILLS_COUNT" ]; then
-      echo "⚠️  $doc diz '$DOC_SKILLS skills' mas $SKILLS_DIR tem $SKILLS_COUNT skills (com SKILL.md)"
+      echo "⚠️  $doc diz '$DOC_SKILLS skills' mas $SKILLS_DIR tem $SKILLS_COUNT skills do pack (com SKILL.md)"
       WARNED=$((WARNED + 1))
     fi
   done
-  [ $GLOBAL_ERRORS -eq 0 ] && [ -z "$DUPS" ] && echo "(sem erros globais)"
+  [ $GLOBAL_ERRORS -eq 0 ] && [ $DUPS_REPORTED -eq 0 ] && echo "(sem erros globais)"
 fi
 
 echo ""
 TOTAL_ERR=$((PROBLEMS + GLOBAL_ERRORS))
+SPLIT="$((CHECKED - CHECKED_CUSTOM)) do pack + $CHECKED_CUSTOM próprio(s)"
 if [ $TOTAL_ERR -eq 0 ]; then
   if [ $WARNED -gt 0 ]; then
-    echo "✅ $CHECKED agente(s) sem erro — $WARNED item(ns) com warning."
+    echo "✅ $CHECKED agente(s) sem erro ($SPLIT) — $WARNED item(ns) com warning."
   else
-    echo "✅ Todos $CHECKED agente(s) conforme(s)."
+    echo "✅ Todos $CHECKED agente(s) conforme(s) ($SPLIT)."
   fi
   exit 0
 else
-  echo "❌ $PROBLEMS agente(s) com erro + $GLOBAL_ERRORS erro(s) global(is), de $CHECKED verificado(s)."
+  echo "❌ $PROBLEMS agente(s) com erro + $GLOBAL_ERRORS erro(s) global(is), de $CHECKED verificado(s) ($SPLIT)."
   exit 1
 fi

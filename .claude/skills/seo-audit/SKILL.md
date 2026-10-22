@@ -1,6 +1,8 @@
 ---
 name: seo-audit
-description: "Full website SEO audit with parallel subagent delegation. Crawls up to 500 pages, detects business type, delegates to up to 15 specialists (8 always + 7 conditional), generates health score. Use when user says audit, full SEO check, analyze my site, or website health check."
+description: "Auditoria SEO completa de um site com delegação paralela a subagentes — rastreia até 500 páginas, detecta tipo de negócio, aciona até 14 especialistas e gera health score. Use quando o usuário pedir 'audit', 'auditoria SEO completa', 'analise meu site' ou 'saúde do site'."
+version: "2.3.3"
+updated: "2026-10-20"
 user-invocable: true
 argument-hint: "[url]"
 license: MIT
@@ -10,34 +12,35 @@ metadata:
   category: seo
 ---
 
-# Full Website SEO Audit
+# Auditoria SEO completa de site
 
-## Process
+**Quando usar esta vs. `sites-seo-technical`:** esta roda a auditoria completa de um site publicado (até 500 páginas, vários especialistas, health score). Para implementar SEO técnico no código Next.js/Astro, use `sites-seo-technical`.
 
-1. **Render homepage**: use `"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run render_page.py <url> --mode auto --json` to capture raw HTML, rendered HTML, extracted text, SPA status, and accessibility data when needed
-2. **Detect business type**: analyze homepage signals per seo orchestrator
-3. **Crawl site**: follow internal links up to 500 pages, respect robots.txt
-4. **Delegate to subagents** (if available, otherwise run inline sequentially):
-   - `seo-technical` -- robots.txt, sitemaps, canonicals, Core Web Vitals, security headers
-   - `seo-content` -- E-E-A-T, readability, thin content, AI citation readiness
-   - `seo-schema` -- detection, validation, generation recommendations
-   - `seo-sitemap` -- structure analysis, quality gates, missing pages
-   - `seo-performance` -- LCP, INP, CLS measurements
-   - `seo-visual` -- screenshots, mobile testing, above-fold analysis
-   - `seo-geo` -- AI crawler access, llms.txt, citability, brand mention signals
-   - `seo-local` -- GBP signals, NAP consistency, reviews, local schema, industry-specific local factors (spawn when Local Service industry detected: brick-and-mortar, SAB, or hybrid business type)
-   - `seo-maps` -- Geo-grid rank tracking, GBP audit, review intelligence, competitor radius mapping (spawn when Local Service detected AND DataForSEO MCP available)
-   - `seo-google` -- CWV field data (CrUX), URL indexation (GSC), organic traffic (GA4) (spawn when Google API credentials detected via `"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run google_auth.py --check`)
-   - `seo-backlinks` -- Backlink profile data: DA/PA, referring domains, anchor text, toxic links (spawn when Moz or Bing API credentials detected via `"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run backlinks_auth.py --check`, or always include Common Crawl domain-level metrics)
-   - `seo-cluster` -- Semantic clustering analysis (spawn when content strategy signals detected: blog, pillar pages, topic clusters)
-   - `seo-sxo` -- Search experience analysis: page-type mismatch, user stories, persona scoring (always include in full audits)
-   - `seo-drift` -- Drift analysis: compare against stored baseline (spawn when drift baseline exists for the URL via `"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run drift_history.py <url>`)
-   - `seo-ecommerce` -- Product schema, marketplace intelligence (spawn when E-commerce industry detected)
-5. **Score** -- aggregate into SEO Health Score (0-100)
-6. **Persist audit artifacts** -- write all outputs under `{domain}-audit/`
-7. **Report** -- generate prioritized action plan and optional PDF/HTML report
+## Processo
 
-## Crawl Configuration
+1. **Renderizar a home**: use `"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run render_page.py <url> --mode auto --json` para capturar HTML bruto, HTML renderizado, texto extraído, status de SPA e dados de acessibilidade quando necessário
+2. **Detectar o tipo de negócio**: analise os sinais da home conforme o orquestrador `seo`
+3. **Rastrear o site**: siga links internos até 500 páginas, respeitando o robots.txt
+4. **Delegar aos subagentes** (se disponíveis; senão, rode em linha, em sequência):
+   - `seo-technical` -- robots.txt, sitemaps, canonicals, Core Web Vitals, headers de segurança
+   - `seo-content` -- E-E-A-T, legibilidade, conteúdo raso, prontidão para citação por IA
+   - `seo-schema` -- detecção, validação, recomendações de geração
+   - `seo-sitemap` -- análise de estrutura, quality gates, páginas faltantes
+   - `seo-performance` -- medições de LCP, INP, CLS; screenshots, teste mobile, análise da dobra (render em navegador headless)
+   - `seo-geo` -- acesso de crawlers de IA, llms.txt, citabilidade, sinais de menção de marca
+   - `seo-local` -- sinais do GBP, consistência de NAP, avaliações, schema local, fatores locais por setor (acione quando detectar negócio local: loja física, SAB ou tipo híbrido)
+   - `seo-maps` -- geo-grid de ranking, auditoria do GBP, inteligência de avaliações, raio de concorrentes (acione quando detectar negócio local E o MCP do DataForSEO estiver disponível)
+   - `seo-google` -- dados de campo de CWV (CrUX), indexação de URL (GSC), tráfego orgânico (GA4) (acione quando houver credenciais de API do Google, detectadas via `"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run google_auth.py --check`)
+   - `seo-backlinks` -- perfil de backlinks: DA/PA, domínios de referência, âncoras, links tóxicos (acione quando houver credenciais de Moz ou Bing, detectadas via `"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run backlinks_auth.py --check`; ou inclua sempre as métricas por domínio do Common Crawl)
+   - `seo-cluster` -- análise de clusters semânticos (acione quando houver sinais de estratégia de conteúdo: blog, páginas pilar, clusters de tema)
+   - `seo-sxo` -- experiência de busca: descasamento de tipo de página, user stories, pontuação por persona (inclua sempre em auditoria completa)
+   - `seo-drift` -- análise de drift: compara com a baseline guardada (acione quando existir baseline para a URL, via `"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run drift_history.py <url>`)
+   - `seo-ecommerce` -- schema de produto, inteligência de marketplace (acione quando detectar e-commerce)
+5. **Pontuar** -- agregue no SEO Health Score (0-100)
+6. **Persistir os artefatos da auditoria** -- grave todas as saídas em `{domain}-audit/`
+7. **Relatar** -- gere o plano de ação priorizado e, opcionalmente, o relatório em PDF/HTML
+
+## Configuração do rastreio
 
 ```
 Max pages: 500
@@ -48,18 +51,18 @@ Concurrent requests: 5
 Delay between requests: 1 second
 ```
 
-## Output Files
+## Arquivos de saída
 
-- `{domain}-audit/FULL-AUDIT-REPORT.md`: Comprehensive findings
-- `{domain}-audit/ACTION-PLAN.md`: Prioritized recommendations (Critical > High > Medium > Low)
-- `{domain}-audit/audit-data.json`: Structured audit envelope for report generation
-- `{domain}-audit/findings/*.md`: Per-category specialist findings (`technical.md`, `content.md`, `schema.md`, `performance.md`, `visual.md`, etc.)
-- `{domain}-audit/screenshots/`: Desktop + mobile captures (if Playwright available)
-- **PDF Report** (recommended): Generate a professional A4 PDF using `"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run google_report.py --type full --data {domain}-audit/audit-data.json --domain <domain> --output-dir {domain}-audit/`. This produces a white-cover enterprise report with TOC, executive summary, charts (Lighthouse gauges, query bars, index donut), metric cards, threshold tables, prioritized recommendations with effort estimates, and implementation roadmap. Always offer PDF generation after completing an audit.
+- `{domain}-audit/FULL-AUDIT-REPORT.md`: achados completos
+- `{domain}-audit/ACTION-PLAN.md`: recomendações priorizadas (Critical > High > Medium > Low)
+- `{domain}-audit/audit-data.json`: envelope estruturado da auditoria para gerar o relatório
+- `{domain}-audit/findings/*.md`: achados por especialista (`technical.md`, `content.md`, `schema.md`, `performance.md` etc.)
+- `{domain}-audit/screenshots/`: capturas desktop + mobile (se o Playwright estiver disponível)
+- **Relatório em PDF** (recomendado): gere um PDF A4 profissional com `"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run google_report.py --type full --data {domain}-audit/audit-data.json --domain <domain> --output-dir {domain}-audit/`. Ele produz um relatório com capa branca, sumário, resumo executivo, gráficos (medidores do Lighthouse, barras de consultas, rosca de indexação), cartões de métrica, tabelas de limiar, recomendações priorizadas com estimativa de esforço e roadmap de implementação. Sempre ofereça gerar o PDF ao concluir uma auditoria.
 
-## Structured Audit Data Envelope
+## Envelope estruturado da auditoria
 
-Write `{domain}-audit/audit-data.json` with this shape so `"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run google_report.py --type full --data {domain}-audit/audit-data.json --domain <domain> --output-dir {domain}-audit/` can generate a report even when Google API data is unavailable:
+Grave `{domain}-audit/audit-data.json` com este formato, para que `"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run google_report.py --type full --data {domain}-audit/audit-data.json --domain <domain> --output-dir {domain}-audit/` consiga gerar o relatório mesmo sem dados da API do Google (mantenha as chaves e os valores de `severity` exatamente como abaixo):
 
 ```json
 {
@@ -99,85 +102,85 @@ Write `{domain}-audit/audit-data.json` with this shape so `"${CLAUDE_PROJECT_DIR
 }
 ```
 
-## Scoring Weights
+## Pesos da pontuação
 
-| Category | Weight |
+| Categoria | Peso |
 |----------|--------|
-| Technical SEO | 22% |
-| Content Quality | 23% |
-| On-Page SEO | 20% |
-| Schema / Structured Data | 10% |
+| SEO técnico (Technical SEO) | 22% |
+| Qualidade de conteúdo (Content Quality) | 23% |
+| SEO on-page (On-Page SEO) | 20% |
+| Schema / dados estruturados | 10% |
 | Performance (CWV) | 10% |
-| AI Search Readiness | 10% |
-| Images | 5% |
+| Prontidão para busca por IA (AI Search Readiness) | 10% |
+| Imagens | 5% |
 
-## Report Structure
+## Estrutura do relatório
 
-### Executive Summary
-- Overall SEO Health Score (0-100)
-- Business type detected
-- Top 5 critical issues
-- Top 5 quick wins
+### Resumo executivo
+- SEO Health Score geral (0-100)
+- Tipo de negócio detectado
+- Top 5 problemas críticos
+- Top 5 ganhos rápidos
 
-### Technical SEO
-- Crawlability issues
-- Indexability problems
-- Security concerns
-- Core Web Vitals status
+### SEO técnico
+- Problemas de rastreabilidade
+- Problemas de indexabilidade
+- Questões de segurança
+- Status dos Core Web Vitals
 
-### Content Quality
-- E-E-A-T assessment
-- Thin content pages
-- Duplicate content issues
-- Readability scores
+### Qualidade de conteúdo
+- Avaliação de E-E-A-T
+- Páginas com conteúdo raso
+- Conteúdo duplicado
+- Notas de legibilidade
 
-### On-Page SEO
-- Title tag issues
-- Meta description problems
-- Heading structure
-- Internal linking gaps
+### SEO on-page
+- Problemas de title tag
+- Problemas de meta description
+- Estrutura de títulos
+- Lacunas de link interno
 
-### Schema & Structured Data
-- Current implementation
-- Validation errors
-- Missing opportunities
+### Schema e dados estruturados
+- Implementação atual
+- Erros de validação
+- Oportunidades faltantes
 
 ### Performance
-- LCP, INP, CLS scores
-- Resource optimization needs
-- Third-party script impact
+- Notas de LCP, INP, CLS
+- Necessidades de otimização de recursos
+- Impacto de scripts de terceiros
 
-### Images
-- Missing alt text
-- Oversized images
-- Format recommendations
+### Imagens
+- Alt text ausente
+- Imagens pesadas demais
+- Recomendações de formato
 
-### AI Search Readiness
-- Citability score
-- Structural improvements
-- Authority signals
+### Prontidão para busca por IA
+- Pontuação de citabilidade
+- Melhorias estruturais
+- Sinais de autoridade
 
-## Priority Definitions
+## Definição de prioridades
 
-- **Critical**: Blocks indexing or causes penalties (fix immediately)
-- **High**: Significantly impacts rankings (fix within 1 week)
-- **Medium**: Optimization opportunity (fix within 1 month)
-- **Low**: Nice to have (backlog)
+- **Critical**: bloqueia indexação ou causa penalidade (corrigir imediatamente)
+- **High**: impacta o ranking de forma significativa (corrigir em até 1 semana)
+- **Medium**: oportunidade de otimização (corrigir em até 1 mês)
+- **Low**: desejável (backlog)
 
-## DataForSEO Integration (Optional)
+## Integração com DataForSEO (opcional)
 
-If DataForSEO MCP tools are available, spawn the `seo-dataforseo` agent alongside existing subagents to enrich the audit with live data: real SERP positions, backlink profiles with spam scores, on-page analysis (Lighthouse), business listings, and AI visibility checks (ChatGPT scraper, LLM mentions).
+Se as ferramentas MCP do DataForSEO estiverem disponíveis, acione o agente `seo-dataforseo` junto com os demais subagentes para enriquecer a auditoria com dados ao vivo: posições reais na SERP, perfis de backlinks com spam score, análise on-page (Lighthouse), listagens de negócio e checagens de visibilidade em IA (ChatGPT scraper, menções em LLMs).
 
-## Google API Integration (Optional)
+## Integração com a API do Google (opcional)
 
-If Google API credentials are configured (`"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run google_auth.py --check`), spawn the `seo-google` agent to enrich the audit with real Google field data: CrUX Core Web Vitals (replaces lab-only estimates), GSC URL indexation status, search performance (clicks, impressions, CTR), and GA4 organic traffic trends. The Performance (CWV) category score benefits most from field data.
+Se houver credenciais de API do Google configuradas (`"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run google_auth.py --check`), acione o agente `seo-google` para enriquecer a auditoria com dados de campo reais do Google: Core Web Vitals do CrUX (substituem estimativas só de laboratório), status de indexação de URL no GSC, desempenho de busca (cliques, impressões, CTR) e tendência de tráfego orgânico no GA4. A nota da categoria Performance (CWV) é a que mais se beneficia de dado de campo.
 
-## Error Handling
+## Tratamento de erros
 
-| Scenario | Action |
+| Cenário | Ação |
 |----------|--------|
-| URL unreachable (DNS failure, connection refused) | Report the error clearly. Do not guess site content. Suggest the user verify the URL and try again. |
-| robots.txt blocks crawling | Report which paths are blocked. Analyze only accessible pages and note the limitation in the report. |
-| Rate limiting (429 responses) | Back off and reduce concurrent requests. Report partial results with a note on which sections could not be completed. |
-| Timeout on large sites (500+ pages) | Cap the crawl at the timeout limit. Report findings for pages crawled and estimate total site scope. |
-| Subagent hits its `maxTurns` budget on a large site | Findings are not lost: every audit subagent writes a partial `output_dir/findings/*.md` after its first analysis pass and overwrites it with the complete findings before finishing. Read whatever findings file exists and merge it into the report, noting it may be partial. |
+| URL inacessível (falha de DNS, conexão recusada) | Relate o erro com clareza. Não adivinhe o conteúdo do site. Sugira ao usuário conferir a URL e tentar de novo. |
+| robots.txt bloqueia o rastreio | Relate quais caminhos estão bloqueados. Analise só as páginas acessíveis e registre a limitação no relatório. |
+| Limite de taxa (respostas 429) | Recue e reduza as requisições simultâneas. Relate resultados parciais, indicando quais seções não puderam ser concluídas. |
+| Timeout em site grande (500+ páginas) | Limite o rastreio ao teto de tempo. Relate os achados das páginas rastreadas e estime o tamanho total do site. |
+| Subagente atinge o orçamento de `maxTurns` num site grande | Os achados não se perdem: todo subagente de auditoria grava um `output_dir/findings/*.md` parcial após a primeira passada de análise e o sobrescreve com os achados completos antes de terminar. Leia o arquivo de achados que existir e incorpore ao relatório, indicando que pode estar parcial. |

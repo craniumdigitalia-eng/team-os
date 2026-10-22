@@ -2,7 +2,7 @@
 
 > Extraído do SKILL.md — carregar sob demanda.
 
-Dois hooks de qualidade fazem parte do **settings padrão** de todo projeto team-os (registrados pelo `scripts/ensure-settings.sh` e pelo `*install`); o terceiro (`TeammateIdle`) é receita **opcional** por projeto.
+Seis hooks de qualidade fazem parte do **settings padrão** de todo projeto team-os (registrados pelo `scripts/ensure-settings.sh`, que o `*install` chama): **TaskCreated** → `task-quality.sh`; **TaskCompleted** → `check-story-progress.sh`, `check-social-progress.sh`, `check-proposal-progress.sh`, `check-finance-progress.sh`, `check-legal-progress.sh`. Mais dois de **economia de tokens** (PreToolUse, também padrão): `guard-smart-memory-read.sh` e `guard-message-size.sh` — ver abaixo. `TeammateIdle` é receita **opcional** por projeto. Os scripts vivem em `.claude/hooks/` (distribuídos pelo `*propagate`) e são testados pelo `team-os-creator/scripts/test-hooks.sh`.
 
 ## TaskCreated — gate de qualidade de task (PADRÃO)
 
@@ -22,7 +22,7 @@ Registro (o `ensure-settings.sh` garante — não edite à mão):
 
 ## TaskCompleted — gate de evidência (PADRÃO)
 
-`check-story-progress.sh` roda quando uma task é marcada como concluída e valida o progresso da story: **story só fecha com evidência** (commits/artefatos reais, ACs checados). Complementa a doutrina "Não confie no relato" do Lead OS — o hook barra o fechamento sem evidência antes mesmo de o lead verificar.
+`check-story-progress.sh` roda quando uma task é marcada como concluída e valida o progresso da story: **story só fecha com evidência** (`## QA Results` ou `status: done|in-review` na story). Complementa a doutrina "Não confie no relato" do Lead OS — o hook barra o fechamento sem evidência antes mesmo de o lead verificar. Os outros quatro gates do mesmo evento — `check-social-progress.sh` (publicação social só com aprovação VERA/strategist), `check-proposal-progress.sh` (proposta só com PASS do `sales-qa` + confirmação do usuário), `check-finance-progress.sh` (execução financeira só com PASS do `finance-qa` + confirmação) e `check-legal-progress.sh` (saída jurídica só com PASS do `legal-qa` + confirmação) — seguem o mesmo padrão: **a squad prepara, o humano executa**.
 
 Registro (o `ensure-settings.sh` garante — não edite à mão):
 ```json
@@ -30,13 +30,44 @@ Registro (o `ensure-settings.sh` garante — não edite à mão):
   "hooks": {
     "TaskCompleted": [{
       "matcher": "",
-      "hooks": [{ "type": "command", "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/check-story-progress.sh" }]
+      "hooks": [
+        { "type": "command", "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/check-story-progress.sh" },
+        { "type": "command", "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/check-social-progress.sh" },
+        { "type": "command", "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/check-proposal-progress.sh" },
+        { "type": "command", "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/check-finance-progress.sh" },
+        { "type": "command", "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/check-legal-progress.sh" }
+      ]
     }]
   }
 }
 ```
 
 > Se algum desses scripts faltar em `.claude/hooks/` do projeto, o `ensure-settings.sh` avisa — rode `/team-os-creator *propagate` no CT (os hooks são distribuídos de lá).
+
+## PreToolUse — economia de tokens como garantia dura (PADRÃO)
+
+**`guard-smart-memory-read.sh`** (matcher `Read|Bash`) — "buscar em vez de ler":
+- **bloqueia** qualquer leitura de `docs/smart-memory/_archive/**` (Read, ou `cat|head|tail|less|more|sed -n|awk|bat` no Bash);
+- **bloqueia** leitura de pasta inteira: glob (`cat docs/smart-memory/*`), diretório como alvo, `find docs/smart-memory -exec cat`, `find … | xargs cat`, `grep -r`/`rg` sem `-l`/`-c`/`-q` numa pasta da smart-memory (`grep -rl` é busca → passa);
+- **orçamento L2:** notas fora do L0 (`INDEX.md`, qualquer `DIGEST.md`, `stories/active/*.md`, `stories/BACKLOG.md`, `stories/done/LEDGER.md`, `_inbox/*`, `project/*.md`) contam por sessão em `${TMPDIR:-/tmp}/team-os-l2-<session_id>.count` (reler não conta). A 4ª nota distinta (`TEAM_OS_L2_BUDGET`, default 3) é bloqueada; um Bash com `sm-find.sh` zera o contador. Sem `session_id` → não conta. Escrever (`cat > nota.md <<EOF`) não é leitura. JSON inválido → passa.
+
+**`guard-message-size.sh`** (matcher `SendMessage`) — mensagem curta:
+- **bloqueia** `message` (string) com mais de `TEAM_OS_MSG_MAX_LINES` (20) linhas ou `TEAM_OS_MSG_MAX_CHARS` (1.500) caracteres Unicode — "resumo primeiro; detalhe vai em arquivo na smart-memory e a mensagem leva o path";
+- **passa** `message` que não é string (JSON de protocolo — shutdown, plan approval) e a mensagem cuja 1ª linha começa com `[handoff]` (resultado final de teammate ao lead) até 60 linhas / 4.000 caracteres (`TEAM_OS_HANDOFF_MAX_LINES`/`_CHARS`). JSON inválido → passa.
+
+Registro (o `ensure-settings.sh` garante — não edite à mão):
+```json
+{
+  "hooks": {
+    "PreToolUse": [
+      { "matcher": "Read|Bash",
+        "hooks": [{ "type": "command", "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/guard-smart-memory-read.sh" }] },
+      { "matcher": "SendMessage",
+        "hooks": [{ "type": "command", "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/guard-message-size.sh" }] }
+    ]
+  }
+}
+```
 
 ## TeammateIdle — OPCIONAL, e CUIDADO com loop
 
@@ -76,7 +107,9 @@ Versão **condicional segura** ("mantém trabalhando" sem loop): `exit 2` **apen
 #!/bin/bash
 # idle-nudge.sh — exemplo de TeammateIdle SEM loop infinito.
 # Só devolve exit 2 (bloqueia o idle, com mensagem) se houver task pendente na fila.
-PENDING=$(claude tasks list 2>/dev/null | grep -c 'pending' || true)
+# Como contar tasks pendentes depende do seu projeto (não há CLI oficial para a
+# task list do Agent Teams). Exemplo: um arquivo de fila mantido pelo lead.
+PENDING=$(grep -c '^- \[ \]' "${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/docs/smart-memory/_session/queue.md" 2>/dev/null || echo 0)
 if [ "${PENDING:-0}" -gt 0 ]; then
   echo "Há $PENDING task(s) pendente(s) na fila — faça self-claim da próxima compatível." >&2
   exit 2   # condicional: SÓ quando há trabalho real esperando

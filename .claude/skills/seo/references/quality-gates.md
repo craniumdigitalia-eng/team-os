@@ -107,7 +107,7 @@ Google's doorway page algorithm penalizes programmatic location pages with thin/
 > when the body copy is entirely original; this heuristic check does not
 > claim any specific Google ranking or spam update targeted this pattern.
 > Check with
-> `"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run metadata_template.py --pairs-file <file> --json`.
+> `"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run metadata_template.py --pairs-file <file> --json`.
 > The CTA requirement above means a CTA written for this page, not one
 > appended to every page by a template.
 

@@ -1,8 +1,8 @@
 ---
 name: brand-visual-system
-description: Método da identidade visual — direções com moodboard e racional por traço, sistema de cor com papéis e contraste medido, tipografia com hierarquia e fallbacks, grid e espaçamento, iconografia e formas, fotografia e imagem, movimento, hierarquia de logos conforme a arquitetura, proibições, aplicações-chave e a estrutura do brandbook, com Claude Design como ferramenta padrão. Use ao propor direções visuais, construir o sistema visual ou especificar o brandbook a partir da plataforma aprovada.
-version: "1.0"
-updated: "2026-09-16"
+description: "Método da identidade visual — direções com moodboard e racional, sistema de cor com papéis e contraste medido, tipografia com hierarquia, grid, iconografia, fotografia, movimento, hierarquia de logos, proibições, aplicações-chave e estrutura do brandbook, com Claude Design como ferramenta padrão. Use ao propor direções visuais, construir o sistema visual ou especificar o brandbook."
+version: "1.1"
+updated: "2026-10-20"
 ---
 
 # Brand Visual System — a plataforma que se vê
@@ -56,6 +56,8 @@ Versões (principal, reduzida, símbolo, monocromática), área de proteção, t
 
 Lista explícita, uma linha cada: cores fora da paleta, fontes fora do sistema, distorção de logo, combinações proibidas, estilos de imagem recusados, elementos do concorrente mapeado que a marca não adota. Proibição é o que torna o sistema auditável.
 
+Herde o **registro de sinais de `/ui-craft` (§3)**: cada sinal que a marca não adota entra como proibição (ex.: "texto com gradiente", "eyebrow em caixa alta acima do título"); o que a marca adota de propósito entra com a justificativa, para o QA não marcar como default. Tiques de texto ficam com `/copy-humanize`.
+
 ## 11. Aplicações-chave
 
 As 6–10 peças que mais aparecem, especificadas no canvas: avatar e capa de perfil, post padrão e carrossel (`/social-key-visual` para o key visual de campanha), hero do site, slide de deck (capa + conteúdo), assinatura de e-mail, papelaria digital. Cada uma com a regra que exemplifica.
@@ -67,3 +69,19 @@ Estrutura em ordem: plataforma em 1 página (copiada, não parafraseada) → voz
 ## 13. Template
 
 `templates/brand-visual.md` — sistema completo (§3 a §11) com rastreio por seção e link do canvas.
+
+## 14. Gravação no formato DESIGN.md
+
+O sistema aprovado também é gravado como **`DESIGN.md`** na smart-memory — o arquivo que dev, sites e social leem antes de produzir qualquer tela ou peça. Local: `docs/smart-memory/agents/brand/visual/DESIGN.md`; sem squad brand no projeto, a área ux de sites ou dev (`docs/smart-memory/agents/sites/ux/DESIGN.md` ou `docs/smart-memory/agents/dev/ux/DESIGN.md`). Um arquivo por projeto; atualizado in-place.
+
+Seções, nesta ordem (estilo Google Stitch):
+
+1. **Visão** — 3–5 frases: atmosfera, modo (Persuadir/Operar/Ler), assinatura, `↳ traço` da plataforma.
+2. **Cores com papéis** — nome, hex, papel (fundo, tinta, acento, estado) e contraste medido.
+3. **Tipografia** — famílias, papéis, escala (≤5 tamanhos), peso, entrelinha, tracking.
+4. **Espaçamento e layout** — escala, grid, larguras máximas, raio por hierarquia, elevação.
+5. **Componentes** — botão, campo, card, navegação: estados (padrão, hover, foco, desabilitado, erro).
+6. **Movimento** — tokens de easing e duração, o que anima e o que não anima, momento de assinatura, reduced-motion.
+7. **Do / Don't** — o que fazer e as proibições do §10 (inclui os sinais herdados de `/ui-craft`).
+
+Nunca copie, adapte ou parta de `DESIGN.md` de marca de terceiro (coleções de "design de empresa X"): o arquivo descreve **esta** marca, com rastreio à plataforma.

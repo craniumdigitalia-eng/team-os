@@ -5,11 +5,7 @@
     "SLASH_COMMAND_TOOL_CHAR_BUDGET": "80000"
   },
   "permissions": {
-    "allow": [
-      "Bash(curl:*)",
-      "Bash(supabase:*)",
-      "Bash(npx supabase:*)"
-    ]
+    "allow": []
   },
   "subagentPromptCacheTtl": "1h",
   "worktree": {
@@ -32,6 +28,24 @@
           {
             "type": "command",
             "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/block-worktree.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "Read|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/guard-smart-memory-read.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "SendMessage",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/guard-message-size.sh"
           }
         ]
       }

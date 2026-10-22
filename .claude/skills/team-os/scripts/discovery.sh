@@ -12,16 +12,18 @@
 #   --dry-run        mostra o que faria, sem escrever
 #   --areas "a,b,c"  override manual das áreas de agents/ (ignora a detecção por squad)
 #
-# Áreas de agents/: derivadas das squads INSTALADAS no projeto (ls .claude/agents/ do target):
-#   dev     → research, qa, ux, bi, data-engineer, data-performance
-#   sites   → research, qa, ux, data
-#   social  → content, design, photo, video, publisher
-#   traffic → traffic, qa, copy, automation
-#   pm      → portfolio, qa, processos
+# Áreas de agents/: convenção `agents/<squad>/<área>/` (DIGEST.md + arquivos).
+#   Fonte primária: a linha machine-readable de cada agente instalado em
+#   $TARGET/.claude/agents/*.md:
+#     **Área na smart-memory:** `docs/smart-memory/agents/<squad>/<área>/`
+#   Fallback (agente sem a linha): tabela squad_areas por prefixo do agente.
 # Squads combinam (união). Sem .claude/agents/ → fallback (dev).
+# --repair também MIGRA layouts antigos (mv, nunca rm; tudo logado):
+#   agents/<área>/ sem squad → agents/<squad>/<área>/ quando só há UMA squad instalada;
+#   docs/smart-memory/pm/*.md → agents/pm/*.md quando a squad pm está instalada.
 #
 # Saída: cria docs/smart-memory/{INDEX.md, project/, decisions/,
-#        stories/{backlog,active,in-review,done}, agents/<área>/, _inbox/, _archive/}
+#        stories/{backlog,active,in-review,done}, agents/<squad>/<área>/, _inbox/, _archive/}
 #        com conteúdo detectado (architecture e modules vivem como arquivos em project/).
 # Pontos narrativos (domínio/propósito) ficam marcados com <!-- TODO --> para o agente enriquecer.
 
@@ -104,39 +106,88 @@ want() { # $1=path-absoluto-dentro-da-SM
 AREAS=""
 add_area() { case " $AREAS " in *" $1 "*) : ;; *) AREAS="$AREAS${AREAS:+ }$1" ;; esac; }
 
-squad_areas() { # $1=squad
+# Squads conhecidas — nunca lista escrita à mão em outro lugar. Fontes, em ordem:
+#   1. presets/*.yaml do pack (campo `name:`), quando o script roda dentro do CT;
+#   2. fallback fixo abaixo (o destino não tem presets);
+#   3. prefixo dos agentes do destino que declaram a linha "Área na smart-memory" (squads
+#      novas do pack e agentes próprios entram sem editar este arquivo).
+KNOWN_SQUADS_FALLBACK="dev sites social instagram tiktok youtube linkedin traffic pm sales brand finance legal seo security"
+KNOWN_SQUADS=""
+add_squad() { case " $KNOWN_SQUADS " in *" $1 "*) : ;; *) KNOWN_SQUADS="$KNOWN_SQUADS${KNOWN_SQUADS:+ }$1" ;; esac; }
+_DISC_DIR="$(cd "$(dirname "$0")" 2>/dev/null && pwd)"
+for _pdir in "$TARGET/.claude/skills/team-os-creator/presets" "$_DISC_DIR/../../team-os-creator/presets"; do
+  for _y in "$_pdir"/*.yaml; do
+    [ -f "$_y" ] || continue
+    _n="$(sed -n 's/^name:[[:space:]]*["'\'']\{0,1\}\([a-z][a-z0-9]*\)["'\'']\{0,1\}[[:space:]]*$/\1/p' "$_y" | head -1)"
+    [ -n "$_n" ] && add_squad "$_n"
+  done
+done
+for _s in $KNOWN_SQUADS_FALLBACK; do add_squad "$_s"; done
+for _af in "$TARGET/.claude/agents/"*-*.md; do
+  [ -f "$_af" ] || continue
+  grep -q '^\*\*Área na smart-memory:\*\*' "$_af" 2>/dev/null || continue
+  _b="$(basename "$_af" .md)"; add_squad "${_b%%-*}"
+done
+
+# Fallback por squad — usado SÓ para agente sem a linha "Área na smart-memory".
+squad_areas() { # $1=squad → áreas (sem o prefixo da squad)
   case "$1" in
     dev)     echo "research qa ux bi data-engineer data-performance" ;;
-    sites)   echo "research qa ux data" ;;
-    social)  echo "content design photo video publisher" ;;
-    traffic) echo "traffic qa copy automation" ;;
-    pm)      echo "portfolio qa processos" ;;
+    sites)   echo "research qa ux data-engineer" ;;
+    social)  echo "design photo video" ;;   # estúdio comum (sob brief de uma squad de plataforma)
+    instagram|tiktok|youtube|linkedin) echo "strategy content publisher" ;;
+    traffic) echo "traffic qa copy automation bi design research meta google tiktok strategy" ;;
+    pm)      echo "analyst client coach data demand engineer ops planner qa reporter" ;;
     sales)   echo "discovery strategy planning finance copy design qa closer" ;;
     brand)   echo "research strategy architecture voice visual tracking rollout qa" ;;
     finance) echo "research strategy planning controller billing tax reporting qa" ;;
     legal)   echo "research strategy architecture drafting compliance disputes ops qa" ;;
+    seo)     echo "technical performance schema sitemap content cluster geo local ecommerce backlinks sxo drift google architect qa" ;;
+    security) echo "architecture appsec ai-code secrets privacy incident qa" ;;
   esac
 }
 
+# Área declarada no body do agente → "squad/área" (ou "squad" se o agente usa a raiz da squad)
+agent_area() { # $1=arquivo do agente → stdout: caminho relativo a agents/ (sem barra final) ou vazio
+  grep -m1 '^\*\*Área na smart-memory:\*\*' "$1" 2>/dev/null \
+    | sed -n 's|.*`docs/smart-memory/agents/\([^`]*\)`.*|\1|p' | sed 's|/*$||'
+}
+
 SQUADS_DETECTED=""
+SQUADS_LIST=""            # squads instaladas (separadas por espaço)
+FALLBACK_AGENTS=""        # agentes sem a linha (usaram a tabela)
 if [ -n "$AREAS_OVERRIDE" ]; then
   for a in $(echo "$AREAS_OVERRIDE" | tr ',' ' '); do
     [ -n "$a" ] && add_area "$a"
   done
   SQUADS_DETECTED="(override --areas)"
 elif [ -d "$TARGET/.claude/agents" ]; then
-  for sq in dev sites social traffic pm sales brand finance legal; do
-    if ls "$TARGET/.claude/agents/$sq-"*.md >/dev/null 2>&1; then
-      SQUADS_DETECTED="$SQUADS_DETECTED${SQUADS_DETECTED:+, }$sq"
-      for a in $(squad_areas "$sq"); do add_area "$a"; done
+  for sq in $KNOWN_SQUADS; do
+    ls "$TARGET/.claude/agents/$sq-"*.md >/dev/null 2>&1 || continue
+    SQUADS_DETECTED="$SQUADS_DETECTED${SQUADS_DETECTED:+, }$sq"
+    SQUADS_LIST="$SQUADS_LIST${SQUADS_LIST:+ }$sq"
+    for af in "$TARGET/.claude/agents/$sq-"*.md; do
+      [ -f "$af" ] || continue
+      area="$(agent_area "$af")"
+      if [ -n "$area" ]; then
+        add_area "$area"
+      else
+        FALLBACK_AGENTS="$FALLBACK_AGENTS${FALLBACK_AGENTS:+ }$(basename "$af" .md)"
+      fi
+    done
+    # Fallback só para os agentes sem a linha: cobre a squad inteira pela tabela
+    if printf '%s' "$FALLBACK_AGENTS" | grep -qE "(^| )$sq-"; then
+      for a in $(squad_areas "$sq"); do add_area "$sq/$a"; done
     fi
   done
 fi
 if [ -z "$AREAS" ]; then
   # fallback: sem .claude/agents/ (ou sem squad reconhecida) → áreas da squad dev
-  for a in $(squad_areas dev); do add_area "$a"; done
+  for a in $(squad_areas dev); do add_area "dev/$a"; done
   [ -z "$SQUADS_DETECTED" ] && SQUADS_DETECTED="(fallback dev — sem .claude/agents/)"
+  [ -z "$SQUADS_LIST" ] && SQUADS_LIST="dev"
 fi
+[ -n "$FALLBACK_AGENTS" ] && echo "AVISO: agente(s) sem a linha '**Área na smart-memory:**' — áreas pela tabela: $FALLBACK_AGENTS"
 
 # ── Helpers de detecção (dependency-free) ────────────────────────────────────
 hasf() { [ -e "$TARGET/$1" ]; }
@@ -216,6 +267,39 @@ hasf pnpm-lock.yaml && PKG_MGR="pnpm"
 MONOREPO="não"
 { hasf turbo.json || hasf pnpm-workspace.yaml || { hasf package.json && grep -q '"workspaces"' "$TARGET/package.json"; }; } && MONOREPO="sim"
 
+# ── Automações sugeridas (só SUGESTÃO em project/tech-stack.md — nada é aplicado) ──
+# Cada item diz como ativar; o lead só aplica com OK explícito do usuário.
+FMT_TOOLS=""
+{ hasf .prettierrc || hasf .prettierrc.json || hasf .prettierrc.js || hasf .prettierrc.cjs || hasf .prettierrc.mjs \
+  || hasf .prettierrc.yaml || hasf .prettierrc.yml || hasf prettier.config.js || hasf prettier.config.cjs \
+  || hasf prettier.config.mjs || pkg_has '"prettier"'; } && FMT_TOOLS="${FMT_TOOLS}${FMT_TOOLS:+, }Prettier"
+{ hasf .eslintrc || hasf .eslintrc.js || hasf .eslintrc.cjs || hasf .eslintrc.json || hasf .eslintrc.yml \
+  || hasf eslint.config.js || hasf eslint.config.mjs || hasf eslint.config.cjs || hasf eslint.config.ts \
+  || pkg_has '"eslint"'; } && FMT_TOOLS="${FMT_TOOLS}${FMT_TOOLS:+, }ESLint"
+{ hasf biome.json || hasf biome.jsonc || pkg_has '"@biomejs/biome"'; } && FMT_TOOLS="${FMT_TOOLS}${FMT_TOOLS:+, }Biome"
+ENV_FILES=$(find "$TARGET" -maxdepth 3 \( -name node_modules -o -name .git -o -name .venv -o -name vendor \) -prune \
+  -o -type f \( -name '.env' -o -name '.env.*' \) -print 2>/dev/null | sed "s|^$TARGET/||" | sort | head -5 | tr '\n' ' ' | sed 's/ *$//')
+LOCKFILES=""
+for lf in package-lock.json pnpm-lock.yaml yarn.lock bun.lockb poetry.lock Cargo.lock; do
+  hasf "$lf" && LOCKFILES="${LOCKFILES}${LOCKFILES:+, }$lf"
+done
+AUTOMATIONS=""
+add_auto() { AUTOMATIONS="${AUTOMATIONS}- $1
+"; }
+[ -n "$FMT_TOOLS" ] && add_auto "**Formatar/lintar ao editar** (detectado: $FMT_TOOLS): hook \`PostToolUse\` (matcher \`Edit|Write|MultiEdit\`) que roda o formatador/linter no arquivo editado. Como ativar: o lead propõe o comando exato do projeto e registra em \`.claude/settings.json\` só com o seu OK."
+[ -n "$ENV_FILES" ] && add_auto "**Bloquear edição de .env** (encontrado: $ENV_FILES): hook opcional \`guard-env-files.sh\` (\`.env.example\`/\`.sample\`/\`.template\` continuam editáveis). Como ativar: a partir do CT, \`install-to-project.sh --with-env-guard\` — só com o seu OK."
+[ -n "$LOCKFILES" ] && add_auto "**Não editar lockfile à mão** ($LOCKFILES): lockfile muda só pelo gerenciador de pacotes. O mesmo \`guard-env-files.sh\` bloqueia a edição manual. Como ativar: \`install-to-project.sh --with-env-guard\` — só com o seu OK."
+[ -n "$FRAMEWORKS" ] && add_auto "**MCP de documentação** (framework: $FRAMEWORKS): considerar o MCP context7 para consultar a doc atual do framework em vez de depender de memória. Como ativar: \`claude mcp add\` pelo usuário — só com o seu OK (servidor externo)."
+if [ -n "$AUTOMATIONS" ]; then
+  AUTOMATIONS_MD="## Automações sugeridas (não aplicadas)
+
+> Só sugestões, detectadas dos arquivos do projeto. **Nada aqui foi ativado.** O lead mostra a lista e aplica cada item só com o OK do usuário.
+
+$AUTOMATIONS"
+else
+  AUTOMATIONS_MD=""
+fi
+
 # ── Mapa de módulos ──────────────────────────────────────────────────────────
 MODULE_DIRS=""
 for base in src app lib packages apps server api components services modules; do
@@ -244,6 +328,44 @@ if [ "$DRY" -eq 1 ]; then
   echo "Módulos    :"
   printf "%b" "$MODULE_DIRS" | sed 's/^/  - /'
   exit 0
+fi
+
+# ── Migração de layout antigo (só --repair; mv, nunca rm; tudo logado) ────────
+if [ "$REPAIR" -eq 1 ] && [ -d "$SM/agents" ]; then
+  n_squads=$(printf '%s\n' $SQUADS_LIST | grep -c .)
+  for old in "$SM/agents"/*/; do
+    [ -d "$old" ] || continue
+    ob="$(basename "$old")"
+    case " $KNOWN_SQUADS " in *" $ob "*) continue ;; esac   # já é pasta de squad
+    if [ "$n_squads" -eq 1 ]; then
+      dest="$SM/agents/$SQUADS_LIST/$ob"
+      if [ -e "$dest" ]; then
+        echo "  migração: agents/$ob/ NÃO movida — agents/$SQUADS_LIST/$ob/ já existe (resolva à mão)"
+      else
+        mkdir -p "$SM/agents/$SQUADS_LIST"
+        mv "$old" "$dest" && echo "  migração: agents/$ob/ → agents/$SQUADS_LIST/$ob/"
+      fi
+    else
+      echo "  migração: agents/$ob/ sem squad — ambíguo com ${n_squads} squads instaladas ($SQUADS_LIST); mova à mão para agents/<squad>/$ob/"
+    fi
+  done
+fi
+if [ "$REPAIR" -eq 1 ] && [ -d "$SM/pm" ]; then
+  case " $SQUADS_LIST " in
+    *" pm "*)
+      mkdir -p "$SM/agents/pm"
+      for f in "$SM/pm"/*.md; do
+        [ -f "$f" ] || continue
+        fb="$(basename "$f")"
+        if [ -e "$SM/agents/pm/$fb" ]; then
+          echo "  migração: pm/$fb NÃO movido — agents/pm/$fb já existe"
+        else
+          mv "$f" "$SM/agents/pm/$fb" && echo "  migração: pm/$fb → agents/pm/$fb"
+        fi
+      done
+      rmdir "$SM/pm" 2>/dev/null && echo "  migração: pm/ vazia removida (rmdir)" ;;
+    *) echo "  migração: docs/smart-memory/pm/ existe mas a squad pm não está instalada — deixada como está" ;;
+  esac
 fi
 
 # ── Geração ──────────────────────────────────────────────────────────────────
@@ -281,7 +403,7 @@ updated: $DATE
 ## Apontadores
 <!-- - [[nota-relevante]] — por que importa (1 linha) -->
 
-<!-- Regras: máx ~40 linhas por DIGEST · bullets ≤200 chars · nada de prosa.
+<!-- Regras: ~40 linhas por DIGEST (máx 60) · bullets ≤200 chars · nada de prosa.
      Fato novo SUBSTITUI o antigo (mesma linha, data nova) — não acumule histórico. -->
 EOF
 done
@@ -313,7 +435,7 @@ fi
 # Links nominais dos DIGESTs por área
 AGENT_LINKS=""
 for area in $AREAS; do
-  AGENT_LINKS="${AGENT_LINKS}- [[agents/$area/DIGEST]] — resumo vivo da área $area
+  AGENT_LINKS="${AGENT_LINKS}- [[agents/$area/DIGEST]] — resumo vivo da área $area (squad ${area%%/*})
 "
 done
 
@@ -362,7 +484,7 @@ tags: [index, smart-memory]
 
 ### Ativas
 $ACTIVE_LINKS
-## DIGESTs por área (porta de entrada L0)
+## DIGESTs por área — agents/<squad>/<área>/ (porta de entrada L0)
 $AGENT_LINKS
 ## Inbox
 - \`_inbox/\` — anotações baratas da sessão; consolidadas em lote no \`*compact\` (archivist)
@@ -420,6 +542,8 @@ tags: [project, tech-stack]
 | Monorepo | $MONOREPO |
 
 > Detectado automaticamente dos manifestos do projeto. Confirme/complete o que faltar.
+
+$AUTOMATIONS_MD
 EOF
 fi
 

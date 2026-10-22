@@ -791,7 +791,6 @@ FROM intermediate.users;
 - **SQLMesh Model Patterns**: [template-sqlmesh-model.md](template-sqlmesh-model.md)
 - **SQLMesh Testing**: [template-sqlmesh-testing.md](template-sqlmesh-testing.md)
 - **Database Security**: [template-security-audit.md](../../../../data-sql-optimization/assets/cross-platform/template-security-audit.md)
-- **Application Security**: [Software Security AppSec](../../../../software-security-appsec/SKILL.md)
 
 ---
 

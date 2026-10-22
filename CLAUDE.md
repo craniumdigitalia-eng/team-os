@@ -1,59 +1,76 @@
 # team-os — by João Guirunas
 
-Repositório fonte do pack **team-os**: 95 agentes e 107 skills para Claude Code Agent Teams. (Codinome interno do repo: **CT — Centro de Treinamento**.)
+Pack **team-os**: 111 agentes e 124 skills para Claude Code Agent Teams. (Codinome interno do repo: **CT — Centro de Treinamento**.)
 
-> 📖 **Documentação completa: [README.md](./README.md)** — tutorial detalhado das skills principais (`/team-os` e `/team-os-creator`), dos 95 agentes com suas skills relacionadas, do catálogo de skills de apoio, passo a passo, modelo de coordenação, política de modelos e manutenção. Consulte o README como fonte completa; este arquivo traz só as regras operacionais essenciais.
+> 📖 **Documentação completa: [README.md](./README.md)** — tutorial detalhado das skills principais (`/team-os` e `/team-os-creator`), dos 111 agentes com suas skills relacionadas, do catálogo de skills de apoio, passo a passo, modelo de coordenação, política de modelos, hooks e manutenção. Consulte o README como fonte completa; este arquivo traz só as regras operacionais essenciais.
 
 ## O que é este projeto
 
-O CT é a **fonte da verdade** — qualquer alteração em agentes ou skills é feita aqui e propagada para os projetos destino via `/team-os-creator *propagate`. Nunca editar agentes diretamente nos projetos destino.
-→ Detalhes em [README.md §13 — Manutenção do CT](./README.md#13-manutenção-do-ct).
+O CT é a **fonte da verdade** — qualquer alteração em agentes ou skills é feita aqui e propagada para os projetos destino via `/team-os-creator *propagate`. Nunca editar agentes diretamente nos projetos destino; a partir do CT só se roda `*install`/`*propagate` (nunca git ou arquivos de produto num destino).
 
-## As duas skills principais
+Quem baixou o pack (`git clone`) cria os **próprios** agentes com `/team-os-creator *create` (nascem com `origin: custom`, em `presets/custom/`) e recebe as versões novas com `/team-os-creator *update`, que **nunca sobrescreve** o que o usuário criou ou editou (a versão nova fica ao lado, em `<arquivo>.new`, e o usuário escolhe).
+→ [README.md — Instalar e atualizar](./README.md#instalar-e-atualizar) · [README.md §13 — Manutenção do CT](./README.md#13-manutenção-do-ct).
+
+## As skills principais
 
 - **`/team-os`** — Bootstrap e orquestração de sessões Agent Teams. **É distribuída para todos os projetos** (obrigatória — o usuário roda `/team-os` no início de cada sessão). → [README.md §3](./README.md#3-skill-principal-team-os)
-- **`/team-os-creator`** — Factory de agentes. **Única skill exclusiva do CT** — nunca copiada para projetos destino. → [README.md §4](./README.md#4-skill-principal-team-os-creator)
-- **`/maestri-os`** — **Sala de Controle** (recurso opt-in para o Maestri): roteia pedidos entre os terminais dos projetos. Vive numa pasta própria **sem agentes e sem `team-os`**; nunca é propagada sozinha — só via `*install --squads none --extra-skills maestri-os`. → [README.md §6 — Sala de Controle](./README.md#sala-de-controle--maestri-os-recurso-para-o-maestri)
+- **`/team-os-creator`** — Factory de agentes. **Exclusiva do CT** (uma das duas, com a `sala-de-controle`) — nunca copiada para projetos destino. Comandos e flags reais em `.claude/skills/team-os-creator/SKILL.md`. → [README.md §4](./README.md#4-skill-principal-team-os-creator)
+- **`/sala-de-controle`** — **Sala de Controle** das sessões do Claude Code. **Mora no CT, exclusiva do CT** (como o `team-os-creator`; nunca vai para projeto nem se instala — `*install` recusa). Rodar numa sessão do CT lê todas as sessões e a etapa de cada projeto pela smart-memory e abre o painel ao vivo dos agentes em produção (`127.0.0.1:8787`); despacha cada pedido para a sessão certa e propõe a organização de pastas (raiz = `0 | Centro de Treinamento` + negócios). Lê e roteia, **nunca executa em outro projeto**; não cria agentes do pack. Memória em `docs/smart-memory/sala-de-controle/` do CT (fora do git). Pasta de Sala antiga → o `/team-os-creator` avisa e sugere `migrate-sala-to-ct.sh` (simula primeiro; a pasta vai para a Lixeira). → [README.md §6 — Sala de Controle](./README.md#sala-de-controle--sala-de-controle-mora-no-ct)
 
 ## Padrão de agentes
 
 Todo agente do CT segue o **Native Teams Protocol** (detalhado em [README.md §1](./README.md#1-conceitos-fundamentais)):
 - `memory: project` no frontmatter (obrigatório)
-- Bloco `## Native Teams Protocol` no body (comunicação peer-to-peer, TaskList nativo, smart-memory)
-- Sem campo `skills:` no frontmatter (ignorado em Agent Teams)
-- Implementers com hook `block-git-push.sh` (sem `isolation: worktree` — agentes escrevem direto na branch ativa)
-- Política de modelos **Híbrida**: `opus` fixo em architects/reviewers(QA)/strategists; `inherit` nos demais → [README.md §9](./README.md#9-política-de-modelos-híbrido)
+- Bloco `## Native Teams Protocol` no body, byte-idêntico em todos (trocar só via `scripts/migrate-ntp.sh`)
+- Linha `**Área na smart-memory:** \`docs/smart-memory/agents/<squad>/<área>/\`` logo após o H1 — o `discovery.sh` da `team-os` lê essa linha para criar as áreas no projeto destino
+- Sem campo `skills:` no frontmatter (ignorado em Agent Teams); tools `mcp__*` só na forma curta `mcp__<server>` e só servidores de `.claude/skills/team-os-creator/reference/mcp-servers.md`
+- `block-git-push.sh` em **todo agente com Bash exceto os devops** (todas as squads); sem `isolation: worktree` — agentes escrevem direto na branch ativa
+- Política de modelos **Híbrida**: `opus` fixo em architects/planners, QA e strategists (28); `inherit` nos demais (83). Effort por archetype em `.claude/skills/team-os-creator/reference/archetypes.md` (omitido em implementer/devops) → [README.md §9](./README.md#9-política-de-modelos-híbrido)
+
+**Commit, push e CHANGELOG no CT são só do mantenedor** (quem tem o arquivo `.team-os-maintainer` na raiz — ignorado pelo git, só na máquina do criador). Quem apenas usa o pack **não recebe proposta de commit nem de push**: o ciclo dele termina no `*audit`/`*propagate`. O ciclo do mantenedor (manifest, release, push manual) está em [MAINTAINERS.md](./MAINTAINERS.md).
 
 Para criar ou atualizar agentes, use `/team-os-creator` — nunca editar manualmente sem rodar `*audit` depois.
 
+## Smart-memory (convenção do projeto destino)
+
+O CT não versiona `docs/smart-memory/` — ela nasce em cada destino na 1ª sessão de `/team-os` (Discovery Engine). Convenção: `agents/<squad>/<área>/` (um DIGEST.md por área; PM em `agents/pm/*`), `stories/BACKLOG.md` + `stories/{backlog,active,in-review,done}/<id>-<slug>.md`. → `.claude/skills/team-os/reference/estrutura-smart-memory.md` e [README.md §11](./README.md#11-estrutura-do-repositório)
+
 ## Hooks
 
-Os hooks em `.claude/hooks/` são referenciados diretamente no frontmatter dos agentes (ver [README.md §10](./README.md#10-hooks-de-qualidade)):
+14 hooks em `.claude/hooks/`, testados por `scripts/test-hooks.sh` (544 casos, no CI). Descrição completa em [README.md §10](./README.md#10-hooks-de-qualidade):
 
-- `block-git-push.sh` — PreToolUse em **TODO agente com Bash exceto os devops** (todas as squads): push é garantia dura, exclusiva do devops. Cobre `git -C`/`--git-dir`/aliases/multilinha e `gh pr`/`gh api`
-- `block-worktree.sh` — PreToolUse registrado no `.claude/settings.json` de cada projeto (matchers `Agent|Task|EnterWorktree` e `Bash`): bloqueia `isolation: worktree`, EnterWorktree, `git worktree add` **e criação de branch** (`checkout -b`/`switch -c`/`git branch <nome>`) — todo trabalho acontece direto na branch ativa. Complementado por `"worktree": { "bgIsolation": "none" }` no mesmo settings
-- `guard-push-branch.sh` — disponível, mas não ligado em nenhum devops por padrão (política: não travar deploy). Se ligado no PreToolUse: push permitido só na `main`/`master`; fora dela exige pedido explícito do usuário na sessão
-- `task-quality.sh` — hook `TaskCreated` (registrado no settings): rejeita task vaga (título curto/genérico ou sem descrição)
-- `check-story-progress.sh` — hook `TaskCompleted`: task que referencia story só fecha com `## QA Results` ou `status: done|in-review` na story
-- `check-social-progress.sh` — hook `TaskCompleted`: task de publicação social só fecha com aprovação registrada (VERA/strategist)
-- `check-proposal-progress.sh` — hook `TaskCompleted`: task de emissão/envio de proposta (squad sales) só fecha com PASS do `sales-qa` **e** confirmação explícita do usuário
-- `check-finance-progress.sh` — hook `TaskCompleted`: task de execução financeira (pagar, transferir, emitir, recolher, enviar relatório — squad finance) só fecha com PASS do `finance-qa` **e** confirmação explícita do usuário; a squad prepara, o humano executa
-- `check-legal-progress.sh` — hook `TaskCompleted`: task de saída jurídica (enviar minuta/notificação, assinar, protocolar, publicar — squad legal) só fecha com PASS do `legal-qa` **e** confirmação explícita do usuário; a squad prepara, o advogado e o usuário executam
-- `team-os-session-title.sh` — hook `SessionStart` que nomeia a sessão por "projeto · branch" (instalado globalmente em `~/.claude/hooks/` e registrado no `~/.claude/settings.json` pelo `*install`)
+- Guards de git (`PreToolUse`): `block-git-push.sh` (107 agentes) · `guard-push-branch.sh` (disponível, **não ligado** em nenhum devops — política: não travar deploy; se ligado, push só na `main`/`master`) · `block-worktree.sh` (settings.json de cada projeto). Ambos os guards de push bloqueiam shell embutido (`sh -c`, `eval`, `xargs`…).
+- Gates de task (`TaskCreated`/`TaskCompleted`, leem `task_subject`/`task_description`): `task-quality.sh` · `check-story-progress.sh` · `check-social-progress.sh` (social, instagram, tiktok, youtube, linkedin) · `check-proposal-progress.sh` · `check-finance-progress.sh` · `check-legal-progress.sh`
+- Economia de tokens (`PreToolUse`, settings de cada projeto): `guard-smart-memory-read.sh` (bloqueia `_archive/`, pasta inteira e a 4ª nota sem `sm-find.sh`) · `guard-message-size.sh` (mensagem entre agentes ≤20 linhas; `[handoff]` até 60) · `context-watch.sh` (`UserPromptSubmit`: avisa contexto >200k/400k e propõe `/compact` ou sessão nova; nunca bloqueia)
+- Sessão: `team-os-session-title.sh` (`SessionStart`, instalado em `~/.claude/hooks/` pelo `*install`)
+- Opcional (só com OK do usuário, `--with-env-guard`): `guard-env-files.sh` (`PreToolUse` em `Edit|Write|MultiEdit`: bloqueia `.env`/`.env.*` exceto `.example`/`.sample`/`.template`, e lockfiles)
 
 ## Fluxo de trabalho
 
 ```
-Editar agente no CT → /team-os-creator *audit → /team-os-creator *propagate → commit por projeto
+Editar agente/skill no CT
+→ validate-agent.sh            (= *audit; 111/111 do pack)
+→ validate-agent.sh --skills   (lint das 124 skills)
+→ test-hooks.sh                (544/544)
+→ test-propagate.sh            (127/127)
+→ generate-agents-page.py      (regenera docs/agentes.html — obrigatório após mudar agente ou skill)
+→ /team-os-creator *propagate  (--match-target-squads)
 ```
+
+Scripts em `.claude/skills/team-os-creator/scripts/`. O CI (`.github/workflows/audit.yml`) repete tudo e ainda confere o manifest do pack, as contagens "111 agentes"/"124 skills" no README e aqui (contadas só no pack), zero caminho de máquina versionado (use `<raiz>/...`) e `docs/agentes.html` em dia. Mantenedor: ciclo completo em [MAINTAINERS.md](./MAINTAINERS.md).
 
 ## Comandos rápidos
 
 ```
 /team-os                    → orquestrar sessão com Agent Teams
-/team-os-creator *audit     → validar todos os agentes
+/team-os-creator *audit     → validar todos os agentes e skills
+/team-os-creator *update    → atualizar o pack sem perder o que é seu
 /team-os-creator *propagate → propagar para projetos destino
+/team-os-creator *feedback  → juntar as correções [skill-feedback] dos projetos e propor melhoria no CT
 /team-os-creator *install   → instalar squads em projeto novo
+/team-os-creator *painel    → mapa do pack (squads, agentes, skills) em 127.0.0.1:8788
+/sala-de-controle           → Sala de Controle no CT: lê sessões/projetos e abre o painel ao vivo (127.0.0.1:8787)
+/sala-de-controle *painel   → reabre o painel ao vivo dos agentes em produção, no CT (*painel stop derruba)
 ```
 
-> Para qualquer dúvida de uso, agentes, skills ou fluxo: **[README.md](./README.md)** é a referência completa.
+> Para qualquer dúvida de uso, agentes, skills ou fluxo: **[README.md](./README.md)** é a referência completa. Licença MIT — [LICENSE](./LICENSE); terceiros em [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md); contribuição em [CONTRIBUTING.md](./CONTRIBUTING.md); mantenedor em [MAINTAINERS.md](./MAINTAINERS.md).

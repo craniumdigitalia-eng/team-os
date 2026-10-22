@@ -1,10 +1,8 @@
 ---
 name: seo-page
-description: >
-  Deep single-page SEO analysis covering on-page elements, content quality,
-  technical meta tags, schema, images, and performance. Use when user says
-  "analyze this page", "check page SEO", "single URL", "check this page",
-  "page analysis", or provides a single URL for review.
+description: "Análise SEO profunda de uma única página — elementos on-page, qualidade de conteúdo, meta tags técnicas, schema, imagens e performance. Use ao pedir 'analise esta página', 'check page SEO', 'single URL' ou quando o usuário fornecer uma URL para revisão."
+version: "2.3.3"
+updated: "2026-10-20"
 user-invocable: true
 argument-hint: "[url]"
 license: MIT
@@ -22,7 +20,7 @@ metadata:
 - Title tag: 50-60 characters, includes primary keyword, unique
 - Meta description: 150-160 characters, compelling, includes keyword
 - Meta description is not a restatement of the title: run
-  `"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run metadata_template.py --title "<title>" --description "<desc>" --json`
+  `"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run metadata_template.py --title "<title>" --description "<desc>" --json`
   (heuristic, deterministic string comparison). A description that opens by
   repeating its own title and closes on a stock CTA ("Try it free now.",
   "Start free!") is templated metadata, the shape bulk generation jobs produce
@@ -65,6 +63,9 @@ metadata:
 - Flag potential LCP issues (huge hero images, render-blocking resources)
 - Flag potential INP issues (heavy JS, no async/defer)
 - Flag potential CLS issues (missing image dimensions, injected content)
+
+### Página nova (antes de publicar)
+Para página que ainda vai ao ar, use o checklist de página nova em `seo-google/references/rankings-push.md` (3 links internos de entrada, canonical, sitemap, conteúdo no HTML do servidor, indexação pedida uma vez só).
 
 ## Output
 

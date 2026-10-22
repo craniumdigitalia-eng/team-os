@@ -3,12 +3,13 @@
 # Usage: detect-project-signals.sh [pasta]   (default: pasta atual)
 # Output: key=value linhas (consumível por eval ou grep)
 
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 if [ -n "${1:-}" ]; then
   cd "$1" 2>/dev/null || { echo "ERROR=not_a_dir|PATH=$1" >&2; exit 1; }
 fi
 
 ARCHETYPE="custom"
-HAS_CONTROL_ROOM=0
+LEGACY_CONTROL_ROOM=0
 LANGUAGE="unknown"
 FRAMEWORK="none"
 HAS_FRONTEND=0
@@ -22,6 +23,8 @@ HAS_PROPOSALS=0
 HAS_BRANDING=0
 HAS_FINANCE=0
 HAS_LEGAL=0
+HAS_SEO=0
+HAS_SOCIAL=0
 HAS_PACKAGE=0
 [ -f "package.json" ] && HAS_PACKAGE=1
 
@@ -116,6 +119,16 @@ if [ "${BRANDING_HITS:-0}" -ge 2 ] && [ "${PROPOSAL_CORE_HITS:-0}" -lt 1 ] && [ 
   HAS_BRANDING=1
 fi
 
+# Social signals — workspace de conteúdo para redes (sem código): Reels, carrosséis, Stories,
+# roteiros, legendas, thumbnails, calendário editorial, pastas por plataforma. O nome da pasta
+# (Marketing, Social, Instagram, Conteúdo, Redes Sociais…) soma 2. Exige ≥2 sinais, nenhum sinal
+# nuclear de proposta, sem código e mais sinais de social que de marca (pasta de marca também tem
+# key visual e logo). Sugere o estúdio `social` + a squad de plataforma `instagram` (a mais comum);
+# troque por tiktok/youtube/linkedin se o projeto for de outra rede.
+BASENAME_SOC=$(basename "$(pwd)" | tr '[:upper:]' '[:lower:]' | sed 's/[áàâã]/a/g; s/[éê]/e/g; s/í/i/g; s/[óôõ]/o/g; s/ú/u/g; s/ç/c/g')
+SOCIAL_HITS=$(find . -maxdepth 3 \( -iname "*reels*" -o -iname "*carrossel*" -o -iname "*carrosseis*" -o -iname "*carrosséis*" -o -iname "*carousel*" -o -iname "*stories*" -o -iname "*instagram*" -o -iname "*tiktok*" -o -iname "*youtube*" -o -iname "*shorts*" -o -iname "*linkedin*" -o -iname "*legenda*" -o -iname "*roteiro*" -o -iname "*thumbnail*" -o -iname "*calendario*editorial*" -o -iname "*calendário*editorial*" -o -iname "*pauta*" -o -iname "*redes*sociais*" -o -iname "*social*media*" \) -not -path "*/node_modules/*" -not -path "*/.git/*" -not -path "*/.claude/*" 2>/dev/null | head -20 | wc -l | tr -d ' ')
+case "$BASENAME_SOC" in *social*|*marketing*|*instagram*|*tiktok*|*youtube*|*linkedin*|*conteudo*|*"redes sociais"*|*reels*) SOCIAL_HITS=$((SOCIAL_HITS + 2)) ;; esac
+
 # Finance / Legal signals — workspaces de gestão financeira e jurídica (sem código).
 # Pasta recém-criada costuma estar VAZIA: o nome da pasta é sinal forte (Financeiro, Finance,
 # Jurídico, Legal, Contratos). Conteúdo: ≥2 arquivos/pastas com vocabulário da área e nenhum
@@ -131,29 +144,56 @@ elif [ "${LEGAL_HITS:-0}" -ge 2 ] && [ "${PROPOSAL_CORE_HITS:-0}" -lt 1 ] && [ $
   HAS_LEGAL=1
 fi
 
-# Sala de Controle (recurso Maestri): pasta cujo nome diz "sala de controle"/"control room",
-# ou que já tem a skill maestri-os. Sem código, sem squad — só a skill opt-in.
-DIRNAME_LC=$(basename "$(pwd)" | tr '[:upper:]' '[:lower:]')
-case "$DIRNAME_LC" in *"sala de controle"*|*"sala-de-controle"*|*"control room"*|*"control-room"*) HAS_CONTROL_ROOM=1 ;; esac
-[ -d ".claude/skills/maestri-os" ] && HAS_CONTROL_ROOM=1
+# SEO signals — sitemap.xml, robots.txt, next-sitemap, "seo" no package.json, pasta seo/,
+# ou o nome da pasta diz "seo". Squad seo audita e recomenda; não implementa (a squad sites
+# implementa) — por isso, num site com código, `seo` é ADD-ON (`--squads sites,seo`), e só
+# vira archetype principal num workspace sem código ou nomeado como SEO.
+SEO_HITS=0
+find . -maxdepth 3 -iname "sitemap*.xml" -not -path "*/node_modules/*" -not -path "*/.git/*" 2>/dev/null | head -1 | grep -q . && SEO_HITS=$((SEO_HITS + 1))
+find . -maxdepth 3 -iname "robots.txt" -not -path "*/node_modules/*" -not -path "*/.git/*" 2>/dev/null | head -1 | grep -q . && SEO_HITS=$((SEO_HITS + 1))
+[ -f "package.json" ] && grep -q '"next-sitemap"' package.json 2>/dev/null && SEO_HITS=$((SEO_HITS + 1))
+[ -f "package.json" ] && grep -qi 'seo' package.json 2>/dev/null && SEO_HITS=$((SEO_HITS + 1))
+find . -maxdepth 2 -type d -iname "seo" -not -path "*/node_modules/*" -not -path "*/.git/*" -not -path "*/.claude/*" 2>/dev/null | head -1 | grep -q . && SEO_HITS=$((SEO_HITS + 2))
+SEO_NAME=0
+case "$BASENAME_LC" in *seo*|*"busca organica"*|*"organic search"*) SEO_NAME=1; SEO_HITS=$((SEO_HITS + 2)) ;; esac
+[ "${SEO_HITS:-0}" -ge 2 ] && HAS_SEO=1
+
+if [ "${SOCIAL_HITS:-0}" -ge 2 ] && [ "${PROPOSAL_CORE_HITS:-0}" -lt 1 ] && [ $HAS_PACKAGE -eq 0 ] && [ $HAS_BACKEND -eq 0 ] && [ "${SOCIAL_HITS:-0}" -ge "${BRANDING_HITS:-0}" ]; then
+  HAS_SOCIAL=1
+fi
+
+# Pasta de Sala de Controle ANTIGA: a Sala agora mora no CT (exclusiva do CT, nunca instalada em
+# projeto). Sem agentes, com a skill sala-de-controle ou maestri-os (versões anteriores do pack)
+# ou com nome de Sala → não sugere squad; sugere migrar (migrate-sala-to-ct.sh, dry-run primeiro).
+if ! ls .claude/agents/*.md >/dev/null 2>&1; then
+  DIRNAME_LC=$(basename "$(pwd)" | tr '[:upper:]' '[:lower:]')
+  case "$DIRNAME_LC" in *"sala de controle"*|*"sala-de-controle"*|*"control room"*|*"control-room"*) LEGACY_CONTROL_ROOM=1 ;; esac
+  [ -d ".claude/skills/maestri-os" ] && LEGACY_CONTROL_ROOM=1
+  [ -d ".claude/skills/sala-de-controle" ] && LEGACY_CONTROL_ROOM=1
+fi
 
 # Classificar archetype
-# Ordem importa: control-room primeiro (é declarado pelo nome/skill, não inferido);
+# Ordem importa: legacy-control-room primeiro (é declarado pelo nome/skill, não inferido);
 # depois fullstack (um SaaS com pandas no requirements não é data-pipeline — o
 # teste HAS_ML vem DEPOIS da classificação fullstack).
 # "website" = Next/Astro/landing sem backend pesado (backend + database juntos)
 # — sem ele o preset `sites` era inalcançável. "proposals" = pasta de propostas
 # comerciais sem código → preset `sales`.
-if [ $HAS_CONTROL_ROOM -eq 1 ]; then
-  ARCHETYPE="control-room"
+if [ $LEGACY_CONTROL_ROOM -eq 1 ]; then
+  ARCHETYPE="legacy-control-room"
 elif [ $HAS_FINANCE -eq 1 ]; then
   ARCHETYPE="finance"
 elif [ $HAS_LEGAL -eq 1 ]; then
   ARCHETYPE="legal"
+elif [ $HAS_SOCIAL -eq 1 ] && [ $HAS_FINANCE -eq 0 ] && [ $HAS_LEGAL -eq 0 ]; then
+  ARCHETYPE="social-media"
 elif [ $HAS_BRANDING -eq 1 ]; then
   ARCHETYPE="branding"
 elif [ $HAS_PROPOSALS -eq 1 ]; then
   ARCHETYPE="proposals"
+elif [ $HAS_SEO -eq 1 ] && { [ $SEO_NAME -eq 1 ] || { [ $HAS_FRONTEND -eq 0 ] && [ $HAS_BACKEND -eq 0 ]; }; }; then
+  # workspace de SEO (sem código, ou nomeado como SEO) → squad seo é a principal
+  ARCHETYPE="seo"
 elif [ $HAS_FRONTEND -eq 1 ] && [ $HAS_BACKEND -eq 1 ] && [ $HAS_DATABASE -eq 1 ]; then
   ARCHETYPE="fullstack-saas"
 elif [ $HAS_ML -eq 1 ]; then
@@ -173,13 +213,16 @@ fi
 
 # Mapear archetype → preset do team-os-creator
 SUGGESTED_PRESET="custom"
+SUGGESTED_SQUADS=""
+SUGGESTED_SQUAD_ADDON=""
 SUGGESTED_EXTRA_SKILLS=""
 WARNING=""
 case "$ARCHETYPE" in
-  control-room)
-    # Não é squad: instala só a skill maestri-os (--squads none --extra-skills maestri-os)
+  legacy-control-room)
+    # Não é projeto a instalar: a Sala mora no CT. Sugere a migração (nada muda sem OK).
     SUGGESTED_PRESET="none"
-    SUGGESTED_EXTRA_SKILLS="maestri-os" ;;
+    CT_DIR="$(cd "$SCRIPT_DIR/../../../.." 2>/dev/null && pwd)"
+    NEXT="bash \"$CT_DIR/.claude/skills/team-os-creator/scripts/migrate-sala-to-ct.sh\" \"$(pwd)\"" ;;
   fullstack-saas|data-pipeline|api-service|frontend-app)
     SUGGESTED_PRESET="dev" ;;
   website|content-site)
@@ -188,21 +231,47 @@ case "$ARCHETYPE" in
     SUGGESTED_PRESET="sales" ;;
   branding)
     SUGGESTED_PRESET="brand" ;;
+  social-media)
+    # Estúdio sozinho não tem gate nem publicação → sempre com uma squad de plataforma
+    SUGGESTED_PRESET="social"
+    SUGGESTED_SQUAD_ADDON="instagram"
+    SUGGESTED_SQUADS="social,instagram" ;;
   finance)
     SUGGESTED_PRESET="finance" ;;
   legal)
     SUGGESTED_PRESET="legal" ;;
+  seo)
+    SUGGESTED_PRESET="seo" ;;
   mobile-app)
     # Não existe preset mobile — usa dev (o mais próximo), com aviso explícito.
     SUGGESTED_PRESET="dev"
     WARNING="mobile-app detectado: não há preset mobile — usando preset dev (revise a squad manualmente)"
     ;;
 esac
+# Site com código e sinais de SEO → sugere a squad seo como add-on (audita; sites implementa)
+if [ $HAS_SEO -eq 1 ] && [ "$ARCHETYPE" != "seo" ]; then
+  case "$ARCHETYPE" in website|content-site|fullstack-saas|frontend-app) SUGGESTED_SQUAD_ADDON="seo" ;; esac
+fi
+# Projeto com código que guarda dado, autentica, cobra ou chama IA → sugere a squad security como
+# add-on (audita e especifica; dev/sites corrige). Lista separada por vírgula (ex.: "seo,security").
+SEC_HITS=0
+if [ -f "package.json" ]; then
+  grep -qiE '"(@supabase/[a-z-]+|next-auth|@auth/[a-z-]+|@clerk/[a-z-]+|firebase|prisma|@prisma/client|drizzle-orm|stripe|openai|@anthropic-ai/sdk|ai|@ai-sdk/[a-z-]+|langchain)"' package.json 2>/dev/null && SEC_HITS=1
+fi
+[ -d "supabase/migrations" ] && SEC_HITS=1
+if [ $SEC_HITS -eq 1 ]; then
+  case "$ARCHETYPE" in website|content-site|fullstack-saas|frontend-app)
+    SUGGESTED_SQUAD_ADDON="${SUGGESTED_SQUAD_ADDON:+$SUGGESTED_SQUAD_ADDON,}security" ;;
+  esac
+fi
 [ -n "$WARNING" ] && echo "⚠️  $WARNING" >&2
 
 echo "PROJECT_ARCHETYPE=$ARCHETYPE"
 echo "SUGGESTED_PRESET=$SUGGESTED_PRESET"
 [ -n "$SUGGESTED_EXTRA_SKILLS" ] && echo "SUGGESTED_EXTRA_SKILLS=$SUGGESTED_EXTRA_SKILLS"
+[ -n "$SUGGESTED_SQUAD_ADDON" ] && echo "SUGGESTED_SQUAD_ADDON=$SUGGESTED_SQUAD_ADDON"
+[ -n "$SUGGESTED_SQUADS" ] && echo "SUGGESTED_SQUADS=$SUGGESTED_SQUADS"
+[ -n "${NEXT:-}" ] && echo "NEXT=$NEXT"
 [ -n "$WARNING" ] && echo "WARNING=$WARNING"
 echo "LANGUAGE=$LANGUAGE"
 echo "FRAMEWORK=$FRAMEWORK"
@@ -213,3 +282,5 @@ echo "HAS_MOBILE=$HAS_MOBILE"
 echo "HAS_CI=$HAS_CI"
 echo "HAS_ML=$HAS_ML"
 echo "HAS_CONTENT=$HAS_CONTENT"
+echo "HAS_SEO=$HAS_SEO"
+echo "HAS_SOCIAL=$HAS_SOCIAL"

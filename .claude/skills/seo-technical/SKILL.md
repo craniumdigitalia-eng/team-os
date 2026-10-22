@@ -1,10 +1,8 @@
 ---
 name: seo-technical
-description: >
-  Technical SEO audit across 9 categories: crawlability, indexability, security,
-  URL structure, mobile, Core Web Vitals, structured data, JavaScript rendering,
-  and IndexNow protocol. Use when user says "technical SEO", "crawl issues",
-  "robots.txt", "Core Web Vitals", "site speed", or "security headers".
+description: "Auditoria de SEO técnico em 9 categorias — rastreabilidade, indexação, segurança, estrutura de URL, mobile, Core Web Vitals, dados estruturados, renderização JavaScript e IndexNow. Use ao pedir 'technical SEO', 'crawl issues', 'robots.txt', 'Core Web Vitals', 'site speed' ou 'security headers'."
+version: "2.3.2"
+updated: "2026-10-20"
 user-invocable: true
 argument-hint: "[url]"
 license: MIT
@@ -16,11 +14,13 @@ metadata:
 
 # Technical SEO Audit
 
+**Quando usar esta vs. `sites-seo-technical`:** esta *audita* um site já no ar (rastreabilidade, indexação, headers, CWV) e entrega achados. Para *implementar* as correções no código Next.js/Astro, use `sites-seo-technical`.
+
 ## Categories
 
 ### 1. Crawlability
 - robots.txt: exists, valid, not blocking important resources
-- XML sitemap: run `"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run sitemap_discovery.py <url> --json`; require a
+- XML sitemap: run `"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run sitemap_discovery.py <url> --json`; require a
   valid entry in `found`, and report stale or unsafe robots.txt declarations
   separately from working fallback locations
 - Noindex tags: intentional vs accidental
@@ -204,7 +204,7 @@ It is also available through Lighthouse CLI with
 
 ```bash
 # Render with Playwright + capture accessibility tree, then score
-"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run agent_ux_check.py https://example.com --json
+"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run agent_ux_check.py https://example.com --json
 ```
 
 The scanner outputs an Agent-UX score (0-100) plus itemized issues:
@@ -216,7 +216,7 @@ The scanner outputs an Agent-UX score (0-100) plus itemized issues:
 The accessibility-tree snapshot uses Chromium's
 `Accessibility.getFullAXTree` CDP command through Playwright. To capture the
 tree without scoring, use
-`"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run render_page.py <url> --a11y-tree --json`.
+`"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run render_page.py <url> --a11y-tree --json`.
 
 Surface findings as **opportunities**, not failures; don't gate audits on a
 sub-100 Agent-UX score. WebMCP origin-trial/sign-up status needs verification,
@@ -250,7 +250,7 @@ If DataForSEO MCP tools are available, use `on_page_instant_pages` for real page
 
 ## Google API Integration (Optional)
 
-If Google API credentials are configured, use `"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run pagespeed_check.py <url> --json` for real PSI + CrUX field data (replaces lab-only CWV estimates), `"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run crux_history.py <url> --json` for 25-week CWV trends, and `"${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run gsc_inspect.py <url> --json` for real indexation status per URL.
+If Google API credentials are configured, use `"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run pagespeed_check.py <url> --json` for real PSI + CrUX field data (replaces lab-only CWV estimates), `"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run crux_history.py <url> --json` for 25-week CWV trends, and `"${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run gsc_inspect.py <url> --json` for real indexation status per URL.
 
 ## Auditing a Local or Private Host
 
@@ -260,7 +260,7 @@ To audit a pre-deployment host, the operator names it in `CLAUDE_SEO_LOCAL_TARGE
 
 ```bash
 CLAUDE_SEO_LOCAL_TARGETS="localhost:3000,127.0.0.1:8080,100.101.102.103" \
-  "${CLAUDE_PROJECT_DIR}/.claude/skills/seo/scripts/claude-seo" run fetch_page.py http://localhost:3000/
+  "${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}/.claude/skills/seo/scripts/claude-seo" run fetch_page.py http://localhost:3000/
 ```
 
 What it does and does not cover:

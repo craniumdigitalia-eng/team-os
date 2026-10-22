@@ -43,8 +43,16 @@ class SourceEvaluator:
 
         # Reputable News (Fact-check verified)
         'reuters.com', 'apnews.com', 'bbc.com', 'economist.com',
-        'nature.com/news', 'scientificamerican.com'
+        'scientificamerican.com',
+
+        # Brasil — fontes oficiais (governo, judiciário, legislativo, estatística)
+        'gov.br', 'jus.br', 'leg.br', 'bcb.gov.br', 'ibge.gov.br',
+        'ipea.gov.br', 'planalto.gov.br', 'stf.jus.br', 'stj.jus.br',
+        'camara.leg.br', 'senado.leg.br', 'cvm.gov.br', 'anpd.gov.br'
     }
+
+    # Sufixos oficiais que recebem nota máxima de domínio (casam por sufixo)
+    OFFICIAL_SUFFIXES = ('gov', 'gov.br', 'jus.br', 'leg.br', 'mil.br', 'mp.br', 'gov.uk', 'europa.eu', 'int')
 
     MODERATE_AUTHORITY_DOMAINS = {
         # Tech News & Analysis
@@ -113,20 +121,36 @@ class SourceEvaluator:
         )
 
     def _extract_domain(self, url: str) -> str:
-        """Extract domain from URL"""
-        parsed = urlparse(url)
-        domain = parsed.netloc.lower()
-        # Remove www prefix
-        domain = domain.replace('www.', '')
+        """Extract domain from URL (sem porta, sem www.)"""
+        if '://' not in url:
+            url = 'https://' + url
+        domain = (urlparse(url).hostname or '').lower().rstrip('.')
+        if domain.startswith('www.'):
+            domain = domain[4:]
         return domain
+
+    @staticmethod
+    def _matches(domain: str, candidates) -> Optional[str]:
+        """Casa por sufixo de domínio: 'agenciadenoticias.ibge.gov.br' casa 'ibge.gov.br'."""
+        best = None
+        for c in candidates:
+            if domain == c or domain.endswith('.' + c):
+                if best is None or len(c) > len(best):
+                    best = c
+        return best
+
+    def _is_official(self, domain: str) -> bool:
+        return self._matches(domain, self.OFFICIAL_SUFFIXES) is not None
 
     def _evaluate_domain_authority(self, domain: str) -> float:
         """Evaluate domain authority (0-100)"""
-        if domain in self.HIGH_AUTHORITY_DOMAINS:
+        if self._is_official(domain):
+            return 95.0
+        if self._matches(domain, self.HIGH_AUTHORITY_DOMAINS):
             return 90.0
-        elif domain in self.MODERATE_AUTHORITY_DOMAINS:
+        elif self._matches(domain, self.MODERATE_AUTHORITY_DOMAINS):
             return 70.0
-        elif any(indicator in domain for indicator in self.LOW_AUTHORITY_INDICATORS):
+        elif self._matches(domain, self.LOW_AUTHORITY_INDICATORS):
             return 40.0
         else:
             # Unknown domain - moderate skepticism
@@ -169,8 +193,8 @@ class SourceEvaluator:
         if any(d in domain for d in ['arxiv', 'nature', 'science', 'ieee', 'acm']):
             score += 30
 
-        # Government/official sources
-        if '.gov' in domain or 'who.int' in domain:
+        # Government/official sources (inclui .gov.br, .jus.br, .leg.br)
+        if self._is_official(domain):
             score += 25
 
         # Technical documentation
@@ -226,7 +250,9 @@ class SourceEvaluator:
         """Identify key credibility factors"""
         factors = {}
 
-        if domain_score >= 85:
+        if self._is_official(domain):
+            factors['domain'] = "Official source (government/judiciary/legislature)"
+        elif domain_score >= 85:
             factors['domain'] = "High authority domain"
         elif domain_score <= 45:
             factors['domain'] = "Low authority domain - verify claims"
@@ -260,33 +286,24 @@ class SourceEvaluator:
             return "verify"
 
 
-# Example usage
-if __name__ == '__main__':
+def main(argv: Optional[List[str]] = None) -> int:
+    import argparse
+    parser = argparse.ArgumentParser(
+        description="Nota de credibilidade (0-100) de uma ou mais URLs, com o motivo. Só stdlib, sem rede."
+    )
+    parser.add_argument('urls', nargs='+', help='URL(s) a avaliar')
+    parser.add_argument('--title', default='', help='Título da fonte (opcional, vale para todas)')
+    parser.add_argument('--date', default=None, help='Data de publicação ISO (AAAA-MM-DD), opcional')
+    parser.add_argument('--author', default=None, help='Autor (opcional)')
+    args = parser.parse_args(argv)
+
     evaluator = SourceEvaluator()
+    for url in args.urls:
+        r = evaluator.evaluate_source(url, args.title, publication_date=args.date, author=args.author)
+        reasons = '; '.join(r.factors.values()) or 'sem sinais fortes'
+        print(f"{r.overall_score:5.1f}  {r.recommendation:<14}  {url}  — dominio={r.domain_authority:.0f}; {reasons}")
+    return 0
 
-    # Test sources
-    test_sources = [
-        {
-            'url': 'https://www.nature.com/articles/s41586-2025-12345',
-            'title': 'Breakthrough in Quantum Computing',
-            'publication_date': '2025-10-15'
-        },
-        {
-            'url': 'https://someblog.wordpress.com/shocking-discovery',
-            'title': 'SHOCKING! You Won\'t Believe This Discovery!',
-            'publication_date': '2020-01-01'
-        },
-        {
-            'url': 'https://docs.python.org/3/library/asyncio.html',
-            'title': 'asyncio — Asynchronous I/O',
-            'publication_date': '2025-11-01'
-        }
-    ]
 
-    for source in test_sources:
-        score = evaluator.evaluate_source(**source)
-        print(f"\nSource: {source['title']}")
-        print(f"URL: {source['url']}")
-        print(f"Overall Score: {score.overall_score}/100")
-        print(f"Recommendation: {score.recommendation}")
-        print(f"Factors: {score.factors}")
+if __name__ == '__main__':
+    raise SystemExit(main())

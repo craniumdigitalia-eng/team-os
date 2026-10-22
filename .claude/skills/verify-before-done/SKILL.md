@@ -1,8 +1,9 @@
 ---
 name: verify-before-done
-description: Verificação obrigatória antes de declarar qualquer trabalho como concluído — evidência antes de afirmação. Use SEMPRE antes de dizer que algo "está pronto", "funciona", "passa nos testes", "está corrigido" ou antes de commit/marcar story como done. Gatilhos - concluir tarefa, fechar story, reportar sucesso, emitir veredicto de QA, dar bug como resolvido.
-version: "1.0"
-updated: "2026-08-26"
+description: "Verificação obrigatória antes de declarar qualquer trabalho como concluído — evidência antes de afirmação. Use SEMPRE antes de dizer que algo \"está pronto\", \"funciona\", \"passa nos testes\", \"está corrigido\" ou antes de commit/marcar story como done. Gatilhos - concluir tarefa, fechar story, reportar sucesso, emitir veredicto de QA, dar bug como resolvido."
+version: "1.1"
+updated: "2026-10-20"
+source: "https://github.com/obra/superpowers"
 ---
 
 # Verify Before Done
@@ -18,7 +19,7 @@ Skill de disciplina de verificação destilada do verification-before-completion
 1. **IDENTIFY** — qual comando/checagem prova a afirmação?
 2. **RUN** — execute-o por completo, AGORA (evidência fresca, não de 20 minutos atrás).
 3. **READ** — leia o output inteiro e o exit code, não só a última linha.
-4. **VERIFY** — o output realmente suporta a afirmação? (0 failures? exit 0? sintoma original sumiu?)
+4. **VERIFY** — o output realmente suporta a afirmação? (0 failures? exit 0? sintoma original sumiu?) Se não passou, **declare o estado real com a evidência** ("3 de 5 critérios ok; falta X — erro Y") — relatar parcial é obrigatório, nunca arredondar para "pronto".
 5. **CLAIM** — só então afirme, citando a evidência.
 
 Pular qualquer passo = verificação falsa. "Rodei antes do último edit" não conta — qualquer mudança invalida a evidência anterior.
@@ -42,17 +43,20 @@ Outras red flags:
 
 ## Tabela de claims → evidência exigida
 
-| Claim | Evidência mínima |
-|---|---|
-| "Testes passam" | Output fresco da suíte com **0 failures**, exit 0 |
-| "Lint/typecheck limpo" | Output do linter/tsc com **0 errors** |
-| "Build funciona" | Build completo com **exit code 0** |
-| "Bug corrigido" | Reprodução do sintoma original → confirmado ausente |
-| "Regression test cobre o bug" | Ciclo **red-green documentado**: teste falha sem o fix, passa com o fix |
-| "Feature completa" | Todos os critérios de aceite da story checados um a um contra o comportamento real |
-| "Migration segura" | Dry-run + smoke-test executados (protocolo do data engineer) |
-| "Campanha pronta" | Checklist pré-launch + conversão de teste real (squad traffic) |
-| "Story done" | Tudo acima que se aplique + `check-story-progress.sh` verde |
+| Claim | Evidência mínima | Não basta |
+|---|---|---|
+| "Testes passam" | Output fresco da suíte com **0 failures**, exit 0 | Rodar 1 teste; output de antes do último edit |
+| "Lint/typecheck limpo" | Output do linter/tsc com **0 errors** | Linter limpo (linter ≠ compilador) |
+| "Build funciona" | Build completo com **exit code 0** | Linter/testes ok (build ok ≠ linter ok, e vice-versa) |
+| "Bug corrigido" | Reprodução do sintoma original → confirmado ausente | "O código parece certo" |
+| "Regression test cobre o bug" | Ciclo **red-green-revert** (abaixo) | Teste que só foi visto passando |
+| "Feature completa" / "requisitos atendidos" | Reler o plano/story → checklist item a item contra o comportamento real → **reportar lacunas** | Testes passando (≠ requisitos atendidos) |
+| "Agente disse que terminou" | **Conferir o diff no git** (`git diff --stat` + o trecho) e rodar o check você mesmo | O relato do agente |
+| "Migration segura" | Dry-run + smoke-test executados (protocolo do data engineer) | Migration aplicada sem erro |
+| "Campanha pronta" | Checklist pré-launch + conversão de teste real (squad traffic) | Campanha salva na plataforma |
+| "Story done" | Tudo acima que se aplique + `check-story-progress.sh` verde | Story movida para done |
+
+**Ciclo red-green-revert** (prova que o teste pega o bug): escreve o teste → passa com o fix → **reverte o fix** → o teste **TEM que falhar** → restaura o fix → passa de novo. Se não falhou com o fix revertido, o teste não prova nada.
 
 ## Bloqueio de racionalizações
 
@@ -69,6 +73,8 @@ Toda desculpa recebe a mesma resposta — a evidência importa, nada mais:
 **Sempre**, antes de:
 - Qualquer expressão de sucesso ou satisfação com o trabalho
 - Marcar task/story/todo como concluído (TaskList nativo incluído)
+- Passar à próxima task (a anterior precisa estar provada, não "quase")
+- Delegar trabalho que depende do anterior (quem recebe herda o que você não verificou)
 - Fazer commit (e antes de o devops fazer push)
 - Emitir veredicto de QA (PASS/CONCERNS/FAIL — um PASS sem evidência fresca é FAIL do próprio QA)
 - Reportar progresso ao lead ou ao usuário
@@ -91,4 +97,4 @@ Nunca:
 
 ---
 
-Adaptado de obra/superpowers → verification-before-completion (skills.sh) — 2026-08-26.
+Adaptado de obra/superpowers → verification-before-completion (skills.sh) — 2026-08-26; revisado em 2026-10-20 (coluna "Não basta", red-green-revert, relato parcial).

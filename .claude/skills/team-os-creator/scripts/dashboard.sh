@@ -3,6 +3,8 @@
 # Roda o scan e renaderiza o painel de status dos projetos irmãos + as 3 ações.
 # Determinístico: mesma entrada → mesma saída. Usado pela skill ao abrir /team-os-creator.
 # Usage: dashboard.sh [CT_ROOT]
+# Raiz dos projetos: argumento, ou env CT_ROOT, ou arquivo .team-os-root na raiz do CT
+# (gitignored, por máquina), ou o pai do git root — resolvido pelo scan-ct-projects.sh.
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
 SCAN="$HERE/scan-ct-projects.sh"
@@ -21,20 +23,44 @@ ct_root="$(printf '%s\n' "$RAW" | grep '^CT_ROOT=' | cut -d= -f2-)"
 src_agents="$(printf '%s\n' "$RAW" | grep '^SOURCE_AGENTS=' | cut -d= -f2-)"
 src_skills="$(printf '%s\n' "$RAW" | grep '^SOURCE_SKILLS_COUNT=' | cut -d= -f2-)"
 src_squads="$(printf '%s\n' "$RAW" | grep '^SOURCE_SQUADS=' | cut -d= -f2-)"
+src_custom="$(printf '%s\n' "$RAW" | grep '^SOURCE_CUSTOM_AGENTS=' | cut -d= -f2-)"
+src_custom_sk="$(printf '%s\n' "$RAW" | grep '^SOURCE_CUSTOM_SKILLS=' | cut -d= -f2-)"
 
 echo "╔════════════════════════════════════════════════════════════════════╗"
 echo "║  team-os-creator  ·  Command Center  ·  by João Guirunas            ║"
 echo "╚════════════════════════════════════════════════════════════════════╝"
 echo
 echo "  CT (fonte): ${src_agents:-?} agentes · ${src_skills:-?} skills · ${src_squads:-?} squads  ·  root: $ct_root"
+if [ "${src_custom:-0}" -gt 0 ] 2>/dev/null || [ "${src_custom_sk:-0}" -gt 0 ] 2>/dev/null; then
+  echo "  Seus (fora do pack): ${src_custom:-0} agentes próprios · ${src_custom_sk:-0} skills próprias"
+fi
+echo "  Sala de Controle: no CT · /sala-de-controle abre o painel em 127.0.0.1:8787"
 echo
+
+# Pasta de Sala de Controle antiga (fora do CT): a Sala agora mora no CT — avisa e sugere a
+# migração (dry-run primeiro; nada muda sem OK do usuário).
+MIGRATE="$HERE/migrate-sala-to-ct.sh"
+legacy_rooms=0
+while IFS= read -r line; do
+  case "$line" in PROJECT=*) ;; *) continue ;; esac
+  [ "$(field "$line" IS_LEGACY_CONTROL_ROOM)" = "1" ] || continue
+  legacy_rooms=$((legacy_rooms + 1))
+  lpath="$(field "$line" PATH)"; lpath="${lpath%/}"
+  echo "  ┌─────────────────────────────────────────────────────────────────"
+  echo "  │ ⚠ Sala de Controle em pasta separada: $(field "$line" PROJECT)"
+  echo "  │   Ela agora mora no CT. Para migrar (simulação primeiro):"
+  echo "  │   bash \"$MIGRATE\" \"$lpath\""
+  echo "  └─────────────────────────────────────────────────────────────────"
+done <<EOF
+$RAW
+EOF
+[ $legacy_rooms -gt 0 ] && echo
 printf "  %-24s %-8s %-8s %-13s %s\n" "PROJETO" "team-os" "agentes" "smart-mem" "DRIFT vs CT"
 printf "  %-24s %-8s %-8s %-13s %s\n" "------------------------" "-------" "-------" "-------------" "-----------"
 
 projects=0
 need_update=0
 not_installed=0
-control_rooms=0
 
 while IFS= read -r line; do
   case "$line" in PROJECT=*) ;; *) continue ;; esac
@@ -53,25 +79,18 @@ while IFS= read -r line; do
   d_extra="$(field "$line" DRIFT_EXTRA)"
   d_miss="$(field "$line" DRIFT_MISSING)"
   s_out="$(field "$line" SKILLS_OUTDATED)"
-  has_mos="$(field "$line" HAS_MAESTRI_OS)"
-  is_cr="$(field "$line" IS_CONTROL_ROOM)"
+  d_conf="$(field "$line" DRIFT_CONFLICT)"
+  s_conf="$(field "$line" SKILLS_CONFLICT)"
+  n_conf=$(( ${d_conf:-0} + ${s_conf:-0} ))
+  is_legacy="$(field "$line" IS_LEGACY_CONTROL_ROOM)"
 
   tos=$([ "$has_team_os" = "1" ] && echo "sim" || echo "--")
   sm=$([ "$has_sm" = "1" ] && echo "sim" || echo "--")
 
-  if [ "$is_cr" = "1" ]; then
-    # Sala de Controle (recurso Maestri): sem squad por design — só a skill maestri-os
-    control_rooms=$((control_rooms + 1))
-    if [ "$has_mos" != "1" ]; then
-      drift="sala de controle · instalar maestri-os"
-      not_installed=$((not_installed + 1))
-    elif [ "${s_out:-0}" -gt 0 ]; then
-      drift="sala de controle · maestri-os desatual."
-      need_update=$((need_update + 1))
-    else
-      drift="sala de controle · em dia"
-    fi
-    printf "  %-24.24s %-8s %-8s %-13s %s\n" "$name" "--" "n/a" "$sm" "$drift"
+  if [ "$is_legacy" = "1" ]; then
+    projects=$((projects - 1))   # não é projeto: conta à parte no resumo
+    # Pasta de Sala antiga: não é projeto a instalar — o aviso no topo traz o comando de migração
+    printf "  %-24.24s %-8s %-8s %-13s %s\n" "$name" "--" "n/a" "$sm" "sala antiga · migrar para o CT (ver aviso acima)"
     continue
   fi
 
@@ -84,6 +103,8 @@ while IFS= read -r line; do
   else
     drift="em dia"
   fi
+  # Editados no projeto E mudados no CT: o *propagate pergunta o que fazer (nada é sobrescrito)
+  [ "$n_conf" -gt 0 ] 2>/dev/null && drift="$drift · $n_conf editado(s) no projeto"
 
   printf "  %-24.24s %-8s %-8s %-13s %s\n" "$name" "$tos" "${acount:-0}" "$sm" "$drift"
 done <<EOF
@@ -91,11 +112,20 @@ $RAW
 EOF
 
 echo
-echo "  Resumo: $projects projeto(s)  ·  $need_update precisam atualizar  ·  $not_installed sem squad/skill  ·  $control_rooms sala(s) de controle"
+echo "  Resumo: $projects projeto(s)  ·  $need_update precisam atualizar  ·  $not_installed sem squad/skill  ·  $legacy_rooms pasta(s) de Sala antiga"
 echo
+
+# ── Organização de pastas (negócio → projeto → squads) ───────────────────────
+# Fonte única: org-map.py da skill sala-de-controle (read-only; só aponta e sugere).
+ORG_MAP="$HERE/../../sala-de-controle/scripts/org-map.py"
+if [ -f "$ORG_MAP" ] && command -v python3 >/dev/null 2>&1; then
+  echo "  Organização (negócio → projeto):"
+  python3 "$ORG_MAP" "$ct_root" --tree 2>/dev/null | sed 's/^/    /'
+  echo
+fi
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "  [1] Criar equipe      → novos agentes/squad (*create / *squad)"
 echo "  [2] Atualizar equipes → propaga o drift detectado (*propagate)"
 echo "  [3] Instalar equipe   → squad + skills + team-os num projeto (*install)"
-echo "                          · pasta 'Sala de Controle' → só a skill maestri-os (--squads none --extra-skills maestri-os)"
+echo "  [4] Organizar pastas  → árvore + pontos fora do padrão + proposta (*organize) — nada é movido sem OK"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
