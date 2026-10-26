@@ -2,7 +2,7 @@
  "name": "team-os",
  "version": "2.4.0",
  "upstream": "https://github.com/joaoguirunas/team-os",
- "generated": "2026-10-26T02:42:16Z",
+ "generated": "2026-10-26T03:28:35Z",
  "files": {
   ".claude/agents/brand-analyst.md": "f3584f0c2e22e9b66e77537c4aeb9b71a55d349cbbd10d8ce18859f0785802ce",
   ".claude/agents/brand-architect.md": "af64ba200cd880829ebf60cfe681b8b4a8cec50b33776f2805ac44f074c4d528",
@@ -401,7 +401,7 @@
   ".claude/skills/sala-de-controle/scripts/painel/tokens.py": "0bbe2223d5069d7102d23f9e3411dfaf3b63b15c6637c36aefc3d691d1d6ab5b",
   ".claude/skills/sala-de-controle/scripts/project-context.py": "5ea9bf07b97f6046baa9055d608e590c07fb0700f3fef98cb3e431ad2397bb10",
   ".claude/skills/sala-de-controle/scripts/refresh.py": "3fff9702e759998dda627353ce8a63732f6c3f03594d3961ba8b6e05dfa477f8",
-  ".claude/skills/sala-de-controle/scripts/scan-sessions.py": "8a9fa381f9db1a03150ca712492fab2bb3ef6acc5ffd8db44a6d047ac42f310a",
+  ".claude/skills/sala-de-controle/scripts/scan-sessions.py": "5670430b0e57ceb220da6a6a57d2ad7fc83ed2f1ff947a9a2364b31131ce6557",
   ".claude/skills/sala-de-controle/scripts/session-tail.py": "9a3c98e559172fe7d7992fc08739b1e73b80731027c0bed921edd25a78c25111",
   ".claude/skills/sala-de-controle/templates/dispatches.md": "2cc3c64365b3ecacf03b75fb84e3afdb9882ef6203cda430efcac4c82fb232be",
   ".claude/skills/sala-de-controle/templates/organizacao.md": "604d6e5c51009fbf9cba9d2d8363f70c9ccf3fc28b5fec7a3b9d558a9a3288f4",

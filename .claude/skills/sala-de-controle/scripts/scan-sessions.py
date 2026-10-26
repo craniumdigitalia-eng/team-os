@@ -120,6 +120,24 @@ def main():
                 "IS_SELF": "1" if int(pid) in ancestors else "0",
                 "TRANSCRIPT": transcript_path(s.get("cwd") or "", s.get("sessionId", "")),
             })
+    # Sessão de fundo que o `claude agents` lista mas sumiu do registro (ex.: o processo foi
+    # reaproveitado depois de um attach): entra pela lista oficial, senão some do painel.
+    seen = {r["SESSION_ID"] for r in rows}
+    for sid, o in off.items():
+        if not sid or sid in seen:
+            continue
+        cwd = nfc(o.get("cwd") or "")
+        name = nfc(o.get("name") or "")
+        folder = os.path.basename(cwd.rstrip("/")) if cwd not in ("", "/") else ""
+        std = 1 if folder and name.startswith(folder + " | ") and len(name) > len(folder) + 3 else (2 if name == folder else 0)
+        rows.append({
+            "NAME": name, "SESSION_ID": sid, "SHORT_ID": o.get("id", ""), "PID": "", "CWD": cwd,
+            "FOLDER": folder, "KIND": o.get("kind", ""), "ENTRYPOINT": "", "STATUS": "",
+            "STATE": o.get("state", ""), "UPDATED": "", "NAME_STANDARD": str(std),
+            "SUGGESTED_NAME": name if std == 1 else (f"{folder} | <Título>" if folder else ""),
+            "ORPHAN": "1" if cwd and cwd != "/" and not os.path.isdir(cwd) else "0",
+            "IS_SELF": "0", "TRANSCRIPT": transcript_path(cwd, sid),
+        })
     rows.sort(key=lambda r: (r["FOLDER"], r["NAME"]))
     self_name = next((r["NAME"] for r in rows if r["IS_SELF"] == "1"), "")
     if as_json:
