@@ -70,8 +70,9 @@ def info(path):
 
 def children(path):
     try:
+        # "_arquivo" e afins: pasta com "_" na frente é arquivo morto, fora do mapa
         return sorted(os.path.join(path, n) for n in os.listdir(path)
-                      if not n.startswith(".") and n not in SKIP and os.path.isdir(os.path.join(path, n)))
+                      if not n.startswith((".", "_")) and n not in SKIP and os.path.isdir(os.path.join(path, n)))
     except Exception:
         return []
 

@@ -190,6 +190,51 @@
 
   @keyframes in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
   @keyframes breathe{0%,100%{transform:scale(.85);opacity:.7}50%{transform:scale(1);opacity:1}}
+
+  /* ===== Prédio: andar = negócio, sala = projeto, pessoa = agente (ao vivo) ===== */
+  .bld{inset:0;background:var(--void);z-index:10;display:flex;flex-direction:column;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .32s var(--e),visibility 0s linear .32s}
+  body.bld-open .bld{opacity:1;visibility:visible;pointer-events:auto;transition:opacity .32s var(--e),visibility 0s}
+  .bld .btop{display:flex;align-items:center;gap:16px;padding:0 24px;height:56px;flex:none;border-bottom:1px solid var(--hair);background:var(--ink)}
+  .bld .btop .back{background:none;border:1px solid var(--hair-strong);color:var(--bone);border-radius:6px;padding:7px 12px;font-family:var(--sans);font-size:12px;cursor:pointer} .bld .btop .back:hover{border-color:var(--bone-mute)}
+  .bld .btop h3{margin:0;font-size:14px;font-weight:500} .bld .btop h3 small{font-family:var(--mono);font-size:10.5px;color:var(--bone-mute);margin-left:12px;letter-spacing:.06em}
+  .bld .bleg{margin-left:auto;display:flex;gap:16px;font-size:11px;color:var(--bone-mute)} .bld .bleg span{display:flex;align-items:center;gap:6px}
+  .bld .bscroll{flex:1;overflow:auto;padding:28px max(16px,4vw) 48px}
+  .bld .tower{max-width:1080px;margin:0 auto;display:flex;flex-direction:column}
+  .bld .roof{display:flex;flex-direction:column;align-items:center}
+  .bld .ant{width:2px;height:26px;background:var(--hair-strong);position:relative} .bld .ant::before{content:"";position:absolute;top:-4px;left:-3px;width:8px;height:8px;border-radius:50%;background:var(--danger);box-shadow:0 0 10px var(--danger);animation:bBeacon 2.4s ease-in-out infinite}
+  .bld .sign{padding:8px 28px;border:1px solid var(--hair-strong);border-bottom:0;border-radius:8px 8px 0 0;background:var(--ink);font-family:var(--display);font-weight:600;font-size:15px;letter-spacing:.28em;text-transform:uppercase;color:var(--bone)}
+  .bld .body{border:1px solid var(--hair-strong);border-radius:10px 10px 0 0;background:var(--ink);overflow:hidden}
+  .bld .floor{display:grid;grid-template-columns:150px 1fr;border-top:1px solid var(--hair)} .bld .floor:first-child{border-top:0}
+  .bld .flab{display:flex;flex-direction:column;gap:3px;padding:12px 14px;border-right:1px solid var(--hair);background:var(--ink-2);min-width:0}
+  .bld .flab .n{font-family:var(--mono);font-size:10px;color:var(--bone-mute);letter-spacing:.08em;text-transform:uppercase}
+  .bld .flab b{font-size:12.5px;font-weight:600;overflow-wrap:anywhere}
+  .bld .flab .chip{align-self:flex-start;margin-top:3px;padding:1px 7px;border-radius:999px;border:1px solid var(--hair-strong);font-size:10px;color:var(--bone-mute)}
+  .bld .flab .chip.emp{color:var(--success);border-color:#3fbf7a66}
+  .bld .flab .ct{font-size:10.5px;color:var(--bone-mute);margin-top:4px;line-height:1.4}
+  .bld .rooms{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;padding:12px;min-width:0}
+  .bld .room{position:relative;display:flex;flex-direction:column;gap:4px;min-height:96px;padding:10px 11px;border:1px solid var(--hair);border-radius:7px;background:#0e0f0d;min-width:0;transition:background .4s var(--e),border-color .4s var(--e),box-shadow .4s var(--e)}
+  .bld .room.lit{background:linear-gradient(180deg,#3d8fff1f,#3d8fff08);border-color:#3d8fff55;box-shadow:inset 0 0 18px #3d8fff1a}
+  .bld .room.call{border-color:var(--azure);box-shadow:inset 0 0 0 1px var(--azure),0 0 18px #3d8fff33}
+  .bld .room.click{cursor:pointer} .bld .room.click:hover{border-color:var(--bone-mute)}
+  .bld .room .rn{font-size:12px;font-weight:600;overflow-wrap:anywhere} .bld .room .rs{font-family:var(--mono);font-size:9.5px;color:var(--bone-mute);overflow-wrap:anywhere}
+  .bld .room .stage{font-size:10px;color:var(--bone-mute);line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .bld .room .ppl{display:flex;flex-wrap:wrap;gap:7px;margin-top:auto;padding-top:6px;align-items:flex-end;min-height:26px}
+  .bld .room .dark{margin-top:auto;font-size:10px;color:#585C57}
+  .bld .p{position:relative;width:16px;height:23px;padding:0;border:0;background:none;cursor:pointer;--c:var(--bone-mute)}
+  .bld .p::before{content:"";position:absolute;top:0;left:3px;width:10px;height:10px;border-radius:50%;background:var(--c)}
+  .bld .p::after{content:"";position:absolute;bottom:0;left:0;width:16px;height:11px;border-radius:8px 8px 2px 2px;background:var(--c)}
+  .bld .p.lead{transform:scale(1.2);transform-origin:bottom center} .bld .p.lead::after{box-shadow:0 0 0 1.5px var(--ink),0 0 0 3px var(--c)}
+  .bld .p.work{--c:var(--success)} .bld .p.work::before{animation:bType 1s ease-in-out infinite alternate}
+  .bld .p.ap{--c:var(--azure)} .bld .p.ap::before,.bld .p.ap::after{animation:bCall .9s ease-in-out infinite alternate}
+  .bld .p:focus-visible{outline:2px solid var(--bone);outline-offset:2px;border-radius:4px}
+  .bld .ground{height:8px;margin:0 -14px;border-radius:0 0 8px 8px;background:var(--hair-strong)}
+  .bld .bcard{position:fixed;z-index:12;max-width:260px;padding:9px 12px;border-radius:8px;border:1px solid var(--hair-strong);background:var(--ink-2);box-shadow:0 12px 32px #000a;font-size:11.5px;line-height:1.45;pointer-events:none}
+  .bld .bcard b{display:block;font-size:12.5px} .bld .bcard small{display:block;color:var(--bone-mute)} .bld .bcard .now{margin-top:4px;font-family:var(--mono);font-size:10.5px;color:var(--bone-dim);overflow-wrap:anywhere}
+  @keyframes bType{from{transform:translateY(0)}to{transform:translateY(-2px)}}
+  @keyframes bCall{from{opacity:1}to{opacity:.35}}
+  @keyframes bBeacon{0%,100%{opacity:1}50%{opacity:.3}}
+  @media (prefers-reduced-motion:reduce){.bld .p::before,.bld .p::after,.bld .ant::before{animation:none!important}}
+  @media (max-width:640px){.bld .floor{grid-template-columns:1fr}.bld .flab{border-right:0;border-bottom:1px solid var(--hair)}.bld .bleg{display:none}}
 </style>
 
 <style id="refine">
@@ -290,6 +335,7 @@
     <button class="m wait" id="mWait" data-pop="wait"><span class="k">Precisam de você</span><b id="sWait">0</b></button>
     <button class="m" id="mFeed" data-pop="feed"><span class="k">Atividade</span><b id="sFeed">—</b></button>
     <button class="m" data-pop="tok"><span class="k" id="sTokK">Tokens</span><b id="sTok">0</b></button>
+    <button class="m" id="mBld" title="ver a empresa como um prédio"><span class="k">Vista</span><b>Prédio</b></button>
   </nav>
 </div>
 <div class="ui pop" id="pop"></div>
@@ -318,6 +364,13 @@
     </div>
     <div class="gtip" id="gtip"></div></div>
   <div class="side"><div class="kicker">Grafo de ligações</div><canvas id="vg"></canvas><div class="kicker">Ligada a</div><div class="links" id="vLinks"></div></div>
+</section>
+
+<section class="ui bld" id="bld" aria-label="Prédio">
+  <div class="btop"><button class="back" id="bBack">← Mapa</button><h3>Prédio<small id="bSub"></small></h3>
+    <div class="bleg"><span><i class="d ok"></i>trabalhando</span><span><i class="d ap"></i>aguardando você</span><span><i class="d off"></i>parado</span></div></div>
+  <div class="bscroll"><div class="tower" id="bBody"></div></div>
+  <div class="bcard" id="bCard" hidden></div>
 </section>
 
 <script>
@@ -502,7 +555,7 @@ function handleEvent(e){
 /* ===================== CONEXÃO ===================== */
 let es=null,lastSeq=0;
 function connect(){es=new EventSource('/events?since='+lastSeq);
-  es.addEventListener('state',ev=>{const d=JSON.parse(ev.data);S=d.state;document.getElementById('live').classList.remove('off');rebuild();updateStats();if(!fitted){fitted=true;setTimeout(fitAll,700);setTimeout(()=>{if(!userMoved)fitAll();},2200);}(d.events||[]).forEach(e=>{lastSeq=Math.max(lastSeq,e.seq||0);handleEvent(e);});});
+  es.addEventListener('state',ev=>{const d=JSON.parse(ev.data);S=d.state;document.getElementById('live').classList.remove('off');rebuild();updateStats();renderBld();if(!fitted){fitted=true;setTimeout(fitAll,700);setTimeout(()=>{if(!userMoved)fitAll();},2200);}(d.events||[]).forEach(e=>{lastSeq=Math.max(lastSeq,e.seq||0);handleEvent(e);});});
   es.onerror=()=>{document.getElementById('live').classList.add('off');};}
 function tokensHtml(t){if(!t||!t.ready)return '';const c=TK_COL[t.level]||TK_COL.ok,pct=Math.min(100,Math.round(t.ctx/CTX_MAX*100)),mx=Math.max(1,...(t.agents||[]).map(a=>a.total),(t.lead||{}).total||0);
   const row=(n,v,sub)=>`<div class="row"><span class="t"><b>${esc(n)}</b>${sub?'<br>'+esc(sub):''}</span><span class="s" style="min-width:96px;text-align:right">${fmtTok(v)}<i style="display:block;height:2px;margin-top:4px;background:rgba(255,255,255,.12)"><i style="display:block;height:2px;width:${Math.max(2,Math.round(v/mx*100))}%;background:${c}"></i></i></span></div>`;
@@ -824,6 +877,55 @@ addEventListener('resize',()=>{G.dirty=true;});new ResizeObserver(()=>{G.autofit
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(document.body.classList.contains('graph-full'))gExit();else if(document.body.classList.contains('vault-open'))vBack.onclick();else if(document.body.classList.contains('open'))closeDrawer();}});
 
 resize();connect();requestAnimationFrame(frame);requestAnimationFrame(gloop);
+
+/* ===================== PRÉDIO ===================== */
+// Andar = negócio (empresa no topo, depois clientes da carteira, depois o resto), sala = projeto,
+// pessoa = líder da sessão + agentes trabalhando agora. Redesenha a cada estado do servidor.
+const bBody=document.getElementById('bBody'),bCard=document.getElementById('bCard');
+function bldOpen(on){document.body.classList.toggle('bld-open',on);try{localStorage.setItem('salaBld',on?'1':'');}catch{}if(on)renderBld();else bCard.hidden=true;}
+document.getElementById('mBld').addEventListener('click',()=>bldOpen(!document.body.classList.contains('bld-open')));
+document.getElementById('bBack').addEventListener('click',()=>bldOpen(false));
+addEventListener('keydown',e=>{if(e.key==='Escape'&&document.body.classList.contains('bld-open'))bldOpen(false);});
+const B_PEOPLE=new Map();
+function bPeople(s){
+  const out=[],st=s.state==='blocked'?'ap':((s.agents||[]).some(a=>a.state==='active')||(Date.now()/1000-(s.last_epoch||0))<20?'work':'');
+  const lt=s.tool?(s.tool[1]?s.tool[0]+' · '+s.tool[1]:s.tool[0]):'';
+  out.push({lead:true,cls:st,who:'Líder da sessão',sub:s.name||s.short,role:'coordena o time desta sessão',now:st==='ap'?'parou esperando você':lt,sess:s.id});
+  (s.agents||[]).forEach(a=>out.push({cls:a.state==='active'?'work':a.state==='approval'?'ap':'',who:a.persona?a.persona+' · '+a.name:a.name,sub:a.type||'',role:a.role||a.description||'',now:a.state==='approval'?'esperando sua decisão':(a.now||''),sess:s.id}));
+  return out;}
+function renderBld(){
+  if(!S||!document.body.classList.contains('bld-open'))return;
+  const emp=S.empresa||'',cli=S.clientes||{};
+  const sessBy={};(S.sessions||[]).forEach(s=>{if(s.is_self||!s.project)return;(sessBy[s.project]=sessBy[s.project]||[]).push(s);});
+  const floors=new Map();
+  (S.projects||[]).forEach(p=>{if(p.kind==='ct')return;const b=p.business||'(sem negócio)';if(!floors.has(b))floors.set(b,[]);floors.get(b).push(p);});
+  const rank=b=>b===emp?0:cli[b]?1:b==='(sem negócio)'?3:2;
+  const order=[...floors.keys()].sort((a,b)=>rank(a)-rank(b)||a.localeCompare(b,'pt'));
+  let people=0,working=0,calling=0;B_PEOPLE.clear();
+  const rows=order.map((b,i)=>{
+    const c=cli[b],num=order.length-1-i,chip=b===emp?'<span class="chip emp">empresa</span>':c?`<span class="chip">cliente · ${esc(c.status||'?')}</span>`:'';
+    const ct=c?`<span class="ct">${esc((c.servicos||[]).join(', '))}${c.proxima_entrega?'<br>próxima: '+esc(c.proxima_entrega):''}</span>`:'';
+    const rooms=floors.get(b).sort((x,y)=>x.name.localeCompare(y.name,'pt')).map(p=>{
+      const ss=sessBy[p.path]||[],ppl=ss.flatMap(bPeople),call=ppl.some(x=>x.cls==='ap');
+      people+=ppl.length;working+=ppl.filter(x=>x.cls==='work').length;calling+=ppl.filter(x=>x.cls==='ap').length;
+      const area=p.name.includes(' | ')?p.name.split(' | ').slice(1).join(' | '):p.name;
+      const pp=ppl.map(x=>{const k='p'+B_PEOPLE.size;B_PEOPLE.set(k,x);return `<button class="p${x.lead?' lead':''}${x.cls?' '+x.cls:''}" data-k="${k}" aria-label="${esc(x.who+(x.now?', '+x.now:''))}"></button>`;}).join('');
+      return `<div class="room${ss.length?' lit':''}${call?' call':''}${p.smart_memory?' click':''}" data-proj="${esc(p.path)}"><span class="rn">${esc(area)}</span><span class="rs">${esc((p.squads||[]).join(' · '))}</span>${p.stage?`<span class="stage">${esc(p.stage)}</span>`:''}${pp?`<div class="ppl">${pp}</div>`:`<span class="dark">${ss.length?'sessão aberta':'ninguém agora'}</span>`}</div>`;}).join('');
+    return `<div class="floor"><div class="flab"><span class="n">${num===0?'Térreo':num+'º andar'}</span><b>${esc(b)}</b>${chip}${ct}</div><div class="rooms">${rooms}</div></div>`;}).join('');
+  const html=`<div class="roof"><div class="ant"></div><div class="sign">${esc(emp||'Sala de Controle')}</div></div><div class="body">${rows}</div><div class="ground"></div>`;
+  if(bBody._html!==html){bBody.innerHTML=html;bBody._html=html;}
+  document.getElementById('bSub').textContent=`${order.length} andares · ${people} pessoas · ${working} trabalhando · ${calling} aguardando você`;}
+function bShow(btn){const x=B_PEOPLE.get(btn.dataset.k);if(!x)return;
+  bCard.innerHTML=`<b>${esc(x.who)}</b>${x.sub?`<small>${esc(x.sub)}</small>`:''}${x.role?`<small>${esc(x.role)}</small>`:''}${x.now?`<div class="now">${esc(x.now)}</div>`:''}`;
+  bCard.hidden=false;const r=btn.getBoundingClientRect(),w=bCard.offsetWidth,h=bCard.offsetHeight;
+  bCard.style.left=Math.max(8,Math.min(innerWidth-w-8,r.left+r.width/2-w/2))+'px';bCard.style.top=(r.top-h-8<8?r.bottom+8:r.top-h-8)+'px';}
+bBody.addEventListener('mouseover',e=>{const b=e.target.closest('.p');if(b)bShow(b);});
+bBody.addEventListener('mouseout',e=>{if(e.target.closest('.p'))bCard.hidden=true;});
+bBody.addEventListener('focusin',e=>{const b=e.target.closest('.p');if(b)bShow(b);});
+bBody.addEventListener('focusout',()=>{bCard.hidden=true;});
+bBody.addEventListener('click',e=>{const b=e.target.closest('.p');if(b){bShow(b);e.stopPropagation();return;}
+  const r=e.target.closest('.room.click');if(r&&typeof openVault==='function'){bldOpen(false);openVault(r.dataset.proj);}});
+try{if(localStorage.getItem('salaBld'))setTimeout(()=>bldOpen(true),0);}catch{}
 </script>
 </body>
 </html>

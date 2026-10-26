@@ -6,7 +6,9 @@ Junta, a cada invocação da skill:
   2. project-context.py (por projeto) → etapa de cada um, lida da smart-memory
   3. scan-sessions.py  → sessões reais abertas agora (sem fantasmas, sem a própria Sala)
   4. session-tail.py   → últimas falas de cada sessão aberta (o que ela está fazendo agora)
-e casa sessão ↔ projeto pela pasta (cwd).
+  5. carteira.py       → empresa × clientes: setores da empresa e o que cada cliente contratou
+e casa sessão ↔ projeto pela pasta (cwd). Relatório: empresa primeiro (por setor), depois os
+clientes da carteira, depois os outros negócios.
 
 A Sala mora no CT (0 | Centro de Treinamento): rode a partir da raiz do CT. A raiz dos projetos
 é a pasta-mãe do CT. Rodando fora do CT, a rodada funciona mas emite WARN=sala_fora_do_ct.
@@ -73,6 +75,9 @@ def tail(path):
 
 
 org = run_json("org-map.py", ROOT)
+cart = run_json("carteira.py", ROOT)
+if not isinstance(cart, dict) or "error" in cart:
+    cart = {"found": False, "clientes": [], "achados": [], "empresa": None}
 sess = run_json("scan-sessions.py")
 sessions = sess.get("sessions", []) if isinstance(sess, dict) else []
 self_name = sess.get("self", "") if isinstance(sess, dict) else ""
@@ -95,6 +100,7 @@ for s in others:
 snapshot = {"generated_at": time.strftime("%Y-%m-%d %H:%M"), "root": ROOT, "self": self_name,
             "home": "CT" if HOME_IS_CT else "",
             "projects": projects, "other_sessions": others, "findings": org.get("findings", []),
+            "carteira": cart,
             "summary": org.get("summary", {})}
 
 if WRITE:
@@ -113,13 +119,41 @@ if not HOME_IS_CT:
 print(f"RODADA {snapshot['generated_at']} · raiz: {ROOT} · esta sessão: {self_name or '?'}")
 print(f"Sessões abertas (fora esta): {sum(1 for s in sessions if s.get('IS_SELF') != '1')}")
 print()
+# Ordem: empresa (por setor) → clientes da carteira → outros negócios → soltos na raiz.
+EMPRESA = nfc(cart.get("empresa") or "")
+CLIENTES = {nfc(c.get("pasta", "")): c for c in cart.get("clientes", []) if c.get("pasta")}
+
+
+def rank(x):
+    b = nfc(x["node"].get("business") or "")
+    return (0 if b and b == EMPRESA else 1 if b in CLIENTES else 2 if b else 3, b or "~", x["node"]["name"])
+
+
+def header(b):
+    if not b:
+        return "━━ (sem negócio) ━━"
+    if b == EMPRESA:
+        return f"━━ {b} · EMPRESA (setores) ━━"
+    c = CLIENTES.get(b)
+    if c:
+        serv = ", ".join(c.get("servicos") or []) or "—"
+        nxt = f" · próxima: {c['proxima_entrega']}" if c.get("proxima_entrega") else ""
+        return f"━━ {b} · cliente {c.get('status') or '?'} · contratou: {serv}{nxt} ━━"
+    return f"━━ {b}{' · fora da carteira' if cart.get('found') else ''} ━━"
+
+
+if cart.get("found"):
+    print(f"Carteira: {len(cart['clientes'])} cliente(s) · empresa {EMPRESA}")
+else:
+    print("Carteira: ausente (a squad de Operações da empresa cria — formato em reference/carteira.md)")
+print()
 biz = None
-for p in sorted(projects, key=lambda x: (x["node"].get("business") or "~", x["node"]["name"])):
+for p in sorted(projects, key=rank):
     n, c = p["node"], p["context"]
-    b = n.get("business") or "(sem negócio)"
+    b = nfc(n.get("business") or "")
     if b != biz:
         biz = b
-        print(f"━━ {b} ━━")
+        print(header(b))
     shown = f"{n['name']} (casa da Sala)" if n.get("kind") == "ct" else n["name"]
     agents_txt = (f"{n['agents']} agentes-modelo do pack (não é equipe; trabalho no pack → /team-os-creator)"
                   if n.get("kind") == "ct" else f"{n['agents']} agentes ({','.join(n['squads']) or 'sem squad'})")
@@ -158,6 +192,12 @@ if others:
         print(f"  ▶ \"{s['NAME']}\" · {s.get('STATUS')} · {why}")
         for t in s.get("TAIL", [])[-3:]:
             print(f"      {t}")
+    print()
+ca = cart.get("achados", [])
+if ca:
+    print(f"━━ Carteira: {len(ca)} ponto(s) a conferir ━━")
+    for x in ca:
+        print(f"  • [{x['code']}] {x['where']} — {x['what']}")
     print()
 f = org.get("findings", [])
 print(f"━━ Organização: {len(f)} ponto(s) fora do padrão ━━")

@@ -2,7 +2,7 @@
 name: sala-de-controle
 description: Sala de Controle das sessões do Claude Code, que mora no CT: a cada invocação relê todas as sessões abertas, a etapa de cada projeto pela smart-memory e o que cada sessão faz agora; abre o painel de agentes em produção, decompõe o pedido, despacha para a sessão certa (sessão nova só com OK) e acompanha os retornos. Mapeia a organização de pastas. Roteia, nunca executa. Trigger: /sala-de-controle
 version: "2.0"
-updated: "2026-10-21"
+updated: "2026-10-25"
 user-invocable: true
 ---
 
@@ -17,6 +17,7 @@ Invocação:
 - `/sala-de-controle *historico` → despachos em andamento e concluídos
 - `/sala-de-controle *painel` → só sobe e abre o painel (sem a leitura completa da rodada): sessões, líderes e agentes trabalhando em tempo real, com a smart-memory de cada projeto navegável
 - `/sala-de-controle *painel stop` → derruba o servidor do painel
+- `/sala-de-controle *nuvem` → atualiza o **painel na nuvem** (dashboard no claude.ai, com o prédio da empresa) com a rodada atual
 
 > A Sala **mora no CT** (`0 | Centro de Treinamento`), como a `team-os-creator`: é exclusiva do CT e nunca vai para projeto destino. Dois painéis, com link cruzado no topo de cada um: **Agentes em produção** (`/sala-de-controle *painel`, `127.0.0.1:8787`, ao vivo) e **Mapa do pack** (`/team-os-creator *painel`, `127.0.0.1:8788`).
 
@@ -79,6 +80,7 @@ Um comando junta tudo (≈2 s para uma dezena de projetos):
 - **Etapa de cada projeto** (`project-context.py`), lida da smart-memory **na ordem de importância**: ledger mais recente de `_session/` → stories `active`/`in-review` + `BACKLOG.md` → `_inbox/` dos últimos 7 dias → "Contexto recente" dos `DIGEST.md` → `decisions/` → `INDEX.md`/`project/overview.md`.
 - **Sessões abertas** (`scan-sessions.py`) — registro vivo `~/.claude/sessions/` cruzado com `claude agents --json`; descarta sessões `spare` (pré-aquecidas, ninguém abriu), processos mortos e **você mesma**.
 - **O que cada sessão está fazendo** (`session-tail.py`) — últimas falas da conversa dela.
+- **Empresa × clientes** (`carteira.py`) — a carteira que a squad de Operações mantém (formato em `reference/carteira.md`): qual negócio é a **empresa** do dono (e seus setores), quem é **cliente**, o que cada um contratou, status e próxima entrega; cruza contratado × pastas e aponta serviço sem pasta, pasta sem contrato, entrega vencida e negócio fora da carteira. Sem carteira, a rodada segue por negócio.
 
 Nunca pule a rodada "porque já sei": sessões abrem e fecham, projetos andam. O mapa é do disco, não da sua cabeça.
 
@@ -92,7 +94,8 @@ Nunca pule a rodada "porque já sei": sessões abrem e fecham, projetos andam. O
 
 1. Suba e abra o painel **Agentes em produção** (mesmos passos do `*painel`, abaixo): `serve.py --bg` → `preview_start` com `url: "http://127.0.0.1:8787"` (se o navegador do Claude já estiver aberto nessa URL, navegue/recarregue; terminal puro → `open http://127.0.0.1:8787`).
 2. Panorama curto em texto, para o usuário ler em 20 segundos:
-   - Uma linha por projeto, agrupada por negócio: `projeto · etapa · sessões abertas (livre/ocupada/aguardando você)`. O CT aparece como `0 | Centro de Treinamento (casa da Sala)`.
+   - Uma linha por projeto, agrupada por negócio: `projeto · etapa · sessões abertas (livre/ocupada/aguardando você)`. Com carteira: **a empresa primeiro, por setor**; depois cada **cliente** com `status · contratou · próxima entrega` no título do grupo; depois os negócios fora da carteira. O CT aparece como `0 | Centro de Treinamento (casa da Sala)`.
+   - **Carteira**: entregas vencidas e serviço contratado sem pasta primeiro; pasta sem contrato e negócio fora da carteira numa linha cada (quem corrige a carteira é a Operações — ofereça despachar).
    - **Precisa de você**: sessões `blocked` cuja última fala é pergunta/permissão, `PENDENTE DO USUÁRIO` nos ledgers, `DECISÃO:` em aberto no `dispatches.md`.
    - Sessões fora do padrão de nome (com a sugestão) e sessões órfãs (pasta não existe mais). Nome igual ao da pasta (`João Guirunas | Site`) é aceito quando é a única sessão do projeto; com duas ou mais, cada uma precisa de título.
    - Organização: só a contagem de pontos fora do padrão + "rode `/sala-de-controle *organizar` para ver a proposta".
@@ -203,6 +206,23 @@ O que ele lê (tudo read-only, mesma regra do resto da Sala): `~/.claude/session
 
 ---
 
+## `*nuvem` — painel na nuvem (claude.ai) e o prédio
+
+Um dashboard privado no claude.ai que o dono abre de qualquer lugar, inclusive no celular: números do momento, **o prédio** (cada andar um negócio, cada sala um projeto, cada pessoa um agente — acesa quando há sessão, pessoa verde trabalhando, âmbar aguardando o dono), o que precisa dele, a carteira, as sessões com tokens e os pedidos e retornos. **Não é ao vivo**: mostra a última rodada enviada. Ao vivo, segundo a segundo, é o `*painel` local.
+
+O endereço fica em `docs/smart-memory/sala-de-controle/nuvem/enviado.json` (`url`). Sem esse arquivo, o painel ainda não existe: ofereça criar (tipo Dashboard do claude.ai, seis arquivos de dados de `export.py`).
+
+Fluxo (no `*nuvem`, e ao fim de toda rodada com pedido quando o `enviado.json` existir):
+1. `python3 "<CT>/.claude/skills/sala-de-controle/scripts/nuvem/export.py"` → `FILE=<nome>|<linhas>|changed|same|<asset anterior>`.
+2. Para cada `changed`: suba `<out>/<nome>.json` como asset do dashboard (Artifact `publish`, `url`, `asset: true`, um arquivo por chamada).
+3. Um `ArtifactData` `batch` com um `update` por dataset trocado: `datasets/<nome>` → `source.url` = `/_blob/<id novo>`, `updated` = `{at: <agora ISO>, by: "Sala de Controle"}` (leia o documento antes para ter o `if_version`).
+4. `export.py --sent <nome>=<id novo> …` e apague o asset anterior de cada um (Artifact `delete`, `url`, `path` = id anterior).
+5. Uma linha ao dono: "painel na nuvem atualizado" + o link.
+
+O que sai para a nuvem é só o que `export.py` escreve: sem falas de conversa, sem comandos, sem conteúdo de nota, sem valores de contrato. A página do dashboard (`files/index.html`) só muda por pedido do dono.
+
+---
+
 ## `*organizar` — organização de pastas, agentes e salas
 
 ```bash
@@ -224,7 +244,7 @@ Entregue ao usuário:
 
 ## Leitura das outras pastas e sessões — o que pode e o que não pode
 
-**Permitido (só leitura, só pelos scripts):** `.claude/agents/*.md` (nomes), existência de `.claude/skills/team-os`, a smart-memory nos pontos listados no passo 1 (e inteira, nota a nota, só no `*painel`), o registro `~/.claude/sessions/`, `claude agents --json`, as últimas falas do transcript de cada sessão, e — no `*painel` — `~/.claude/teams/` (membros e inboxes) e os transcritos dos agentes de cada sessão.
+**Permitido (só leitura, só pelos scripts):** `.claude/agents/*.md` (nomes), existência de `.claude/skills/team-os`, o frontmatter das notas `docs/smart-memory/carteira/clientes/*.md` (só os campos de `reference/carteira.md`), a smart-memory nos pontos listados no passo 1 (e inteira, nota a nota, só no `*painel`), o registro `~/.claude/sessions/`, `claude agents --json`, as últimas falas do transcript de cada sessão, e — no `*painel` — `~/.claude/teams/` (membros e inboxes) e os transcritos dos agentes de cada sessão.
 
 **Proibido:** código; pasta inteira; `_archive/`; qualquer `Write`/`Edit` fora de `docs/smart-memory/sala-de-controle/` do CT (inclusive nos arquivos do pack); qualquer comando (`npm`, `git`, `python` de projeto…) dentro de outra pasta — a única exceção é `claude --bg` para **abrir** sessão com OK (passo 7).
 

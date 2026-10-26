@@ -147,7 +147,35 @@ def read_transcript_state(path, n_turns=6):
 
 
 # ---------- camada cara (cache) ----------
-_cache = {"org": (0, None), "ctx": {}, "scan": (0, None)}
+_cache = {"org": (0, None), "ctx": {}, "scan": (0, None), "cart": (0, None), "persona": {}}
+
+
+def carteira(root, ttl=60):
+    """Empresa × clientes (carteira.py) — o prédio usa para ordenar andares e mostrar o contrato."""
+    t, v = _cache["cart"]
+    if v is None or time.time() - t > ttl:
+        v = run_json([os.path.join(SCRIPTS, "carteira.py"), root, "--json"]) or {}
+        _cache["cart"] = (time.time(), v)
+    return v
+
+
+def persona(agent_type):
+    """'VERA, estrategista…' / 'Serak — Inteligência…' no description do agente do pack (no CT)."""
+    if agent_type in _cache["persona"]:
+        return _cache["persona"][agent_type]
+    out = ("", "")
+    f = os.path.join(os.getcwd(), ".claude", "agents", (agent_type or "x") + ".md")
+    try:
+        head = open(f, encoding="utf-8").read(3000)
+        m = re.search(r"^description:\s*['\"]?(.*)$", head, re.M)
+        d = (m.group(1) if m else "").strip("'\" ")
+        mm = (re.match(r"^([A-ZÁÉÍÓÚÂÊÔÃÕÇ]{3,})[ ,—–-]+(.*)", d)
+              or re.match(r"^([A-ZÁÉÍÓÚ][a-záéíóúâêôãõç]+) — (.*)", d))
+        out = (mm.group(1), clean(mm.group(2), 70)) if mm else ("", clean(d, 70))
+    except Exception:
+        pass
+    _cache["persona"][agent_type] = out
+    return out
 
 
 def org(root, ttl=20):
@@ -266,6 +294,7 @@ def agents_of(session_dir, members):
         elif last_text:
             a["now"] = last_text
         a["age"] = int(age) if age < 1e9 else None
+        a["persona"], a["role"] = persona(a.get("type"))
     # só quem está operando agora (ou esperando o usuário); parado/finalizado não entra no mapa
     fresh = [a for a in agents.values() if a["state"] in ("active", "approval")]
     return sorted(fresh, key=lambda x: x["name"])
@@ -384,9 +413,16 @@ def collect(root):
               "tokens": sum((s.get("tokens") or {}).get("total", 0) for s in out_sessions),
               "tokens_rate": sum((s.get("tokens") or {}).get("rate", 0) for s in out_sessions)}
     home = "CT" if os.path.isdir(os.path.join(os.getcwd(), ".claude", "skills", "team-os-creator")) else ""
+    cart = carteira(root)
+    empresa = nfc(cart.get("empresa") or "") or next(
+        (p["business"] for p in projects.values() if p["business"] and p["name"].endswith(" | Operações")), "")
+    clientes = {nfc(c.get("pasta", "")): {"cliente": c.get("cliente", ""), "status": c.get("status", ""),
+                                          "servicos": c.get("servicos", []), "proxima_entrega": c.get("proxima_entrega", "")}
+                for c in cart.get("clientes", []) if c.get("pasta")}
     return {"root": nfc(root), "self": nfc(self_name), "home": home, "generated": time.strftime("%Y-%m-%dT%H:%M:%S"),
             "took_ms": int((time.time() - t0) * 1000), "projects": list(projects.values()),
-            "sessions": out_sessions, "events": events[:60], "edges": edges, "counts": counts}
+            "sessions": out_sessions, "events": events[:60], "edges": edges, "counts": counts,
+            "empresa": empresa, "clientes": clientes}
 
 
 def default_root():
